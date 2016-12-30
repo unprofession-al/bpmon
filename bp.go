@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
+
+	"github.com/influxdata/influxdb/client/v2"
 )
 
 type bp struct {
@@ -104,6 +107,30 @@ func (rs ResultSet) PrettyPrint(level int) string {
 	out += "\n"
 	for _, childRs := range rs.children {
 		out += childRs.PrettyPrint(level + 1)
+	}
+	return out
+}
+
+type nameTags map[string]string
+
+func (rs ResultSet) AsInflux(nt nameTags, t time.Time) []client.Point {
+	var out []client.Point
+
+	nt[rs.kind] = rs.name
+	tags := map[string]string{
+		"kind": rs.kind,
+	}
+	for k, v := range nt {
+		tags[k] = v
+	}
+	fields := map[string]interface{}{
+		"status": rs.status,
+	}
+	pt, _ := client.NewPoint(nt["BP"], tags, fields, t)
+	out = append(out, *pt)
+
+	for _, childRs := range rs.children {
+		out = append(out, childRs.AsInflux(nt, t)...)
 	}
 	return out
 }

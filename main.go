@@ -8,6 +8,8 @@ import (
 	"log"
 	"path/filepath"
 
+	"github.com/influxdata/influxdb/client/v2"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,9 +46,16 @@ func main() {
 	}
 
 	i = newIcinga(c.Icinga)
+	infl, _ := NewInflux(client.HTTPConfig{
+		Addr: "http://***REMOVED***:8086",
+	})
 	for _, bp := range b {
 		rs := bp.Status()
-		fmt.Println(rs.PrettyPrint(0))
+		//fmt.Println(rs.PrettyPrint(0))
+		err = infl.writeResultSet(rs)
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
