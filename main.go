@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -53,11 +54,13 @@ func readConf() (conf, error) {
 	conf := conf{}
 	file, err := ioutil.ReadFile(confPath)
 	if err != nil {
+		err = errors.New(fmt.Sprintf("Error while reading %s: %s", confPath, err.Error()))
 		return conf, err
 	}
 
 	err = yaml.Unmarshal(file, &conf)
 	if err != nil {
+		err = errors.New(fmt.Sprintf("Error while parsing %s: %s", confPath, err.Error()))
 		return conf, err
 	}
 
@@ -82,11 +85,13 @@ func readBPs() (bps, error) {
 		bp := bp{}
 		file, err := ioutil.ReadFile(bpPath + "/" + f.Name())
 		if err != nil {
+			err = errors.New(fmt.Sprintf("Error while reading %s/%s: %s", bpPath, f.Name(), err.Error()))
 			return bps, err
 		}
 
 		err = yaml.Unmarshal(file, &bp)
 		if err != nil {
+			err = errors.New(fmt.Sprintf("Error while parsing %s/%s: %s", bpPath, f.Name(), err.Error()))
 			return bps, err
 		}
 
