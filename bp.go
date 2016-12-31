@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-
-	"github.com/influxdata/influxdb/client/v2"
 )
 
 type bp struct {
@@ -18,6 +16,7 @@ func (bp bp) Status() ResultSet {
 	rs := ResultSet{
 		kind:     "BP",
 		name:     bp.Name,
+		id:       bp.Id,
 		children: []ResultSet{},
 	}
 
@@ -48,6 +47,7 @@ func (k kpi) Status() ResultSet {
 	rs := ResultSet{
 		kind:     "KPI",
 		name:     k.Name,
+		id:       k.Id,
 		children: []ResultSet{},
 	}
 
@@ -76,6 +76,7 @@ func (s service) Status() ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := ResultSet{
 		name: name,
+		id:   name,
 		kind: "SVC",
 	}
 	ok, err := i.ServiceStatus(s.Host, s.Service)
@@ -92,6 +93,7 @@ func (s service) Status() ResultSet {
 
 type ResultSet struct {
 	name     string
+	id       string
 	kind     string
 	status   status
 	err      error
@@ -111,12 +113,10 @@ func (rs ResultSet) PrettyPrint(level int) string {
 	return out
 }
 
-type nameTags map[string]string
+func (rs ResultSet) AsInflux(nt map[string]string, t time.Time) []point {
+	var out []point
 
-func (rs ResultSet) AsInflux(nt nameTags, t time.Time) []client.Point {
-	var out []client.Point
-
-	nt[rs.kind] = rs.name
+	nt[rs.kind] = rs.id
 	tags := map[string]string{
 		"kind": rs.kind,
 	}
@@ -124,10 +124,14 @@ func (rs ResultSet) AsInflux(nt nameTags, t time.Time) []client.Point {
 		tags[k] = v
 	}
 	fields := map[string]interface{}{
-		"status": rs.status,
+		"status": rs.status.toInt(),
 	}
-	pt, _ := client.NewPoint(nt["BP"], tags, fields, t)
-	out = append(out, *pt)
+	pt := point{
+		tags:   tags,
+		fields: fields,
+		time:   t,
+	}
+	out = append(out, pt)
 
 	for _, childRs := range rs.children {
 		out = append(out, childRs.AsInflux(nt, t)...)
@@ -140,4 +144,10 @@ func (rs ResultSet) Bool() bool {
 		return false
 	}
 	return true
+}
+
+type point struct {
+	tags   map[string]string
+	fields map[string]interface{}
+	time   time.Time
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
@@ -21,7 +22,7 @@ func NewInflux(conf client.HTTPConfig) (Influx, error) {
 func (i Influx) writeResultSet(rs ResultSet) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  "bpmon",
-		Precision: "m",
+		Precision: "s",
 	})
 	if err != nil {
 		return err
@@ -29,9 +30,11 @@ func (i Influx) writeResultSet(rs ResultSet) error {
 
 	ns := make(map[string]string)
 	points := rs.AsInflux(ns, time.Now())
+	fmt.Println(len(points))
 
-	for _, pt := range points {
-		bp.AddPoint(&pt)
+	for _, p := range points {
+		pt, _ := client.NewPoint("bps", p.tags, p.fields, p.time)
+		bp.AddPoint(pt)
 	}
 	err = i.cli.Write(bp)
 

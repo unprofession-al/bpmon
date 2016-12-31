@@ -16,7 +16,20 @@ func (s status) String() string {
 	case StatusNOK:
 		out = "not ok"
 	case StatusUnknown:
-		out = "Unknown"
+		out = "unknown"
+	}
+	return out
+}
+
+func (s status) toInt() int {
+	var out int
+	switch s {
+	case StatusOK:
+		out = StatusOK
+	case StatusNOK:
+		out = StatusNOK
+	case StatusUnknown:
+		out = StatusUnknown
 	}
 	return out
 }
