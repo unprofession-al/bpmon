@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
@@ -30,7 +29,6 @@ func (i Influx) writeResultSet(rs ResultSet) error {
 
 	ns := make(map[string]string)
 	points := rs.AsInflux(ns, time.Now())
-	fmt.Println(len(points))
 
 	for _, p := range points {
 		pt, _ := client.NewPoint("bps", p.tags, p.fields, p.time)
