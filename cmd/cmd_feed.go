@@ -20,14 +20,32 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"log"
+
+	"github.com/spf13/cobra"
+)
 
 // feedCmd represents the feed command
 var feedCmd = &cobra.Command{
 	Use:   "feed",
 	Short: "Insert data into influx db",
 	Run: func(cmd *cobra.Command, args []string) {
-		feed()
+		c, b, err := configure()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		i := NewIcinga(c.Icinga)
+		infl, _ := NewInflux(c.Influx)
+		for _, bp := range b {
+			log.Println("Processing " + bp.Name)
+			rs := bp.Status(i)
+			err = infl.writeResultSet(rs)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
 	},
 }
 

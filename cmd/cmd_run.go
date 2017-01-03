@@ -20,14 +20,28 @@
 
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"log"
+
+	"github.com/spf13/cobra"
+)
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run all business process checks and print to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		run()
+		c, b, err := configure()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		i := NewIcinga(c.Icinga)
+		for _, bp := range b {
+			rs := bp.Status(i)
+			fmt.Println(rs.PrettyPrint(0))
+		}
 	},
 }
 

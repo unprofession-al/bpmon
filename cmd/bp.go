@@ -12,7 +12,11 @@ type bp struct {
 	Kpis []kpi
 }
 
-func (bp bp) Status() ResultSet {
+type ServiceStatusProvider interface {
+	ServiceStatus(Service) (bool, error)
+}
+
+func (bp bp) Status(ssp ServiceStatusProvider) ResultSet {
 	rs := ResultSet{
 		kind:     "BP",
 		name:     bp.Name,
@@ -22,7 +26,7 @@ func (bp bp) Status() ResultSet {
 
 	var values []bool
 	for _, kpi := range bp.Kpis {
-		childRs := kpi.Status()
+		childRs := kpi.Status(ssp)
 		values = append(values, childRs.Bool())
 		rs.children = append(rs.children, childRs)
 	}
@@ -40,10 +44,10 @@ type kpi struct {
 	Name      string
 	Id        string
 	Operation string
-	Services  []service
+	Services  []Service
 }
 
-func (k kpi) Status() ResultSet {
+func (k kpi) Status(ssp ServiceStatusProvider) ResultSet {
 	rs := ResultSet{
 		kind:     "KPI",
 		name:     k.Name,
@@ -53,7 +57,7 @@ func (k kpi) Status() ResultSet {
 
 	var values []bool
 	for _, s := range k.Services {
-		childRs := s.Status()
+		childRs := s.Status(ssp)
 		values = append(values, childRs.Bool())
 		rs.children = append(rs.children, childRs)
 	}
@@ -67,19 +71,19 @@ func (k kpi) Status() ResultSet {
 	return rs
 }
 
-type service struct {
+type Service struct {
 	Host    string
 	Service string
 }
 
-func (s service) Status() ResultSet {
+func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := ResultSet{
 		name: name,
 		id:   name,
 		kind: "SVC",
 	}
-	ok, err := i.ServiceStatus(s.Host, s.Service)
+	ok, err := ssp.ServiceStatus(s)
 	rs.err = err
 	if rs.err != nil {
 		rs.status = StatusUnknown

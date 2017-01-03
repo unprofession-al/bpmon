@@ -18,15 +18,15 @@ type icingaConf struct {
 	Proto  string
 }
 
-type icinga struct {
+type Icinga struct {
 	baseUrl string
 	user    string
 	pass    string
 }
 
-func newIcinga(conf icingaConf) icinga {
+func NewIcinga(conf icingaConf) Icinga {
 	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
-	i := icinga{
+	i := Icinga{
 		baseUrl: baseUrl,
 		user:    conf.User,
 		pass:    conf.Pass,
@@ -34,13 +34,13 @@ func newIcinga(conf icingaConf) icinga {
 	return i
 }
 
-func (i icinga) ServiceStatus(host, service string) (bool, error) {
+func (i Icinga) ServiceStatus(s Service) (bool, error) {
 	// proper encoding for the host string
-	hostUrl := &url.URL{Path: host}
-	host = hostUrl.String()
+	hostUrl := &url.URL{Path: s.Host}
+	host := hostUrl.String()
 	// proper encoding for the service string
-	serviceUrl := &url.URL{Path: service}
-	service = serviceUrl.String()
+	serviceUrl := &url.URL{Path: s.Service}
+	service := serviceUrl.String()
 	// build url
 	url := fmt.Sprintf("%s/objects/services?service=%s!%s", i.baseUrl, host, service)
 	// query api
@@ -71,8 +71,17 @@ func (i icinga) ServiceStatus(host, service string) (bool, error) {
 	return results.Status()
 }
 
+// type serviceStatusResult describes the results returned by the icinga
+// api when a service status is requested.
 type serviceStatusResults struct {
-	Results []serviceStatusResult `json:"results"`
+	Results []struct {
+		Attrs struct {
+			LastCheckResult struct {
+				State  float64 `json:"state"`
+				Active bool    `json:"active"`
+			} `json:"last_check_result"`
+		} `json:"attrs"`
+	} `json:"results"`
 }
 
 func (r serviceStatusResults) Status() (bool, error) {
@@ -85,13 +94,4 @@ func (r serviceStatusResults) Status() (bool, error) {
 		return false, nil
 	}
 	return true, nil
-}
-
-type serviceStatusResult struct {
-	Attrs struct {
-		LastCheckResult struct {
-			State  float64 `json:"state"`
-			Active bool    `json:"active"`
-		} `json:"last_check_result"`
-	} `json:"attrs"`
 }
