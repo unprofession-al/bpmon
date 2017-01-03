@@ -18,10 +18,30 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-package main
+package cmd
 
-import "github.com/swisstxt/bpmon/cmd"
+import "github.com/spf13/cobra"
 
-func main() {
-	cmd.Execute()
+// feedCmd represents the feed command
+var feedCmd = &cobra.Command{
+	Use:   "feed",
+	Short: "Insert data into influx db",
+	Run: func(cmd *cobra.Command, args []string) {
+		feed()
+	},
+}
+
+func init() {
+	RootCmd.AddCommand(feedCmd)
+
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// feedCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// feedCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 }
