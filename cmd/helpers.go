@@ -33,6 +33,8 @@ func configure() (conf, bps, error) {
 }
 
 func readConf() (conf, error) {
+	// TODO: validate cfg for mandatory configuration. For example bpmon will
+	// panic if influx.addr is not set.
 	conf := conf{}
 	file, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
