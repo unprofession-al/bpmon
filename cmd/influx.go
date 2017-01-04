@@ -31,10 +31,17 @@ func (i Influx) writeResultSet(rs ResultSet) error {
 	points := rs.AsInflux(ns, time.Now())
 
 	for _, p := range points {
-		pt, _ := client.NewPoint(rs.kind, p.tags, p.fields, p.time)
+		pt, _ := client.NewPoint(p.series, p.tags, p.fields, p.time)
 		bp.AddPoint(pt)
 	}
 	err = i.cli.Write(bp)
 
 	return err
+}
+
+type point struct {
+	series string
+	tags   map[string]string
+	fields map[string]interface{}
+	time   time.Time
 }

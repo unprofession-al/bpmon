@@ -131,6 +131,7 @@ func (rs ResultSet) AsInflux(nt map[string]string, t time.Time) []point {
 		"status": rs.status.toInt(),
 	}
 	pt := point{
+		series: rs.kind,
 		tags:   tags,
 		fields: fields,
 		time:   t,
@@ -148,10 +149,4 @@ func (rs ResultSet) Bool() bool {
 		return false
 	}
 	return true
-}
-
-type point struct {
-	tags   map[string]string
-	fields map[string]interface{}
-	time   time.Time
 }
