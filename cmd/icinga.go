@@ -77,20 +77,28 @@ type serviceStatusResults struct {
 	Results []struct {
 		Attrs struct {
 			LastCheckResult struct {
-				State  float64 `json:"state"`
-				Active bool    `json:"active"`
+				State float64 `json:"state"`
 			} `json:"last_check_result"`
+			LastInDowntime bool `json:"last_in_downtime"`
 		} `json:"attrs"`
 	} `json:"results"`
 }
+
+const (
+	IcingaStatusOK = iota
+	IcingaStatusWarn
+	IcingaStatusCritical
+	IcingaStatusUnknown
+)
 
 func (r serviceStatusResults) Status() (bool, error) {
 	if len(r.Results) != 1 {
 		return true, errors.New("not exactly one result found")
 	}
-	// only fail if critical and active on icinga
-	// TODO: Ignore when downtime scheduled
-	if r.Results[0].Attrs.LastCheckResult.State == 2 && r.Results[0].Attrs.LastCheckResult.Active {
+	// only fail if critical and not in scheduled downtime
+	// TODO: consider to tread Downtime as a separate state
+	// status Downtime could be a tag in the time series
+	if r.Results[0].Attrs.LastCheckResult.State == IcingaStatusCritical && !r.Results[0].Attrs.LastInDowntime {
 		return false, nil
 	}
 	return true, nil
