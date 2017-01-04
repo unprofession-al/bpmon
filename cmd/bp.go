@@ -24,11 +24,27 @@ func (bp bp) Status(ssp ServiceStatusProvider) ResultSet {
 		children: []ResultSet{},
 	}
 
+	ch := make(chan *ResultSet)
 	var values []bool
-	for _, kpi := range bp.Kpis {
-		childRs := kpi.Status(ssp)
-		values = append(values, childRs.Bool())
-		rs.children = append(rs.children, childRs)
+	for _, k := range bp.Kpis {
+		go func(k kpi, ssp ServiceStatusProvider) {
+			childRs := k.Status(ssp)
+			ch <- &childRs
+		}(k, ssp)
+	}
+
+	for {
+		select {
+		case childRs := <-ch:
+			values = append(values, childRs.Bool())
+			rs.children = append(rs.children, *childRs)
+			if len(values) == len(bp.Kpis) {
+				ch = nil
+			}
+		}
+		if ch == nil {
+			break
+		}
 	}
 
 	ok, err := calculate("AND", values)
@@ -55,11 +71,27 @@ func (k kpi) Status(ssp ServiceStatusProvider) ResultSet {
 		children: []ResultSet{},
 	}
 
+	ch := make(chan *ResultSet)
 	var values []bool
 	for _, s := range k.Services {
-		childRs := s.Status(ssp)
-		values = append(values, childRs.Bool())
-		rs.children = append(rs.children, childRs)
+		go func(s Service, ssp ServiceStatusProvider) {
+			childRs := s.Status(ssp)
+			ch <- &childRs
+		}(s, ssp)
+	}
+
+	for {
+		select {
+		case childRs := <-ch:
+			values = append(values, childRs.Bool())
+			rs.children = append(rs.children, *childRs)
+			if len(values) == len(k.Services) {
+				ch = nil
+			}
+		}
+		if ch == nil {
+			break
+		}
 	}
 
 	ok, err := calculate(k.Operation, values)
