@@ -22,16 +22,7 @@ func (s status) String() string {
 }
 
 func (s status) toInt() int {
-	var out int
-	switch s {
-	case StatusOK:
-		out = StatusOK
-	case StatusNOK:
-		out = StatusNOK
-	case StatusUnknown:
-		out = StatusUnknown
-	}
-	return out
+	return int(s)
 }
 
 func (s status) Colorize(in string) string {
@@ -47,7 +38,7 @@ func (s status) Colorize(in string) string {
 	return out
 }
 
-func boolToStatus(ok bool) status {
+func boolAsStatus(ok bool) status {
 	if ok {
 		return StatusOK
 	} else {

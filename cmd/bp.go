@@ -32,7 +32,7 @@ func (bp bp) Status(ssp ServiceStatusProvider) ResultSet {
 	}
 
 	ok, err := calculate("AND", values)
-	rs.status = boolToStatus(ok)
+	rs.status = boolAsStatus(ok)
 	if err != nil {
 		rs.err = err
 		rs.status = StatusUnknown
@@ -63,7 +63,7 @@ func (k kpi) Status(ssp ServiceStatusProvider) ResultSet {
 	}
 
 	ok, err := calculate(k.Operation, values)
-	rs.status = boolToStatus(ok)
+	rs.status = boolAsStatus(ok)
 	if err != nil {
 		rs.err = err
 		rs.status = StatusUnknown
