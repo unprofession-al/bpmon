@@ -10,26 +10,31 @@ import (
 	"net/url"
 )
 
-type icingaConf struct {
-	Server string
-	Port   int
-	Pass   string
-	User   string
-	Proto  string
+type IcingaConf struct {
+	Connection struct {
+		Server string
+		Port   int
+		Pass   string
+		User   string
+		Proto  string
+	}
+	Timeout int
 }
 
 type Icinga struct {
 	baseUrl string
 	user    string
 	pass    string
+	timeout int
 }
 
-func NewIcinga(conf icingaConf) Icinga {
-	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
+func NewIcinga(conf IcingaConf) Icinga {
+	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
 	i := Icinga{
 		baseUrl: baseUrl,
-		user:    conf.User,
-		pass:    conf.Pass,
+		user:    conf.Connection.User,
+		pass:    conf.Connection.Pass,
+		timeout: conf.Timeout,
 	}
 	return i
 }
@@ -68,7 +73,7 @@ func (i Icinga) ServiceStatus(s Service) (bool, error) {
 	if err := json.Unmarshal(body, &results); err != nil {
 		return true, err
 	}
-	return results.Status()
+	return results.status()
 }
 
 // type serviceStatusResult describes the results returned by the icinga
@@ -91,7 +96,7 @@ const (
 	IcingaStatusUnknown
 )
 
-func (r serviceStatusResults) Status() (bool, error) {
+func (r serviceStatusResults) status() (bool, error) {
 	if len(r.Results) != 1 {
 		return true, errors.New("not exactly one result found")
 	}

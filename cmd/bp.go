@@ -149,8 +149,8 @@ func (rs ResultSet) PrettyPrint(level int) string {
 	return out
 }
 
-func (rs ResultSet) AsInflux(nt map[string]string, t time.Time) []point {
-	var out []point
+func (rs ResultSet) AsInflux(nt map[string]string, t time.Time) []Point {
+	var out []Point
 
 	nt[rs.kind] = rs.id
 	tags := map[string]string{
@@ -162,11 +162,11 @@ func (rs ResultSet) AsInflux(nt map[string]string, t time.Time) []point {
 	fields := map[string]interface{}{
 		"status": rs.status.toInt(),
 	}
-	pt := point{
-		series: rs.kind,
-		tags:   tags,
-		fields: fields,
-		time:   t,
+	pt := Point{
+		Series: rs.kind,
+		Tags:   tags,
+		Fields: fields,
+		Time:   t,
 	}
 	out = append(out, pt)
 

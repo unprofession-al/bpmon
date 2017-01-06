@@ -6,14 +6,12 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	"github.com/influxdata/influxdb/client/v2"
-
 	"gopkg.in/yaml.v2"
 )
 
 type conf struct {
-	Icinga icingaConf
-	Influx client.HTTPConfig
+	Icinga IcingaConf
+	Influx InfluxConf
 }
 
 type bps []bp
