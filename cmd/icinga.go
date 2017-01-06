@@ -11,11 +11,13 @@ import (
 )
 
 type IcingaConf struct {
-	Server string
-	Port   int
-	Pass   string
-	User   string
-	Proto  string
+	Connection struct {
+		Server string
+		Port   int
+		Pass   string
+		User   string
+		Proto  string
+	}
 }
 
 type Icinga struct {
@@ -25,11 +27,11 @@ type Icinga struct {
 }
 
 func NewIcinga(conf IcingaConf) Icinga {
-	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
+	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
 	i := Icinga{
 		baseUrl: baseUrl,
-		user:    conf.User,
-		pass:    conf.Pass,
+		user:    conf.Connection.User,
+		pass:    conf.Connection.Pass,
 	}
 	return i
 }

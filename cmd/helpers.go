@@ -14,7 +14,7 @@ type conf struct {
 	Influx InfluxConf
 }
 
-type bps []bp
+type bps []BusinessProcess
 
 func configure() (conf, bps, error) {
 	c, err := readConf()
@@ -64,7 +64,7 @@ func readBPs() (bps, error) {
 		if !match {
 			continue
 		}
-		bp := bp{}
+		bp := BusinessProcess{}
 		file, err := ioutil.ReadFile(bpPath + "/" + f.Name())
 		if err != nil {
 			err = errors.New(fmt.Sprintf("Error while reading %s/%s: %s", bpPath, f.Name(), err.Error()))

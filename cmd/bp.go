@@ -3,10 +3,9 @@ package cmd
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
-type bp struct {
+type BusinessProcess struct {
 	Name string
 	Id   string
 	Kpis []kpi
@@ -16,7 +15,7 @@ type ServiceStatusProvider interface {
 	ServiceStatus(Service) (bool, error)
 }
 
-func (bp bp) Status(ssp ServiceStatusProvider) ResultSet {
+func (bp BusinessProcess) Status(ssp ServiceStatusProvider) ResultSet {
 	rs := ResultSet{
 		kind:     "BP",
 		name:     bp.Name,
@@ -149,31 +148,44 @@ func (rs ResultSet) PrettyPrint(level int) string {
 	return out
 }
 
-func (rs ResultSet) AsInflux(nt map[string]string, t time.Time) []Point {
+func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Point {
 	var out []Point
 
-	nt[rs.kind] = rs.id
 	tags := map[string]string{
-		"kind": rs.kind,
+		rs.kind: rs.id,
 	}
-	for k, v := range nt {
+	for k, v := range parentTags {
 		tags[k] = v
 	}
-	fields := map[string]interface{}{
-		"status": rs.status.toInt(),
+
+	if rs.status != StatusOK || stringInSlice(rs.kind, saveOK) {
+		fields := map[string]interface{}{
+			"status": rs.status.toInt(),
+		}
+		if rs.err != nil {
+			fields["err"] = fmt.Sprintf("Error: %s | Kind: %s | Name: %s", rs.err.Error(), rs.kind, rs.id)
+		}
+		pt := Point{
+			Series: rs.kind,
+			Tags:   tags,
+			Fields: fields,
+		}
+		out = append(out, pt)
 	}
-	pt := Point{
-		Series: rs.kind,
-		Tags:   tags,
-		Fields: fields,
-		Time:   t,
-	}
-	out = append(out, pt)
 
 	for _, childRs := range rs.children {
-		out = append(out, childRs.AsInflux(nt, t)...)
+		out = append(out, childRs.AsInflux(tags, saveOK)...)
 	}
 	return out
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if strings.ToUpper(b) == strings.ToUpper(a) {
+			return true
+		}
+	}
+	return false
 }
 
 func (rs ResultSet) Bool() bool {

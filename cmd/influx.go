@@ -8,33 +8,41 @@ import (
 )
 
 type InfluxConf struct {
-	Server string
-	Port   int
-	Pass   string
-	User   string
-	Proto  string
+	Connection struct {
+		Server string
+		Port   int
+		Pass   string
+		User   string
+		Proto  string
+	}
+	SaveOK   []string `yaml:"saveOK"`
+	Database string
 }
 
 type Influx struct {
-	cli client.Client
+	cli      client.Client
+	saveOK   []string
+	database string
 }
 
 func NewInflux(conf InfluxConf) (Influx, error) {
-	addr := fmt.Sprintf("%s://%s:%d", conf.Proto, conf.Server, conf.Port)
+	addr := fmt.Sprintf("%s://%s:%d", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
 	c, err := client.NewHTTPClient(client.HTTPConfig{
 		Addr:     addr,
-		Username: conf.User,
-		Password: conf.Pass,
+		Username: conf.Connection.User,
+		Password: conf.Connection.Pass,
 	})
 	cli := Influx{
-		cli: c,
+		cli:      c,
+		saveOK:   conf.SaveOK,
+		database: conf.Database,
 	}
 	return cli, err
 }
 
 func (i Influx) Write(rs ResultSet, ts time.Time) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  "bpmon",
+		Database:  i.database,
 		Precision: "s",
 	})
 	if err != nil {
@@ -42,10 +50,10 @@ func (i Influx) Write(rs ResultSet, ts time.Time) error {
 	}
 
 	ns := make(map[string]string)
-	points := rs.AsInflux(ns, ts)
+	points := rs.AsInflux(ns, i.saveOK)
 
 	for _, p := range points {
-		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Time)
+		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, ts)
 		bp.AddPoint(pt)
 	}
 	err = i.cli.Write(bp)
@@ -57,5 +65,4 @@ type Point struct {
 	Series string
 	Tags   map[string]string
 	Fields map[string]interface{}
-	Time   time.Time
 }
