@@ -8,31 +8,26 @@ import (
 )
 
 type InfluxConf struct {
-	Connection struct {
-		Server string
-		Port   int
-		Pass   string
-		User   string
-		Proto  string
-	}
-	SaveOk bool
+	Server string
+	Port   int
+	Pass   string
+	User   string
+	Proto  string
 }
 
 type Influx struct {
-	cli    client.Client
-	saveOk bool
+	cli client.Client
 }
 
 func NewInflux(conf InfluxConf) (Influx, error) {
-	addr := fmt.Sprintf("%s://%s:%d", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
+	addr := fmt.Sprintf("%s://%s:%d", conf.Proto, conf.Server, conf.Port)
 	c, err := client.NewHTTPClient(client.HTTPConfig{
 		Addr:     addr,
-		Username: conf.Connection.User,
-		Password: conf.Connection.Pass,
+		Username: conf.User,
+		Password: conf.Pass,
 	})
 	cli := Influx{
-		cli:    c,
-		saveOk: conf.SaveOk,
+		cli: c,
 	}
 	return cli, err
 }

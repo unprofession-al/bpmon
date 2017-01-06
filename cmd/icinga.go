@@ -11,30 +11,25 @@ import (
 )
 
 type IcingaConf struct {
-	Connection struct {
-		Server string
-		Port   int
-		Pass   string
-		User   string
-		Proto  string
-	}
-	Timeout int
+	Server string
+	Port   int
+	Pass   string
+	User   string
+	Proto  string
 }
 
 type Icinga struct {
 	baseUrl string
 	user    string
 	pass    string
-	timeout int
 }
 
 func NewIcinga(conf IcingaConf) Icinga {
-	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
+	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
 	i := Icinga{
 		baseUrl: baseUrl,
-		user:    conf.Connection.User,
-		pass:    conf.Connection.Pass,
-		timeout: conf.Timeout,
+		user:    conf.User,
+		pass:    conf.Pass,
 	}
 	return i
 }
