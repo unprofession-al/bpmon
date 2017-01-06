@@ -36,7 +36,12 @@ func NewIcinga(conf IcingaConf) Icinga {
 	return i
 }
 
-func (i Icinga) ServiceStatus(s Service) (bool, error) {
+func (i Icinga) ServiceStatus(s Service) (ok bool, inDowntime bool, output string, err error) {
+	err = nil
+	inDowntime = false
+	output = ""
+	ok = true
+
 	// proper encoding for the host string
 	hostUrl := &url.URL{Path: s.Host}
 	host := hostUrl.String()
@@ -53,24 +58,31 @@ func (i Icinga) ServiceStatus(s Service) (bool, error) {
 	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return true, err
+		return
 	}
 	req.SetBasicAuth(i.user, i.pass)
 	resp, err := client.Do(req)
 	if err != nil {
-		return true, err
+		return
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return true, errors.New("HTTP error " + resp.Status)
+		err = errors.New("HTTP error " + resp.Status)
+		return
 	}
 	// parse response body
 	var results serviceStatusResults
 	body, err := ioutil.ReadAll(resp.Body)
-	if err := json.Unmarshal(body, &results); err != nil {
-		return true, err
+	if err != nil {
+		return
 	}
-	return results.status()
+
+	err = json.Unmarshal(body, &results)
+	if err != nil {
+		return
+	}
+	ok, inDowntime, output, err = results.status()
+	return
 }
 
 // type serviceStatusResult describes the results returned by the icinga
@@ -79,7 +91,8 @@ type serviceStatusResults struct {
 	Results []struct {
 		Attrs struct {
 			LastCheckResult struct {
-				State float64 `json:"state"`
+				State  float64 `json:"state"`
+				Output string  `json:"output"`
 			} `json:"last_check_result"`
 			LastInDowntime bool `json:"last_in_downtime"`
 		} `json:"attrs"`
@@ -93,15 +106,22 @@ const (
 	IcingaStatusUnknown
 )
 
-func (r serviceStatusResults) status() (bool, error) {
+func (r serviceStatusResults) status() (ok bool, inDowntime bool, output string, err error) {
+	err = nil
+	inDowntime = false
+	ok = true
+	output = ""
+
 	if len(r.Results) != 1 {
-		return true, errors.New("not exactly one result found")
+		err = errors.New("not exactly one result found")
+		return
 	}
-	// only fail if critical and not in scheduled downtime
-	// TODO: consider to tread Downtime as a separate state
-	// status Downtime could be a tag in the time series
-	if r.Results[0].Attrs.LastCheckResult.State == IcingaStatusCritical && !r.Results[0].Attrs.LastInDowntime {
-		return false, nil
+	output = r.Results[0].Attrs.LastCheckResult.Output
+	if r.Results[0].Attrs.LastInDowntime {
+		inDowntime = true
 	}
-	return true, nil
+	if r.Results[0].Attrs.LastCheckResult.State == IcingaStatusCritical {
+		ok = false
+	}
+	return
 }

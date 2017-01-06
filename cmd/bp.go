@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -12,7 +13,7 @@ type BusinessProcess struct {
 }
 
 type ServiceStatusProvider interface {
-	ServiceStatus(Service) (bool, error)
+	ServiceStatus(Service) (bool, bool, string, error)
 }
 
 func (bp BusinessProcess) Status(ssp ServiceStatusProvider) ResultSet {
@@ -24,7 +25,7 @@ func (bp BusinessProcess) Status(ssp ServiceStatusProvider) ResultSet {
 	}
 
 	ch := make(chan *ResultSet)
-	var values []bool
+	var calcValues []bool
 	for _, k := range bp.Kpis {
 		go func(k kpi, ssp ServiceStatusProvider) {
 			childRs := k.Status(ssp)
@@ -35,9 +36,9 @@ func (bp BusinessProcess) Status(ssp ServiceStatusProvider) ResultSet {
 	for {
 		select {
 		case childRs := <-ch:
-			values = append(values, childRs.Bool())
+			calcValues = append(calcValues, childRs.considerHealthy())
 			rs.children = append(rs.children, *childRs)
-			if len(values) == len(bp.Kpis) {
+			if len(calcValues) == len(bp.Kpis) {
 				ch = nil
 			}
 		}
@@ -46,7 +47,7 @@ func (bp BusinessProcess) Status(ssp ServiceStatusProvider) ResultSet {
 		}
 	}
 
-	ok, err := calculate("AND", values)
+	ok, err := calculate("AND", calcValues)
 	rs.status = boolAsStatus(ok)
 	if err != nil {
 		rs.err = err
@@ -71,7 +72,7 @@ func (k kpi) Status(ssp ServiceStatusProvider) ResultSet {
 	}
 
 	ch := make(chan *ResultSet)
-	var values []bool
+	var calcValues []bool
 	for _, s := range k.Services {
 		go func(s Service, ssp ServiceStatusProvider) {
 			childRs := s.Status(ssp)
@@ -82,9 +83,9 @@ func (k kpi) Status(ssp ServiceStatusProvider) ResultSet {
 	for {
 		select {
 		case childRs := <-ch:
-			values = append(values, childRs.Bool())
+			calcValues = append(calcValues, childRs.considerHealthy())
 			rs.children = append(rs.children, *childRs)
-			if len(values) == len(k.Services) {
+			if len(calcValues) == len(k.Services) {
 				ch = nil
 			}
 		}
@@ -93,7 +94,7 @@ func (k kpi) Status(ssp ServiceStatusProvider) ResultSet {
 		}
 	}
 
-	ok, err := calculate(k.Operation, values)
+	ok, err := calculate(k.Operation, calcValues)
 	rs.status = boolAsStatus(ok)
 	if err != nil {
 		rs.err = err
@@ -114,8 +115,10 @@ func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 		id:   name,
 		kind: "SVC",
 	}
-	ok, err := ssp.ServiceStatus(s)
+	ok, inDowntime, output, err := ssp.ServiceStatus(s)
 	rs.err = err
+	rs.inDowntime = inDowntime
+	rs.output = output
 	if rs.err != nil {
 		rs.status = StatusUnknown
 	} else if ok {
@@ -127,12 +130,14 @@ func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 }
 
 type ResultSet struct {
-	name     string
-	id       string
-	kind     string
-	status   status
-	err      error
-	children []ResultSet
+	name       string
+	id         string
+	kind       string
+	inDowntime bool
+	status     status
+	err        error
+	output     string
+	children   []ResultSet
 }
 
 func (rs ResultSet) PrettyPrint(level int) string {
@@ -140,6 +145,12 @@ func (rs ResultSet) PrettyPrint(level int) string {
 	out := rs.status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.kind, rs.name, rs.status))
 	if rs.err != nil {
 		out += fmt.Sprintf(" (Error occured: %s)", rs.err.Error())
+	}
+	if rs.inDowntime {
+		out += fmt.Sprint(" (Measured in Scheduled Downtime)")
+	}
+	if rs.status == StatusNOK && rs.output != "" {
+		out += fmt.Sprintf(" (Message from Monitoring: %s)", rs.output)
 	}
 	out += "\n"
 	for _, childRs := range rs.children {
@@ -151,19 +162,22 @@ func (rs ResultSet) PrettyPrint(level int) string {
 func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Point {
 	var out []Point
 
-	tags := map[string]string{
-		rs.kind: rs.id,
-	}
+	tags := make(map[string]string)
 	for k, v := range parentTags {
 		tags[k] = v
 	}
+	tags[rs.kind] = rs.id
+	tags["inDowntime"] = strconv.FormatBool(rs.inDowntime)
 
 	if rs.status != StatusOK || stringInSlice(rs.kind, saveOK) {
 		fields := map[string]interface{}{
 			"status": rs.status.toInt(),
 		}
+		if rs.output != "" {
+			fields["output"] = fmt.Sprintf("Output: %s", rs.output)
+		}
 		if rs.err != nil {
-			fields["err"] = fmt.Sprintf("Error: %s | Kind: %s | Name: %s", rs.err.Error(), rs.kind, rs.id)
+			fields["err"] = fmt.Sprintf("Error: %s", rs.err.Error())
 		}
 		pt := Point{
 			Series: rs.kind,
@@ -188,8 +202,11 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func (rs ResultSet) Bool() bool {
-	if rs.status == StatusNOK {
+// considerHealthy returns a boolean representation of the status. 'true' means
+// that either the status is fine, unknown or the check was in a scheduled
+// downtime; 'false' means that the check was negative
+func (rs ResultSet) considerHealthy() bool {
+	if rs.status == StatusNOK && !rs.inDowntime {
 		return false
 	}
 	return true
