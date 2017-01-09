@@ -154,6 +154,9 @@ func (rs ResultSet) PrettyPrint(level int) string {
 	if rs.err != nil {
 		out += fmt.Sprintf(" (Error occured: %s)", rs.err.Error())
 	}
+	if !rs.inAvailability {
+		out += fmt.Sprint(" (Measured outside of required availability)")
+	}
 	if rs.inDowntime {
 		out += fmt.Sprint(" (Measured in Scheduled Downtime)")
 	}
