@@ -4,19 +4,22 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type BusinessProcess struct {
-	Name string
-	Id   string
-	Kpis []kpi
+	Name             string       `yaml:"name"`
+	Id               string       `yaml:"id"`
+	Kpis             []kpi        `yaml:"kpis"`
+	AvailabilityName string       `yaml:"availability"`
+	Availability     Availability `yaml:"-"`
 }
 
 type ServiceStatusProvider interface {
 	ServiceStatus(Service) (bool, bool, string, error)
 }
 
-func (bp BusinessProcess) Status(ssp ServiceStatusProvider) ResultSet {
+func (bp BusinessProcess) Status(ssp ServiceStatusProvider, ts time.Time) ResultSet {
 	rs := ResultSet{
 		kind:     "BP",
 		name:     bp.Name,
@@ -49,6 +52,7 @@ func (bp BusinessProcess) Status(ssp ServiceStatusProvider) ResultSet {
 
 	ok, err := calculate("AND", calcValues)
 	rs.status = boolAsStatus(ok)
+	rs.inAvailability = bp.Availability.Contains(ts)
 	if err != nil {
 		rs.err = err
 		rs.status = StatusUnknown
@@ -65,10 +69,12 @@ type kpi struct {
 
 func (k kpi) Status(ssp ServiceStatusProvider) ResultSet {
 	rs := ResultSet{
-		kind:     "KPI",
-		name:     k.Name,
-		id:       k.Id,
-		children: []ResultSet{},
+		kind:           "KPI",
+		name:           k.Name,
+		id:             k.Id,
+		children:       []ResultSet{},
+		inDowntime:     false,
+		inAvailability: true,
 	}
 
 	ch := make(chan *ResultSet)
@@ -111,9 +117,10 @@ type Service struct {
 func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := ResultSet{
-		name: name,
-		id:   name,
-		kind: "SVC",
+		name:           name,
+		id:             name,
+		kind:           "SVC",
+		inAvailability: true,
 	}
 	ok, inDowntime, output, err := ssp.ServiceStatus(s)
 	rs.err = err
@@ -130,14 +137,15 @@ func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 }
 
 type ResultSet struct {
-	name       string
-	id         string
-	kind       string
-	inDowntime bool
-	status     status
-	err        error
-	output     string
-	children   []ResultSet
+	name           string
+	id             string
+	kind           string
+	inDowntime     bool
+	inAvailability bool
+	status         status
+	err            error
+	output         string
+	children       []ResultSet
 }
 
 func (rs ResultSet) PrettyPrint(level int) string {
@@ -167,11 +175,12 @@ func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Po
 		tags[k] = v
 	}
 	tags[rs.kind] = rs.id
-	tags["inDowntime"] = strconv.FormatBool(rs.inDowntime)
 
 	if rs.status != StatusOK || stringInSlice(rs.kind, saveOK) {
 		fields := map[string]interface{}{
-			"status": rs.status.toInt(),
+			"status":         rs.status.toInt(),
+			"inAvailability": strconv.FormatBool(rs.inAvailability),
+			"inDowntime":     strconv.FormatBool(rs.inDowntime),
 		}
 		if rs.output != "" {
 			fields["output"] = fmt.Sprintf("Output: %s", rs.output)

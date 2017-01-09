@@ -1,4 +1,3 @@
-// Copyright © 2017 Daniel Menet <membership@sontags.ch>
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +41,7 @@ var writeCmd = &cobra.Command{
 		infl, _ := NewInflux(c.Influx)
 		for _, bp := range b {
 			log.Println("Processing " + bp.Name)
-			rs := bp.Status(i)
+			rs := bp.Status(i, ts)
 			err = infl.Write(rs, ts)
 			if err != nil {
 				log.Fatal(err)

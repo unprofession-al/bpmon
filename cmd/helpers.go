@@ -10,8 +10,9 @@ import (
 )
 
 type conf struct {
-	Icinga IcingaConf
-	Influx InfluxConf
+	Icinga         IcingaConf         `yaml:"icinga"`
+	Influx         InfluxConf         `yaml:"influx"`
+	Availabilities AvailabilitiesConf `yaml:"availabilities"`
 }
 
 type bps []BusinessProcess
@@ -22,7 +23,12 @@ func configure() (conf, bps, error) {
 		return c, nil, err
 	}
 
-	b, err := readBPs()
+	a, err := c.Availabilities.Parse()
+	if err != nil {
+		return c, nil, err
+	}
+
+	b, err := readBPs(a)
 	if err != nil {
 		return c, nil, err
 	}
@@ -49,7 +55,7 @@ func readConf() (conf, error) {
 	return conf, nil
 }
 
-func readBPs() (bps, error) {
+func readBPs(a Availabilities) (bps, error) {
 	bps := bps{}
 	files, err := ioutil.ReadDir(bpPath)
 	if err != nil {
@@ -76,6 +82,18 @@ func readBPs() (bps, error) {
 			err = errors.New(fmt.Sprintf("Error while parsing %s/%s: %s", bpPath, f.Name(), err.Error()))
 			return bps, err
 		}
+
+		if bp.AvailabilityName == "" {
+			err = errors.New(fmt.Sprintf("There is no availability defined in %s/%s", bpPath, f.Name()))
+			return bps, err
+		}
+
+		availability, ok := a[bp.AvailabilityName]
+		if !ok {
+			err = errors.New(fmt.Sprintf("The availability '%s' referenced in '%s/%s' does not exist", bp.AvailabilityName, bpPath, f.Name()))
+			return bps, err
+		}
+		bp.Availability = availability
 
 		bps = append(bps, bp)
 	}

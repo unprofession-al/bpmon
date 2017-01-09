@@ -23,6 +23,7 @@ package cmd
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/spf13/cobra"
 )
@@ -32,6 +33,7 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run all business process checks and print to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
+		ts := time.Now()
 		c, b, err := configure()
 		if err != nil {
 			log.Fatal(err)
@@ -39,7 +41,7 @@ var runCmd = &cobra.Command{
 
 		i := NewIcinga(c.Icinga)
 		for _, bp := range b {
-			rs := bp.Status(i)
+			rs := bp.Status(i, ts)
 			fmt.Println(rs.PrettyPrint(0))
 		}
 	},
