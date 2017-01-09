@@ -1,5 +1,7 @@
 package cmd
 
+import "github.com/mgutz/ansi"
+
 type status int
 
 const (
@@ -29,11 +31,11 @@ func (s status) Colorize(in string) string {
 	var out string
 	switch s {
 	case StatusOK:
-		out = "\x1b[32;1m" + in + "\x1b[0m"
+		out = ansi.Color(in, "green")
 	case StatusNOK:
-		out = "\x1b[31;1m" + in + "\x1b[0m"
+		out = ansi.Color(in, "red+b")
 	case StatusUnknown:
-		out = "\x1b[35;1m" + in + "\x1b[0m"
+		out = ansi.Color(in, "cyan+b")
 	}
 	return out
 }
