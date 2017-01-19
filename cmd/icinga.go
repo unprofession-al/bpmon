@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strconv"
+	"time"
 )
 
 type IcingaConf struct {
@@ -90,13 +92,38 @@ func (i Icinga) ServiceStatus(s Service) (ok bool, inDowntime bool, output strin
 type serviceStatusResults struct {
 	Results []struct {
 		Attrs struct {
+			Acknowledgement float64 `json:"acknowledgement"`
+			//			AcknowledgementExpiry uts     `json:"acknowledgement_expiry"`
 			LastCheckResult struct {
 				State  float64 `json:"state"`
 				Output string  `json:"output"`
 			} `json:"last_check_result"`
-			LastInDowntime bool `json:"last_in_downtime"`
+			LastCheck      Timestamp `json:"last_check"`
+			LastInDowntime bool      `json:"last_in_downtime"`
 		} `json:"attrs"`
 	} `json:"results"`
+}
+
+type Timestamp struct {
+	time.Time
+}
+
+func (t *Timestamp) MarshalJSON() ([]byte, error) {
+	ts := t.Time.Unix()
+	stamp := fmt.Sprint(ts)
+
+	return []byte(stamp), nil
+}
+
+func (t *Timestamp) UnmarshalJSON(b []byte) error {
+	ts, err := strconv.ParseFloat(string(b), 64)
+	if err != nil {
+		return err
+	}
+
+	t.Time = time.Unix(int64(ts), 0)
+
+	return nil
 }
 
 const (
