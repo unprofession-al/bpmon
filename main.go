@@ -20,7 +20,7 @@
 
 package main
 
-import "github.com/swisstxt/bpmon/cmd"
+import "github.com/unprofession-al/bpmon/cmd"
 
 func main() {
 	cmd.Execute()
