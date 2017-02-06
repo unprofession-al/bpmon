@@ -1,6 +1,6 @@
 package cmd
 
-import "github.com/ilowe/ansi"
+import "github.com/mgutz/ansi"
 
 type Status int
 
