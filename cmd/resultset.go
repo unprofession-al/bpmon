@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ilowe/ansi"
+	"github.com/mgutz/ansi"
 )
 
 type ResultSet struct {
