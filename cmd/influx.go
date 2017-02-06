@@ -40,7 +40,7 @@ func NewInflux(conf InfluxConf) (Influx, error) {
 	return cli, err
 }
 
-func (i Influx) Write(rs ResultSet, ts time.Time) error {
+func (i Influx) Write(rs ResultSet) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  i.database,
 		Precision: "s",
@@ -53,7 +53,7 @@ func (i Influx) Write(rs ResultSet, ts time.Time) error {
 	points := rs.AsInflux(ns, i.saveOK)
 
 	for _, p := range points {
-		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, ts)
+		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
 		bp.AddPoint(pt)
 	}
 	err = i.cli.Write(bp)
@@ -62,7 +62,8 @@ func (i Influx) Write(rs ResultSet, ts time.Time) error {
 }
 
 type Point struct {
-	Series string
-	Tags   map[string]string
-	Fields map[string]interface{}
+	Timestamp time.Time
+	Series    string
+	Tags      map[string]string
+	Fields    map[string]interface{}
 }

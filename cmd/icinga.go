@@ -38,10 +38,12 @@ func NewIcinga(conf IcingaConf) Icinga {
 	return i
 }
 
-func (i Icinga) ServiceStatus(s Service) (ok bool, inDowntime bool, output string, err error) {
+func (i Icinga) ServiceStatus(s Service) (ok bool, at time.Time, inDowntime bool, acknowledged bool, output string, err error) {
 	err = nil
 	inDowntime = false
+	acknowledged = false
 	output = ""
+	at = time.Now()
 	ok = true
 
 	// proper encoding for the host string
@@ -83,7 +85,7 @@ func (i Icinga) ServiceStatus(s Service) (ok bool, inDowntime bool, output strin
 	if err != nil {
 		return
 	}
-	ok, inDowntime, output, err = results.status()
+	ok, at, inDowntime, acknowledged, output, err = results.status()
 	return
 }
 
@@ -133,10 +135,11 @@ const (
 	IcingaStatusUnknown
 )
 
-func (r serviceStatusResults) status() (ok bool, inDowntime bool, output string, err error) {
+func (r serviceStatusResults) status() (ok bool, at time.Time, inDowntime bool, acknowledged bool, output string, err error) {
 	err = nil
 	inDowntime = false
 	ok = true
+	acknowledged = false
 	output = ""
 
 	if len(r.Results) != 1 {
@@ -147,8 +150,12 @@ func (r serviceStatusResults) status() (ok bool, inDowntime bool, output string,
 	if r.Results[0].Attrs.LastInDowntime {
 		inDowntime = true
 	}
+	if r.Results[0].Attrs.Acknowledgement > 0.0 {
+		acknowledged = true
+	}
 	if r.Results[0].Attrs.LastCheckResult.State == IcingaStatusCritical {
 		ok = false
 	}
+	at = r.Results[0].Attrs.LastCheck.Time
 	return
 }

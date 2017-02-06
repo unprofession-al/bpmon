@@ -16,10 +16,10 @@ type BusinessProcess struct {
 }
 
 type ServiceStatusProvider interface {
-	ServiceStatus(Service) (bool, bool, string, error)
+	ServiceStatus(Service) (bool, time.Time, bool, bool, string, error)
 }
 
-func (bp BusinessProcess) Status(ssp ServiceStatusProvider, ts time.Time) ResultSet {
+func (bp BusinessProcess) Status(ssp ServiceStatusProvider) ResultSet {
 	rs := ResultSet{
 		kind:     "BP",
 		name:     bp.Name,
@@ -52,7 +52,8 @@ func (bp BusinessProcess) Status(ssp ServiceStatusProvider, ts time.Time) Result
 
 	ok, err := calculate("AND", calcValues)
 	rs.status = boolAsStatus(ok)
-	rs.inAvailability = bp.Availability.Contains(ts)
+	rs.at = time.Now()
+	rs.inAvailability = bp.Availability.Contains(rs.at)
 	if err != nil {
 		rs.err = err
 		rs.status = StatusUnknown
@@ -102,6 +103,7 @@ func (k kpi) Status(ssp ServiceStatusProvider) ResultSet {
 
 	ok, err := calculate(k.Operation, calcValues)
 	rs.status = boolAsStatus(ok)
+	rs.at = time.Now()
 	if err != nil {
 		rs.err = err
 		rs.status = StatusUnknown
@@ -122,9 +124,11 @@ func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 		kind:           "SVC",
 		inAvailability: true,
 	}
-	ok, inDowntime, output, err := ssp.ServiceStatus(s)
+	ok, at, inDowntime, acknowledged, output, err := ssp.ServiceStatus(s)
 	rs.err = err
 	rs.inDowntime = inDowntime
+	rs.at = at
+	rs.acknowledged = acknowledged
 	rs.output = output
 	if rs.err != nil {
 		rs.status = StatusUnknown
@@ -140,7 +144,9 @@ type ResultSet struct {
 	name           string
 	id             string
 	kind           string
+	at             time.Time
 	inDowntime     bool
+	acknowledged   bool
 	inAvailability bool
 	status         status
 	err            error
@@ -151,17 +157,23 @@ type ResultSet struct {
 func (rs ResultSet) PrettyPrint(level int) string {
 	ident := strings.Repeat("   ", level)
 	out := rs.status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.kind, rs.name, rs.status))
+
+	ident = strings.Repeat("   ", level+1)
+	out += fmt.Sprintf("\n%sMeasured at: %v", ident, rs.at)
 	if rs.err != nil {
-		out += fmt.Sprintf(" (Error occured: %s)", rs.err.Error())
+		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.err.Error())
 	}
 	if !rs.inAvailability {
-		out += fmt.Sprint(" (Measured outside of required availability)")
+		out += fmt.Sprintf("\n%sMeasured outside of required availability", ident)
 	}
 	if rs.inDowntime {
-		out += fmt.Sprint(" (Measured in Scheduled Downtime)")
+		out += fmt.Sprintf("\n%sMeasured in Scheduled Downtime", ident)
+	}
+	if rs.acknowledged {
+		out += fmt.Sprintf("\n%sIs acknowledged", ident)
 	}
 	if rs.status == StatusNOK && rs.output != "" {
-		out += fmt.Sprintf(" (Message from Monitoring: %s)", rs.output)
+		out += fmt.Sprintf("\n%sMessage from Monitoring: %s", ident, rs.output)
 	}
 	out += "\n"
 	for _, childRs := range rs.children {
@@ -182,6 +194,7 @@ func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Po
 	if rs.status != StatusOK || stringInSlice(rs.kind, saveOK) {
 		fields := map[string]interface{}{
 			"status":         rs.status.toInt(),
+			"acknowledged":   strconv.FormatBool(rs.acknowledged),
 			"inAvailability": strconv.FormatBool(rs.inAvailability),
 			"inDowntime":     strconv.FormatBool(rs.inDowntime),
 		}
@@ -192,9 +205,10 @@ func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Po
 			fields["err"] = fmt.Sprintf("Error: %s", rs.err.Error())
 		}
 		pt := Point{
-			Series: rs.kind,
-			Tags:   tags,
-			Fields: fields,
+			Timestamp: rs.at,
+			Series:    rs.kind,
+			Tags:      tags,
+			Fields:    fields,
 		}
 		out = append(out, pt)
 	}
