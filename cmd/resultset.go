@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"time"
 
@@ -37,7 +38,13 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 	}
 	if vals && len(rs.vals) > 0 {
 		out += fmt.Sprintf("\n%sValues:", ident)
-		for key, value := range rs.vals {
+		var keys []string
+		for k := range rs.vals {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, key := range keys {
+			value := rs.vals[key]
 			out += " "
 			if !value {
 				out += ansi.Color(key, "magenta+s")
