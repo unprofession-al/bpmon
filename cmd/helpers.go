@@ -15,7 +15,7 @@ type conf struct {
 	Availabilities AvailabilitiesConf `yaml:"availabilities"`
 }
 
-type bps []BusinessProcess
+type bps []BP
 
 func configure() (conf, bps, error) {
 	c, err := readConf()
@@ -70,7 +70,7 @@ func readBPs(a Availabilities) (bps, error) {
 		if !match {
 			continue
 		}
-		bp := BusinessProcess{}
+		bp := BP{}
 		file, err := ioutil.ReadFile(bpPath + "/" + f.Name())
 		if err != nil {
 			err = errors.New(fmt.Sprintf("Error while reading %s/%s: %s", bpPath, f.Name(), err.Error()))

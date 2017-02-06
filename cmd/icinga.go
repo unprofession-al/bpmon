@@ -38,13 +38,63 @@ func NewIcinga(conf IcingaConf) Icinga {
 	return i
 }
 
-func (i Icinga) ServiceStatus(s Service) (ok bool, at time.Time, inDowntime bool, acknowledged bool, output string, err error) {
+func icingaDefaults() map[string]bool {
+	defaults := make(map[string]bool)
+	defaults["ok"] = false
+	defaults["unknown"] = false
+	defaults["warn"] = false
+	defaults["critical"] = false
+	defaults["scheduled_downtime"] = false
+	defaults["acknowledged"] = false
+	defaults["failed"] = true
+	return defaults
+}
+
+func (i Icinga) Values() []string {
+	var out []string
+	for key, _ := range icingaDefaults() {
+		out = append(out, key)
+	}
+	return out
+}
+
+func (i Icinga) Analyze(svc SvcResult) (Status, error) {
+	var ok, unknown, warn, critical, scheduledDowntime, acknowledged, failed bool
+	var exists bool
+	if ok, exists = svc.Vals["ok"]; !exists {
+		return StatusUnknown, errors.New("Value 'ok' does not exist")
+	} else if unknown, exists = svc.Vals["unknown"]; !exists {
+		return StatusUnknown, errors.New("Value 'unknown' does not exist")
+	} else if warn, exists = svc.Vals["warn"]; !exists {
+		return StatusUnknown, errors.New("Value 'warn' does not exist")
+	} else if critical, exists = svc.Vals["critical"]; !exists {
+		return StatusUnknown, errors.New("Value 'critical' does not exist")
+	} else if scheduledDowntime, exists = svc.Vals["scheduled_downtime"]; !exists {
+		return StatusUnknown, errors.New("Value 'scheduled_downtime' does not exist")
+	} else if acknowledged, exists = svc.Vals["acknowledged"]; !exists {
+		return StatusUnknown, errors.New("Value 'acknowledged' does not exist")
+	} else if failed, exists = svc.Vals["failed"]; !exists {
+		return StatusUnknown, errors.New("Value 'failed' does not exist")
+	}
+
+	if failed || unknown {
+		return StatusUnknown, nil
+	} else if !scheduledDowntime && critical {
+		return StatusNOK, nil
+	}
+	if ok || warn || acknowledged {
+		return StatusOK, nil
+	}
+	return StatusOK, nil
+}
+
+func (i Icinga) Status(s Service) (result SvcResult, err error) {
+	result = SvcResult{
+		At:   time.Now(),
+		Msg:  "",
+		Vals: icingaDefaults(),
+	}
 	err = nil
-	inDowntime = false
-	acknowledged = false
-	output = ""
-	at = time.Now()
-	ok = true
 
 	// proper encoding for the host string
 	hostUrl := &url.URL{Path: s.Host}
@@ -75,23 +125,23 @@ func (i Icinga) ServiceStatus(s Service) (ok bool, at time.Time, inDowntime bool
 		return
 	}
 	// parse response body
-	var results serviceStatusResults
+	var response serviceStatusResponse
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return
 	}
 
-	err = json.Unmarshal(body, &results)
+	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return
 	}
-	ok, at, inDowntime, acknowledged, output, err = results.status()
+	result, err = response.status()
 	return
 }
 
 // type serviceStatusResult describes the results returned by the icinga
 // api when a service status is requested.
-type serviceStatusResults struct {
+type serviceStatusResponse struct {
 	Results []struct {
 		Attrs struct {
 			Acknowledgement float64 `json:"acknowledgement"`
@@ -100,8 +150,8 @@ type serviceStatusResults struct {
 				State  float64 `json:"state"`
 				Output string  `json:"output"`
 			} `json:"last_check_result"`
-			LastCheck      Timestamp `json:"last_check"`
-			LastInDowntime bool      `json:"last_in_downtime"`
+			LastCheck     Timestamp `json:"last_check"`
+			DowntimeDepth float64   `json:"downtime_depth"`
 		} `json:"attrs"`
 	} `json:"results"`
 }
@@ -135,27 +185,40 @@ const (
 	IcingaStatusUnknown
 )
 
-func (r serviceStatusResults) status() (ok bool, at time.Time, inDowntime bool, acknowledged bool, output string, err error) {
-	err = nil
-	inDowntime = false
-	ok = true
-	acknowledged = false
-	output = ""
+func (r serviceStatusResponse) status() (result SvcResult, err error) {
+	result = SvcResult{
+		At:   time.Now(),
+		Msg:  "",
+		Vals: icingaDefaults(),
+	}
 
 	if len(r.Results) != 1 {
-		err = errors.New("not exactly one result found")
+		err = errors.New("Not exactly one Result found in Icinga API response for service")
 		return
 	}
-	output = r.Results[0].Attrs.LastCheckResult.Output
-	if r.Results[0].Attrs.LastInDowntime {
-		inDowntime = true
+	attrs := r.Results[0].Attrs
+
+	result.Msg = attrs.LastCheckResult.Output
+	result.At = attrs.LastCheck.Time
+	result.Vals["failed"] = false
+	if attrs.Acknowledgement > 0.0 {
+		result.Vals["acknowledged"] = true
 	}
-	if r.Results[0].Attrs.Acknowledgement > 0.0 {
-		acknowledged = true
+	if attrs.DowntimeDepth > 0.0 {
+		result.Vals["scheduledDowntime"] = true
 	}
-	if r.Results[0].Attrs.LastCheckResult.State == IcingaStatusCritical {
-		ok = false
+	switch attrs.LastCheckResult.State {
+	case IcingaStatusOK:
+		result.Vals["ok"] = true
+	case IcingaStatusWarn:
+		result.Vals["warn"] = true
+	case IcingaStatusCritical:
+		result.Vals["critical"] = true
+	case IcingaStatusUnknown:
+		result.Vals["unknown"] = true
+	default:
+		result.Vals["failed"] = true
+		err = errors.New("Icinga status unknown")
 	}
-	at = r.Results[0].Attrs.LastCheck.Time
 	return
 }

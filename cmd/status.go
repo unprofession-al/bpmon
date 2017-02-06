@@ -1,8 +1,8 @@
 package cmd
 
-import "github.com/mgutz/ansi"
+import "github.com/ilowe/ansi"
 
-type status int
+type Status int
 
 const (
 	StatusOK = iota
@@ -10,7 +10,7 @@ const (
 	StatusUnknown
 )
 
-func (s status) String() string {
+func (s Status) String() string {
 	var out string
 	switch s {
 	case StatusOK:
@@ -23,11 +23,11 @@ func (s status) String() string {
 	return out
 }
 
-func (s status) toInt() int {
+func (s Status) toInt() int {
 	return int(s)
 }
 
-func (s status) Colorize(in string) string {
+func (s Status) Colorize(in string) string {
 	var out string
 	switch s {
 	case StatusOK:
@@ -40,10 +40,17 @@ func (s status) Colorize(in string) string {
 	return out
 }
 
-func boolAsStatus(ok bool) status {
+func boolAsStatus(ok bool) Status {
 	if ok {
 		return StatusOK
 	} else {
 		return StatusNOK
 	}
+}
+
+func (s Status) toBool() bool {
+	if s == StatusNOK {
+		return false
+	}
+	return true
 }
