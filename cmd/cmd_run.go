@@ -27,6 +27,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	printTimestamps bool
+	printValues     bool
+)
+
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -40,7 +45,7 @@ var runCmd = &cobra.Command{
 		i := NewIcinga(c.Icinga)
 		for _, bp := range b {
 			rs := bp.Status(i)
-			fmt.Println(rs.PrettyPrint(0))
+			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues))
 		}
 	},
 }
@@ -53,6 +58,8 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
+	runCmd.PersistentFlags().BoolVarP(&printTimestamps, "ts", "t", false, "print timestamps of measurement")
+	runCmd.PersistentFlags().BoolVarP(&printValues, "vals", "v", false, "print raw  measurement results if available")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

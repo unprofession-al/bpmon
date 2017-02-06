@@ -20,19 +20,21 @@ type ResultSet struct {
 	children []ResultSet
 }
 
-func (rs ResultSet) PrettyPrint(level int) string {
+func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 	ident := strings.Repeat("   ", level)
 	out := rs.status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.kind, rs.name, rs.status))
 
 	ident = strings.Repeat("   ", level+1)
-	out += fmt.Sprintf("\n%sMeasured at: %v", ident, rs.at)
+	if ts {
+		out += fmt.Sprintf("\n%sMeasured at: %v", ident, rs.at)
+	}
 	if rs.err != nil {
 		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.err.Error())
 	}
 	if rs.status == StatusNOK && rs.output != "" {
 		out += fmt.Sprintf("\n%sMessage from Monitoring: %s", ident, rs.output)
 	}
-	if len(rs.vals) > 0 {
+	if vals && len(rs.vals) > 0 {
 		out += fmt.Sprintf("\n%sValues:", ident)
 		for key, value := range rs.vals {
 			out += " "
@@ -45,7 +47,7 @@ func (rs ResultSet) PrettyPrint(level int) string {
 	}
 	out += "\n"
 	for _, childRs := range rs.children {
-		out += childRs.PrettyPrint(level + 1)
+		out += childRs.PrettyPrint(level+1, ts, vals)
 	}
 	return out
 }
