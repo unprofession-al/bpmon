@@ -26,7 +26,8 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 
 	ident = strings.Repeat("   ", level+1)
 	if ts {
-		out += fmt.Sprintf("\n%sMeasured at: %v", ident, rs.at)
+		timestamp := rs.at.Format("2006-01-02 15:04:05")
+		out += fmt.Sprintf(" (%s)", timestamp)
 	}
 	if rs.err != nil {
 		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.err.Error())
