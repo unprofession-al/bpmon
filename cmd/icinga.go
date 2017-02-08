@@ -136,7 +136,7 @@ func (i Icinga) Analyze(svc SvcResult) (Status, error) {
 					break
 				}
 			} else {
-				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %c does not exist", keyname, index))
+				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
 			}
 		}
 
@@ -147,7 +147,7 @@ func (i Icinga) Analyze(svc SvcResult) (Status, error) {
 					break
 				}
 			} else {
-				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %c does not exist", keyname, index))
+				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
 			}
 		}
 

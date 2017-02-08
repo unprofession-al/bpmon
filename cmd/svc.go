@@ -39,7 +39,11 @@ func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 	rs.at = result.At
 	rs.output = result.Msg
 	rs.vals = result.Vals
-	status, _ := ssp.Analyze(result)
+	status, err := ssp.Analyze(result)
 	rs.status = status
+	if rs.err != nil {
+		return rs
+	}
+	rs.err = err
 	return rs
 }
