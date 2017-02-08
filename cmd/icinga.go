@@ -12,6 +12,16 @@ import (
 	"time"
 )
 
+const (
+	IcingaFlagOK                = "ok"
+	IcingaFlagUnknown           = "unknown"
+	IcingaFlagWarn              = "warn"
+	IcingaFlagCritical          = "critical"
+	IcingaFlagScheduledDowntime = "scheduled_downtime"
+	IcingaFlagAcknowledged      = "acknowledged"
+	IcingaFlagFailed            = "failed"
+)
+
 type IcingaConf struct {
 	Connection struct {
 		Server string
@@ -20,6 +30,13 @@ type IcingaConf struct {
 		User   string
 		Proto  string
 	}
+	Rules []RuleDefinitions
+}
+
+type RuleDefinitions struct {
+	Must    []string
+	MustNot []string
+	Then    string
 }
 
 type Icinga struct {
@@ -40,13 +57,13 @@ func NewIcinga(conf IcingaConf) Icinga {
 
 func icingaDefaults() map[string]bool {
 	defaults := make(map[string]bool)
-	defaults["ok"] = false
-	defaults["unknown"] = false
-	defaults["warn"] = false
-	defaults["critical"] = false
-	defaults["scheduled_downtime"] = false
-	defaults["acknowledged"] = false
-	defaults["failed"] = true
+	defaults[IcingaFlagOK] = false
+	defaults[IcingaFlagUnknown] = false
+	defaults[IcingaFlagWarn] = false
+	defaults[IcingaFlagCritical] = false
+	defaults[IcingaFlagScheduledDowntime] = false
+	defaults[IcingaFlagAcknowledged] = false
+	defaults[IcingaFlagFailed] = true
 	return defaults
 }
 
@@ -200,24 +217,24 @@ func (r serviceStatusResponse) status() (result SvcResult, err error) {
 
 	result.Msg = attrs.LastCheckResult.Output
 	result.At = attrs.LastCheck.Time
-	result.Vals["failed"] = false
+	result.Vals[IcingaFlagFailed] = false
 	if attrs.Acknowledgement > 0.0 {
-		result.Vals["acknowledged"] = true
+		result.Vals[IcingaFlagAcknowledged] = true
 	}
 	if attrs.DowntimeDepth > 0.0 {
-		result.Vals["scheduledDowntime"] = true
+		result.Vals[IcingaFlagScheduledDowntime] = true
 	}
 	switch attrs.LastCheckResult.State {
 	case IcingaStatusOK:
-		result.Vals["ok"] = true
+		result.Vals[IcingaFlagOK] = true
 	case IcingaStatusWarn:
-		result.Vals["warn"] = true
+		result.Vals[IcingaFlagWarn] = true
 	case IcingaStatusCritical:
-		result.Vals["critical"] = true
+		result.Vals[IcingaFlagCritical] = true
 	case IcingaStatusUnknown:
-		result.Vals["unknown"] = true
+		result.Vals[IcingaFlagUnknown] = true
 	default:
-		result.Vals["failed"] = true
+		result.Vals[IcingaFlagFailed] = true
 		err = errors.New("Icinga status unknown")
 	}
 	return

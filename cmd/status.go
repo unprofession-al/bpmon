@@ -1,6 +1,12 @@
 package cmd
 
-import "github.com/mgutz/ansi"
+import (
+	"errors"
+	"fmt"
+	"strings"
+
+	"github.com/mgutz/ansi"
+)
 
 type Status int
 
@@ -10,17 +16,36 @@ const (
 	StatusUnknown
 )
 
+const (
+	StatusOKString      = "ok"
+	StatusNOKString     = "not ok"
+	StatusUnknownString = "unknown"
+)
+
 func (s Status) String() string {
 	var out string
 	switch s {
 	case StatusOK:
-		out = "ok"
+		out = StatusOKString
 	case StatusNOK:
-		out = "not ok"
+		out = StatusNOKString
 	case StatusUnknown:
-		out = "unknown"
+		out = StatusUnknownString
 	}
 	return out
+}
+
+func StatusFromString(in string) (Status, error) {
+	switch strings.ToLower(in) {
+	case StatusOKString:
+		return StatusOK, nil
+	case StatusNOKString:
+		return StatusNOK, nil
+	case StatusUnknownString:
+		return StatusUnknown, nil
+	default:
+		return StatusUnknown, errors.New(fmt.Sprintf("String '%s' is not a valid status", in))
+	}
 }
 
 func (s Status) toInt() int {
