@@ -35,7 +35,10 @@ var writeCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		i := NewIcinga(c.Icinga)
+		i, err := NewIcinga(c.Icinga)
+		if err != nil {
+			log.Fatal(err)
+		}
 		infl, _ := NewInflux(c.Influx)
 		for _, bp := range b {
 			log.Println("Processing " + bp.Name)

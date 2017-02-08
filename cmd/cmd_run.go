@@ -42,7 +42,10 @@ var runCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		i := NewIcinga(c.Icinga)
+		i, err := NewIcinga(c.Icinga)
+		if err != nil {
+			log.Fatal(err)
+		}
 		for _, bp := range b {
 			rs := bp.Status(i)
 			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues))

@@ -49,7 +49,7 @@ type Icinga struct {
 	rules   map[int]Rule
 }
 
-func NewIcinga(conf IcingaConf) Icinga {
+func NewIcinga(conf IcingaConf) (Icinga, error) {
 	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
 
 	rules := map[int]Rule{
@@ -76,7 +76,10 @@ func NewIcinga(conf IcingaConf) Icinga {
 	}
 
 	for _, r := range conf.Rules {
-		status, _ := StatusFromString(r.Then)
+		status, err := StatusFromString(r.Then)
+		if err != nil {
+			return Icinga{}, errors.New(fmt.Sprintf("'%s' configured in rule with order %d is not a valid status", r.Then, r.Order))
+		}
 		rule := Rule{
 			Must:       r.Must,
 			MustNot:    r.MustNot,
@@ -91,7 +94,7 @@ func NewIcinga(conf IcingaConf) Icinga {
 		pass:    conf.Connection.Pass,
 		rules:   rules,
 	}
-	return i
+	return i, nil
 }
 
 func icingaDefaults() map[string]bool {
