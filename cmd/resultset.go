@@ -10,41 +10,41 @@ import (
 )
 
 type ResultSet struct {
-	name     string
-	id       string
-	kind     string
-	at       time.Time
-	vals     map[string]bool
-	status   Status
-	err      error
-	output   string
-	children []ResultSet
+	Name     string
+	Id       string
+	Kind     string
+	At       time.Time
+	Vals     map[string]bool
+	Status   Status
+	Err      error
+	Output   string
+	Children []ResultSet
 }
 
 func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 	ident := strings.Repeat("   ", level)
-	out := rs.status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.kind, rs.name, rs.status))
+	out := rs.Status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.Kind, rs.Name, rs.Status))
 
 	ident = strings.Repeat("   ", level+1)
 	if ts {
-		timestamp := rs.at.Format("2006-01-02 15:04:05")
+		timestamp := rs.At.Format("2006-01-02 15:04:05")
 		out += fmt.Sprintf(" (%s)", timestamp)
 	}
-	if rs.err != nil {
-		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.err.Error())
+	if rs.Err != nil {
+		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.Err.Error())
 	}
-	if rs.status == StatusNOK && rs.output != "" {
-		out += fmt.Sprintf("\n%sMessage from Monitoring: %s", ident, rs.output)
+	if rs.Status == StatusNOK && rs.Output != "" {
+		out += fmt.Sprintf("\n%sMessage from Monitoring: %s", ident, rs.Output)
 	}
-	if vals && len(rs.vals) > 0 {
+	if vals && len(rs.Vals) > 0 {
 		out += fmt.Sprintf("\n%sValues:", ident)
 		var keys []string
-		for k := range rs.vals {
+		for k := range rs.Vals {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			value := rs.vals[key]
+			value := rs.Vals[key]
 			out += " "
 			if !value {
 				out += ansi.Color(key, "magenta+s")
@@ -54,10 +54,32 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 		}
 	}
 	out += "\n"
-	for _, childRs := range rs.children {
+	for _, childRs := range rs.Children {
 		out += childRs.PrettyPrint(level+1, ts, vals)
 	}
 	return out
+}
+
+func (rs ResultSet) StripByStatus(s []Status) (ResultSet, bool) {
+	setOut := rs
+	keep := true
+	for _, status := range s {
+		if rs.Status == status {
+			keep = false
+			break
+		}
+	}
+	if keep {
+		var children []ResultSet
+		for _, child := range rs.Children {
+			set, stripped := child.StripByStatus(s)
+			if !stripped {
+				children = append(children, set)
+			}
+		}
+		setOut.Children = children
+	}
+	return setOut, !keep
 }
 
 func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Point {
@@ -67,31 +89,31 @@ func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Po
 	for k, v := range parentTags {
 		tags[k] = v
 	}
-	tags[rs.kind] = rs.id
+	tags[rs.Kind] = rs.Id
 
-	if rs.status != StatusOK || stringInSlice(rs.kind, saveOK) {
+	if rs.Status != StatusOK || stringInSlice(rs.Kind, saveOK) {
 		fields := map[string]interface{}{
-			"status": rs.status.toInt(),
+			"status": rs.Status.toInt(),
 		}
-		for key, value := range rs.vals {
+		for key, value := range rs.Vals {
 			fields[key] = value
 		}
-		if rs.output != "" {
-			fields["output"] = fmt.Sprintf("Output: %s", rs.output)
+		if rs.Output != "" {
+			fields["output"] = fmt.Sprintf("Output: %s", rs.Output)
 		}
-		if rs.err != nil {
-			fields["err"] = fmt.Sprintf("Error: %s", rs.err.Error())
+		if rs.Err != nil {
+			fields["err"] = fmt.Sprintf("Error: %s", rs.Err.Error())
 		}
 		pt := Point{
-			Timestamp: rs.at,
-			Series:    rs.kind,
+			Timestamp: rs.At,
+			Series:    rs.Kind,
 			Tags:      tags,
 			Fields:    fields,
 		}
 		out = append(out, pt)
 	}
 
-	for _, childRs := range rs.children {
+	for _, childRs := range rs.Children {
 		out = append(out, childRs.AsInflux(tags, saveOK)...)
 	}
 	return out

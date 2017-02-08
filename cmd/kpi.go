@@ -11,11 +11,11 @@ type KPI struct {
 
 func (k KPI) Status(ssp ServiceStatusProvider) ResultSet {
 	rs := ResultSet{
-		kind:     "KPI",
-		name:     k.Name,
-		id:       k.Id,
-		children: []ResultSet{},
-		vals:     make(map[string]bool),
+		Kind:     "KPI",
+		Name:     k.Name,
+		Id:       k.Id,
+		Children: []ResultSet{},
+		Vals:     make(map[string]bool),
 	}
 
 	ch := make(chan *ResultSet)
@@ -30,8 +30,8 @@ func (k KPI) Status(ssp ServiceStatusProvider) ResultSet {
 	for {
 		select {
 		case childRs := <-ch:
-			calcValues = append(calcValues, childRs.status.toBool())
-			rs.children = append(rs.children, *childRs)
+			calcValues = append(calcValues, childRs.Status.toBool())
+			rs.Children = append(rs.Children, *childRs)
 			if len(calcValues) == len(k.Services) {
 				ch = nil
 			}
@@ -42,11 +42,11 @@ func (k KPI) Status(ssp ServiceStatusProvider) ResultSet {
 	}
 
 	ok, err := calculate(k.Operation, calcValues)
-	rs.status = boolAsStatus(ok)
-	rs.at = time.Now()
+	rs.Status = boolAsStatus(ok)
+	rs.At = time.Now()
 	if err != nil {
-		rs.err = err
-		rs.status = StatusUnknown
+		rs.Err = err
+		rs.Status = StatusUnknown
 	}
 	return rs
 }

@@ -30,20 +30,20 @@ type Service struct {
 func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := ResultSet{
-		name: name,
-		id:   name,
-		kind: "SVC",
+		Name: name,
+		Id:   name,
+		Kind: "SVC",
 	}
 	result, err := ssp.Status(s)
-	rs.err = err
-	rs.at = result.At
-	rs.output = result.Msg
-	rs.vals = result.Vals
+	rs.Err = err
+	rs.At = result.At
+	rs.Output = result.Msg
+	rs.Vals = result.Vals
 	status, err := ssp.Analyze(result)
-	rs.status = status
-	if rs.err != nil {
+	rs.Status = status
+	if rs.Err != nil {
 		return rs
 	}
-	rs.err = err
+	rs.Err = err
 	return rs
 }

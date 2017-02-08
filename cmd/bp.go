@@ -12,11 +12,11 @@ type BP struct {
 
 func (bp BP) Status(ssp ServiceStatusProvider) ResultSet {
 	rs := ResultSet{
-		kind:     "BP",
-		name:     bp.Name,
-		id:       bp.Id,
-		children: []ResultSet{},
-		vals:     make(map[string]bool),
+		Kind:     "BP",
+		Name:     bp.Name,
+		Id:       bp.Id,
+		Children: []ResultSet{},
+		Vals:     make(map[string]bool),
 	}
 
 	ch := make(chan *ResultSet)
@@ -31,8 +31,8 @@ func (bp BP) Status(ssp ServiceStatusProvider) ResultSet {
 	for {
 		select {
 		case childRs := <-ch:
-			calcValues = append(calcValues, childRs.status.toBool())
-			rs.children = append(rs.children, *childRs)
+			calcValues = append(calcValues, childRs.Status.toBool())
+			rs.Children = append(rs.Children, *childRs)
 			if len(calcValues) == len(bp.Kpis) {
 				ch = nil
 			}
@@ -43,12 +43,12 @@ func (bp BP) Status(ssp ServiceStatusProvider) ResultSet {
 	}
 
 	ok, err := calculate("AND", calcValues)
-	rs.status = boolAsStatus(ok)
-	rs.at = time.Now()
-	rs.vals["in_availability"] = bp.Availability.Contains(rs.at)
+	rs.Status = boolAsStatus(ok)
+	rs.At = time.Now()
+	rs.Vals["in_availability"] = bp.Availability.Contains(rs.At)
 	if err != nil {
-		rs.err = err
-		rs.status = StatusUnknown
+		rs.Err = err
+		rs.Status = StatusUnknown
 	}
 	return rs
 }

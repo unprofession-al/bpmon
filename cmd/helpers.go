@@ -13,6 +13,11 @@ type conf struct {
 	Icinga         IcingaConf         `yaml:"icinga"`
 	Influx         InfluxConf         `yaml:"influx"`
 	Availabilities AvailabilitiesConf `yaml:"availabilities"`
+	Trigger        Trigger            `yaml:"trigger"`
+}
+
+type Trigger struct {
+	Template string `yaml:"template"`
 }
 
 type bps []BP
