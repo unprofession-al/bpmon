@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -30,27 +31,65 @@ type IcingaConf struct {
 		User   string
 		Proto  string
 	}
-	Rules []RuleDefinitions
+	Rules []Rule
 }
 
-type RuleDefinitions struct {
-	Must    []string
-	MustNot []string
-	Then    string
+type Rule struct {
+	Order      int
+	Must       []string
+	MustNot    []string
+	Then       string
+	thenStatus Status
 }
 
 type Icinga struct {
 	baseUrl string
 	user    string
 	pass    string
+	rules   map[int]Rule
 }
 
 func NewIcinga(conf IcingaConf) Icinga {
 	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
+
+	rules := map[int]Rule{
+		10: Rule{
+			Must:       []string{IcingaFlagFailed},
+			MustNot:    []string{},
+			thenStatus: StatusUnknown,
+		},
+		20: Rule{
+			Must:       []string{IcingaFlagUnknown},
+			MustNot:    []string{},
+			thenStatus: StatusUnknown,
+		},
+		30: Rule{
+			Must:       []string{IcingaFlagCritical},
+			MustNot:    []string{IcingaFlagScheduledDowntime},
+			thenStatus: StatusNOK,
+		},
+		9999: Rule{
+			Must:       []string{},
+			MustNot:    []string{},
+			thenStatus: StatusOK,
+		},
+	}
+
+	for _, r := range conf.Rules {
+		status, _ := StatusFromString(r.Then)
+		rule := Rule{
+			Must:       r.Must,
+			MustNot:    r.MustNot,
+			thenStatus: status,
+		}
+		rules[r.Order] = rule
+	}
+
 	i := Icinga{
 		baseUrl: baseUrl,
 		user:    conf.Connection.User,
 		pass:    conf.Connection.Pass,
+		rules:   rules,
 	}
 	return i
 }
@@ -76,33 +115,44 @@ func (i Icinga) Values() []string {
 }
 
 func (i Icinga) Analyze(svc SvcResult) (Status, error) {
-	var ok, unknown, warn, critical, scheduledDowntime, acknowledged, failed bool
-	var exists bool
-	if ok, exists = svc.Vals["ok"]; !exists {
-		return StatusUnknown, errors.New("Value 'ok' does not exist")
-	} else if unknown, exists = svc.Vals["unknown"]; !exists {
-		return StatusUnknown, errors.New("Value 'unknown' does not exist")
-	} else if warn, exists = svc.Vals["warn"]; !exists {
-		return StatusUnknown, errors.New("Value 'warn' does not exist")
-	} else if critical, exists = svc.Vals["critical"]; !exists {
-		return StatusUnknown, errors.New("Value 'critical' does not exist")
-	} else if scheduledDowntime, exists = svc.Vals["scheduled_downtime"]; !exists {
-		return StatusUnknown, errors.New("Value 'scheduled_downtime' does not exist")
-	} else if acknowledged, exists = svc.Vals["acknowledged"]; !exists {
-		return StatusUnknown, errors.New("Value 'acknowledged' does not exist")
-	} else if failed, exists = svc.Vals["failed"]; !exists {
-		return StatusUnknown, errors.New("Value 'failed' does not exist")
+	var order []int
+	for index := range i.rules {
+		order = append(order, index)
 	}
+	sort.Ints(order)
 
-	if failed || unknown {
-		return StatusUnknown, nil
-	} else if !scheduledDowntime && critical {
-		return StatusNOK, nil
+	for _, index := range order {
+		matchMustCond := true
+		matchMustNotCond := true
+		rule := i.rules[index]
+
+		for _, keyname := range rule.Must {
+			if val, ok := svc.Vals[keyname]; ok {
+				if !val {
+					matchMustCond = false
+					break
+				}
+			} else {
+				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %c does not exist", keyname, index))
+			}
+		}
+
+		for _, keyname := range rule.MustNot {
+			if val, ok := svc.Vals[keyname]; ok {
+				if val {
+					matchMustNotCond = false
+					break
+				}
+			} else {
+				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %c does not exist", keyname, index))
+			}
+		}
+
+		if matchMustCond && matchMustNotCond {
+			return rule.thenStatus, nil
+		}
 	}
-	if ok || warn || acknowledged {
-		return StatusOK, nil
-	}
-	return StatusOK, nil
+	return StatusUnknown, errors.New("No rule matched")
 }
 
 func (i Icinga) Status(s Service) (result SvcResult, err error) {
