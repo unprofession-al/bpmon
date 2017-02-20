@@ -44,17 +44,21 @@ func configure() (conf, bps, error) {
 func readConf() (conf, error) {
 	// TODO: validate cfg for mandatory configuration. For example bpmon will
 	// panic if influx.addr is not set.
+	allSections := map[string]conf{}
 	conf := conf{}
 	file, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("Error while reading %s: %s", cfgFile, err.Error()))
-		return conf, err
+		return conf, errors.New(fmt.Sprintf("Error while reading %s: %s", cfgFile, err.Error()))
 	}
 
-	err = yaml.Unmarshal(file, &conf)
+	err = yaml.Unmarshal(file, &allSections)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("Error while parsing %s: %s", cfgFile, err.Error()))
-		return conf, err
+		return conf, errors.New(fmt.Sprintf("Error while parsing %s: %s", cfgFile, err.Error()))
+	}
+
+	conf, ok := allSections[cfgSection]
+	if !ok {
+		return conf, errors.New(fmt.Sprintf("No section '%s' found in file %s", cfgSection, cfgFile))
 	}
 
 	return conf, nil
