@@ -16,6 +16,9 @@ func and(values []bool) bool {
 }
 
 func or(values []bool) bool {
+	if len(values) < 1 {
+		return true
+	}
 	for _, val := range values {
 		if val == true {
 			return true
@@ -34,10 +37,16 @@ func min(values []bool, min float64) bool {
 			return true
 		}
 	}
+	if count >= min {
+		return true
+	}
 	return false
 }
 
 func minpercent(values []bool, minpercent float64) bool {
+	if len(values) < 1 {
+		return true
+	}
 	max := float64(len(values))
 	target := max * minpercent / 100.0
 	count := 0.0
