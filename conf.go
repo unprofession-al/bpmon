@@ -1,4 +1,4 @@
-package cmd
+package bpmon
 
 import (
 	"errors"
@@ -20,8 +20,8 @@ type Trigger struct {
 	Template string `yaml:"template"`
 }
 
-func configure() (conf, []BP, error) {
-	c, err := readConf()
+func Configure(cfgFile, cfgSection, bpPath, bpPattern string) (conf, []BP, error) {
+	c, err := ReadConf(cfgFile, cfgSection)
 	if err != nil {
 		return c, nil, err
 	}
@@ -31,7 +31,7 @@ func configure() (conf, []BP, error) {
 		return c, nil, err
 	}
 
-	b, err := readBPs(a)
+	b, err := readBPs(bpPath, bpPattern, a)
 	if err != nil {
 		return c, nil, err
 	}
@@ -39,7 +39,7 @@ func configure() (conf, []BP, error) {
 	return c, b, nil
 }
 
-func readConf() (conf, error) {
+func ReadConf(cfgFile, cfgSection string) (conf, error) {
 	// TODO: validate cfg for mandatory configuration. For example bpmon will
 	// panic if influx.addr is not set.
 	allSections := map[string]conf{}
@@ -62,7 +62,7 @@ func readConf() (conf, error) {
 	return conf, nil
 }
 
-func readBPs(a Availabilities) ([]BP, error) {
+func readBPs(bpPath, bpPattern string, a Availabilities) ([]BP, error) {
 	bps := []BP{}
 
 	files, err := ioutil.ReadDir(bpPath)
