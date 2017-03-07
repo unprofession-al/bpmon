@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/unprofession-al/bpmon/status"
 )
 
 const (
@@ -42,14 +44,14 @@ type IcingaFetcher interface {
 func NewIcinga(conf IcingaConf, additionalRules Rules) (Icinga, error) {
 	rules := icingaDefaultRules()
 	for order, r := range additionalRules {
-		status, err := StatusFromString(r.Then)
+		s, err := status.FromString(r.Then)
 		if err != nil {
 			return Icinga{}, errors.New(fmt.Sprintf("'%s' configured in rule with order '%d' is not a valid status", r.Then, order))
 		}
 		rule := Rule{
 			Must:       r.Must,
 			MustNot:    r.MustNot,
-			thenStatus: status,
+			thenStatus: s,
 		}
 		rules[order] = rule
 	}
@@ -77,22 +79,22 @@ func icingaDefaultRules() Rules {
 		10: Rule{
 			Must:       []string{IcingaFlagFailed},
 			MustNot:    []string{},
-			thenStatus: StatusUnknown,
+			thenStatus: status.Unknown,
 		},
 		20: Rule{
 			Must:       []string{IcingaFlagUnknown},
 			MustNot:    []string{},
-			thenStatus: StatusUnknown,
+			thenStatus: status.Unknown,
 		},
 		30: Rule{
 			Must:       []string{IcingaFlagCritical},
 			MustNot:    []string{IcingaFlagScheduledDowntime},
-			thenStatus: StatusNOK,
+			thenStatus: status.Nok,
 		},
 		9999: Rule{
 			Must:       []string{},
 			MustNot:    []string{},
-			thenStatus: StatusOK,
+			thenStatus: status.Ok,
 		},
 	}
 	return rules

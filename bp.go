@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/unprofession-al/bpmon/status"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -87,7 +89,7 @@ func (bp BP) Status(ssp ServiceStatusProvider) ResultSet {
 	for {
 		select {
 		case childRs := <-ch:
-			calcValues = append(calcValues, childRs.Status.toBool())
+			calcValues = append(calcValues, childRs.Status.ToBool())
 			rs.Children = append(rs.Children, *childRs)
 			if len(calcValues) == len(bp.Kpis) {
 				ch = nil
@@ -99,12 +101,12 @@ func (bp BP) Status(ssp ServiceStatusProvider) ResultSet {
 	}
 
 	ok, err := calculate("AND", calcValues)
-	rs.Status = boolAsStatus(ok)
+	rs.Status = status.BoolAsStatus(ok)
 	rs.At = time.Now()
 	rs.Vals["in_availability"] = bp.Availability.Contains(rs.At)
 	if err != nil {
 		rs.Err = err
-		rs.Status = StatusUnknown
+		rs.Status = status.Unknown
 	}
 	return rs
 }

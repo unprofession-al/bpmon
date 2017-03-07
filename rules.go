@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+
+	"github.com/unprofession-al/bpmon/status"
 )
 
 type Rules map[int]Rule
@@ -12,10 +14,10 @@ type Rule struct {
 	Must       []string
 	MustNot    []string
 	Then       string
-	thenStatus Status
+	thenStatus status.Status
 }
 
-func (rules Rules) Analyze(svc SvcResult) (Status, error) {
+func (rules Rules) Analyze(svc SvcResult) (status.Status, error) {
 	var order []int
 	for index := range rules {
 		order = append(order, index)
@@ -34,7 +36,7 @@ func (rules Rules) Analyze(svc SvcResult) (Status, error) {
 					break
 				}
 			} else {
-				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
+				return status.Unknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
 			}
 		}
 
@@ -45,7 +47,7 @@ func (rules Rules) Analyze(svc SvcResult) (Status, error) {
 					break
 				}
 			} else {
-				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
+				return status.Unknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
 			}
 		}
 
@@ -53,5 +55,5 @@ func (rules Rules) Analyze(svc SvcResult) (Status, error) {
 			return rule.thenStatus, nil
 		}
 	}
-	return StatusUnknown, errors.New("No rule matched")
+	return status.Unknown, errors.New("No rule matched")
 }

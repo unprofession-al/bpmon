@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/status"
 )
 
 var triggerCmd = &cobra.Command{
@@ -25,7 +26,7 @@ var triggerCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-		stripBy := []bpmon.Status{bpmon.StatusUnknown, bpmon.StatusOK}
+		stripBy := []status.Status{status.Unknown, status.Ok}
 		var sets []bpmon.ResultSet
 		for _, bp := range b {
 			rs := bp.Status(i)

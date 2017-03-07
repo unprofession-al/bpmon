@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/mgutz/ansi"
+	"github.com/unprofession-al/bpmon/status"
 )
 
 type ResultSet struct {
@@ -15,7 +16,7 @@ type ResultSet struct {
 	Kind     string
 	At       time.Time
 	Vals     map[string]bool
-	Status   Status
+	Status   status.Status
 	Err      error
 	Output   string
 	Children []ResultSet
@@ -33,7 +34,7 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 	if rs.Err != nil {
 		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.Err.Error())
 	}
-	if rs.Status == StatusNOK && rs.Output != "" {
+	if rs.Status == status.Nok && rs.Output != "" {
 		out += fmt.Sprintf("\n%sMessage from Monitoring: %s", ident, rs.Output)
 	}
 	if vals && len(rs.Vals) > 0 {
@@ -60,7 +61,7 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 	return out
 }
 
-func (rs ResultSet) StripByStatus(s []Status) (ResultSet, bool) {
+func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	setOut := rs
 	keep := true
 	for _, status := range s {
@@ -91,9 +92,9 @@ func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Po
 	}
 	tags[rs.Kind] = rs.Id
 
-	if rs.Status != StatusOK || stringInSlice(rs.Kind, saveOK) {
+	if rs.Status != status.Ok || stringInSlice(rs.Kind, saveOK) {
 		fields := map[string]interface{}{
-			"status": rs.Status.toInt(),
+			"status": rs.Status.ToInt(),
 		}
 		for key, value := range rs.Vals {
 			fields[key] = value
