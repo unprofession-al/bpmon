@@ -1,6 +1,16 @@
 package bpmon
 
-import "time"
+import (
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
+	"time"
+
+	"gopkg.in/yaml.v2"
+)
+
+type BusinessProcesses []BP
 
 type BP struct {
 	Name             string       `yaml:"name"`
@@ -8,6 +18,52 @@ type BP struct {
 	Kpis             []KPI        `yaml:"kpis"`
 	AvailabilityName string       `yaml:"availability"`
 	Availability     Availability `yaml:"-"`
+}
+
+func readBPs(bpPath, bpPattern string, a Availabilities) (BusinessProcesses, error) {
+	bps := BusinessProcesses{}
+
+	files, err := ioutil.ReadDir(bpPath)
+	if err != nil {
+		return bps, err
+	}
+
+	for _, f := range files {
+		match, err := filepath.Match(bpPattern, f.Name())
+		if err != nil {
+			return bps, err
+		}
+		if !match {
+			continue
+		}
+		bp := BP{}
+		file, err := ioutil.ReadFile(bpPath + "/" + f.Name())
+		if err != nil {
+			err = errors.New(fmt.Sprintf("Error while reading %s/%s: %s", bpPath, f.Name(), err.Error()))
+			return bps, err
+		}
+
+		err = yaml.Unmarshal(file, &bp)
+		if err != nil {
+			err = errors.New(fmt.Sprintf("Error while parsing %s/%s: %s", bpPath, f.Name(), err.Error()))
+			return bps, err
+		}
+
+		if bp.AvailabilityName == "" {
+			err = errors.New(fmt.Sprintf("There is no availability defined in %s/%s", bpPath, f.Name()))
+			return bps, err
+		}
+
+		availability, ok := a[bp.AvailabilityName]
+		if !ok {
+			err = errors.New(fmt.Sprintf("The availability '%s' referenced in '%s/%s' does not exist", bp.AvailabilityName, bpPath, f.Name()))
+			return bps, err
+		}
+		bp.Availability = availability
+
+		bps = append(bps, bp)
+	}
+	return bps, nil
 }
 
 func (bp BP) Status(ssp ServiceStatusProvider) ResultSet {

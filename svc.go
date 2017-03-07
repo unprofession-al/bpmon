@@ -11,15 +11,10 @@ type SvcResult struct {
 	Vals map[string]bool
 }
 
-type Resolution struct {
-	Vals map[string]bool
-	Is   Status
-}
-
 type ServiceStatusProvider interface {
 	Status(Service) (SvcResult, error)
 	Values() []string
-	Analyze(SvcResult) (Status, error)
+	Rules() Rules
 }
 
 type Service struct {
@@ -39,11 +34,10 @@ func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 	rs.At = result.At
 	rs.Output = result.Msg
 	rs.Vals = result.Vals
-	status, err := ssp.Analyze(result)
+	status, err := ssp.Rules().Analyze(result)
 	rs.Status = status
 	if rs.Err != nil {
 		return rs
 	}
-	rs.Err = err
 	return rs
 }

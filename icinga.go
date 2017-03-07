@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"sort"
 	"strconv"
 	"time"
 )
@@ -24,35 +23,51 @@ const (
 )
 
 type IcingaConf struct {
-	Connection struct {
-		Server string
-		Port   int
-		Pass   string
-		User   string
-		Proto  string
-	}
-	Rules []Rule
-}
-
-type Rule struct {
-	Order      int
-	Must       []string
-	MustNot    []string
-	Then       string
-	thenStatus Status
+	Server string
+	Port   int
+	Pass   string
+	User   string
+	Proto  string
 }
 
 type Icinga struct {
 	baseUrl string
 	user    string
 	pass    string
-	rules   map[int]Rule
+	rules   Rules
 }
 
-func NewIcinga(conf IcingaConf) (Icinga, error) {
-	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
+func NewIcinga(conf IcingaConf, additionalRules []Rule) (Icinga, error) {
+	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
 
-	rules := map[int]Rule{
+	rules := icingaDefaultRules()
+	for _, r := range additionalRules {
+		status, err := StatusFromString(r.Then)
+		if err != nil {
+			return Icinga{}, errors.New(fmt.Sprintf("'%s' configured in rule with order %d is not a valid status", r.Then, r.Order))
+		}
+		rule := Rule{
+			Must:       r.Must,
+			MustNot:    r.MustNot,
+			thenStatus: status,
+		}
+		rules[r.Order] = rule
+	}
+
+	i := Icinga{
+		baseUrl: baseUrl,
+		user:    conf.User,
+		pass:    conf.Pass,
+		rules:   rules,
+	}
+	return i, nil
+}
+func (i Icinga) Rules() Rules {
+	return i.rules
+}
+
+func icingaDefaultRules() map[int]Rule {
+	rules := Rules{
 		10: Rule{
 			Must:       []string{IcingaFlagFailed},
 			MustNot:    []string{},
@@ -74,30 +89,10 @@ func NewIcinga(conf IcingaConf) (Icinga, error) {
 			thenStatus: StatusOK,
 		},
 	}
-
-	for _, r := range conf.Rules {
-		status, err := StatusFromString(r.Then)
-		if err != nil {
-			return Icinga{}, errors.New(fmt.Sprintf("'%s' configured in rule with order %d is not a valid status", r.Then, r.Order))
-		}
-		rule := Rule{
-			Must:       r.Must,
-			MustNot:    r.MustNot,
-			thenStatus: status,
-		}
-		rules[r.Order] = rule
-	}
-
-	i := Icinga{
-		baseUrl: baseUrl,
-		user:    conf.Connection.User,
-		pass:    conf.Connection.Pass,
-		rules:   rules,
-	}
-	return i, nil
+	return rules
 }
 
-func icingaDefaults() map[string]bool {
+func icingaDefaultFlags() map[string]bool {
 	defaults := make(map[string]bool)
 	defaults[IcingaFlagOK] = false
 	defaults[IcingaFlagUnknown] = false
@@ -111,58 +106,17 @@ func icingaDefaults() map[string]bool {
 
 func (i Icinga) Values() []string {
 	var out []string
-	for key, _ := range icingaDefaults() {
+	for key, _ := range icingaDefaultFlags() {
 		out = append(out, key)
 	}
 	return out
-}
-
-func (i Icinga) Analyze(svc SvcResult) (Status, error) {
-	var order []int
-	for index := range i.rules {
-		order = append(order, index)
-	}
-	sort.Ints(order)
-
-	for _, index := range order {
-		matchMustCond := true
-		matchMustNotCond := true
-		rule := i.rules[index]
-
-		for _, keyname := range rule.Must {
-			if val, ok := svc.Vals[keyname]; ok {
-				if !val {
-					matchMustCond = false
-					break
-				}
-			} else {
-				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
-			}
-		}
-
-		for _, keyname := range rule.MustNot {
-			if val, ok := svc.Vals[keyname]; ok {
-				if val {
-					matchMustNotCond = false
-					break
-				}
-			} else {
-				return StatusUnknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
-			}
-		}
-
-		if matchMustCond && matchMustNotCond {
-			return rule.thenStatus, nil
-		}
-	}
-	return StatusUnknown, errors.New("No rule matched")
 }
 
 func (i Icinga) Status(s Service) (result SvcResult, err error) {
 	result = SvcResult{
 		At:   time.Now(),
 		Msg:  "",
-		Vals: icingaDefaults(),
+		Vals: icingaDefaultFlags(),
 	}
 	err = nil
 
@@ -259,7 +213,7 @@ func (r serviceStatusResponse) status() (result SvcResult, err error) {
 	result = SvcResult{
 		At:   time.Now(),
 		Msg:  "",
-		Vals: icingaDefaults(),
+		Vals: icingaDefaultFlags(),
 	}
 
 	if len(r.Results) != 1 {

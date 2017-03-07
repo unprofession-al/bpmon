@@ -41,7 +41,6 @@ func (ac AvailabilityConf) Parse() (Availability, error) {
 		}
 
 		a[wd] = at
-
 	}
 	return a, nil
 }
