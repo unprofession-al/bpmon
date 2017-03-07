@@ -13,7 +13,7 @@ type conf struct {
 	Influx         InfluxConf         `yaml:"influx"`
 	Availabilities AvailabilitiesConf `yaml:"availabilities"`
 	Trigger        Trigger            `yaml:"trigger"`
-	Rules          []Rule             `yaml:"rules"`
+	Rules          Rules              `yaml:"rules"`
 }
 
 type Trigger struct {

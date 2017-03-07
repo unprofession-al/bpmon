@@ -41,17 +41,17 @@ func NewIcinga(conf IcingaConf, additionalRules []Rule) (Icinga, error) {
 	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
 
 	rules := icingaDefaultRules()
-	for _, r := range additionalRules {
+	for order, r := range additionalRules {
 		status, err := StatusFromString(r.Then)
 		if err != nil {
-			return Icinga{}, errors.New(fmt.Sprintf("'%s' configured in rule with order %d is not a valid status", r.Then, r.Order))
+			return Icinga{}, errors.New(fmt.Sprintf("'%s' configured in rule with order '%d' is not a valid status", r.Then, order))
 		}
 		rule := Rule{
 			Must:       r.Must,
 			MustNot:    r.MustNot,
 			thenStatus: status,
 		}
-		rules[r.Order] = rule
+		rules[order] = rule
 	}
 
 	i := Icinga{

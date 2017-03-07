@@ -9,7 +9,6 @@ import (
 type Rules map[int]Rule
 
 type Rule struct {
-	Order      int
 	Must       []string
 	MustNot    []string
 	Then       string
