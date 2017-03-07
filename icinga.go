@@ -31,15 +31,15 @@ type IcingaConf struct {
 }
 
 type Icinga struct {
-	baseUrl string
-	user    string
-	pass    string
-	rules   Rules
+	fecher IcingaFetcher
+	rules  Rules
 }
 
-func NewIcinga(conf IcingaConf, additionalRules []Rule) (Icinga, error) {
-	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
+type IcingaFetcher interface {
+	Fetch(string, string) ([]byte, error)
+}
 
+func NewIcinga(conf IcingaConf, additionalRules Rules) (Icinga, error) {
 	rules := icingaDefaultRules()
 	for order, r := range additionalRules {
 		status, err := StatusFromString(r.Then)
@@ -54,19 +54,25 @@ func NewIcinga(conf IcingaConf, additionalRules []Rule) (Icinga, error) {
 		rules[order] = rule
 	}
 
-	i := Icinga{
+	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
+	fetcher := IcingaQuery{
 		baseUrl: baseUrl,
-		user:    conf.User,
 		pass:    conf.Pass,
-		rules:   rules,
+		user:    conf.User,
+	}
+
+	i := Icinga{
+		fecher: fetcher,
+		rules:  rules,
 	}
 	return i, nil
 }
+
 func (i Icinga) Rules() Rules {
 	return i.rules
 }
 
-func icingaDefaultRules() map[int]Rule {
+func icingaDefaultRules() Rules {
 	rules := Rules{
 		10: Rule{
 			Must:       []string{IcingaFlagFailed},
@@ -118,43 +124,10 @@ func (i Icinga) Status(s Service) (result SvcResult, err error) {
 		Msg:  "",
 		Vals: icingaDefaultFlags(),
 	}
-	err = nil
 
-	// proper encoding for the host string
-	hostUrl := &url.URL{Path: s.Host}
-	host := hostUrl.String()
-	// proper encoding for the service string
-	serviceUrl := &url.URL{Path: s.Service}
-	service := serviceUrl.String()
-	// build url
-	url := fmt.Sprintf("%s/objects/services?service=%s!%s", i.baseUrl, host, service)
-	// query api
-	// TODO: read rootca from file
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return
-	}
-	req.SetBasicAuth(i.user, i.pass)
-	resp, err := client.Do(req)
-	if err != nil {
-		return
-	}
+	body, err := i.fecher.Fetch(s.Host, s.Service)
 
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		err = errors.New("HTTP error " + resp.Status)
-		return
-	}
-	// parse response body
 	var response serviceStatusResponse
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return
@@ -245,4 +218,45 @@ func (r serviceStatusResponse) status() (result SvcResult, err error) {
 		err = errors.New("Icinga status unknown")
 	}
 	return
+}
+
+type IcingaQuery struct {
+	baseUrl string
+	user    string
+	pass    string
+}
+
+func (i IcingaQuery) Fetch(host, service string) ([]byte, error) {
+	var body []byte
+	// proper encoding for the host string
+	hostUrl := &url.URL{Path: host}
+	host = hostUrl.String()
+	// proper encoding for the service string
+	serviceUrl := &url.URL{Path: service}
+	service = serviceUrl.String()
+	// build url
+	url := fmt.Sprintf("%s/objects/services?service=%s!%s", i.baseUrl, host, service)
+	// query api
+	// TODO: read rootca from file
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return body, err
+	}
+	req.SetBasicAuth(i.user, i.pass)
+	resp, err := client.Do(req)
+	if err != nil {
+		return body, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		err = errors.New("HTTP error " + resp.Status)
+		return body, err
+	}
+	// parse response body
+	body, err = ioutil.ReadAll(resp.Body)
+	return body, err
 }
