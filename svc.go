@@ -16,7 +16,7 @@ type SvcResult struct {
 type ServiceStatusProvider interface {
 	Status(string, string) (time.Time, string, map[string]bool, error)
 	Values() []string
-	Rules() rules.Rules
+	DefaultRules() rules.Rules
 }
 
 type Service struct {
@@ -24,7 +24,7 @@ type Service struct {
 	Service string
 }
 
-func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
+func (s Service) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := ResultSet{
 		Name: name,
@@ -36,7 +36,7 @@ func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 	rs.At = at
 	rs.Output = msg
 	rs.Vals = vals
-	status, err := ssp.Rules().Analyze(vals)
+	status, err := r.Analyze(vals)
 	rs.Status = status
 	if rs.Err != nil {
 		return rs

@@ -17,6 +17,22 @@ type Rule struct {
 	ThenStatus status.Status `yaml:"-"`
 }
 
+func (r Rules) Merge(additional Rules) error {
+	for order, a := range additional {
+		s, err := status.FromString(a.Then)
+		if err != nil {
+			return errors.New(fmt.Sprintf("'%s' configured in rule with order '%d' is not a valid status", a.Then, order))
+		}
+		rule := Rule{
+			Must:       a.Must,
+			MustNot:    a.MustNot,
+			ThenStatus: s,
+		}
+		r[order] = rule
+	}
+	return nil
+}
+
 func (rules Rules) Analyze(values map[string]bool) (status.Status, error) {
 	var order []int
 	for index := range rules {

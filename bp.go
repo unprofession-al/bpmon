@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
 
 	"gopkg.in/yaml.v2"
@@ -68,7 +69,7 @@ func readBPs(bpPath, bpPattern string, a Availabilities) (BusinessProcesses, err
 	return bps, nil
 }
 
-func (bp BP) Status(ssp ServiceStatusProvider) ResultSet {
+func (bp BP) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	rs := ResultSet{
 		Kind:     "BP",
 		Name:     bp.Name,
@@ -80,10 +81,10 @@ func (bp BP) Status(ssp ServiceStatusProvider) ResultSet {
 	ch := make(chan *ResultSet)
 	var calcValues []bool
 	for _, k := range bp.Kpis {
-		go func(k KPI, ssp ServiceStatusProvider) {
-			childRs := k.Status(ssp)
+		go func(k KPI, ssp ServiceStatusProvider, r rules.Rules) {
+			childRs := k.Status(ssp, r)
 			ch <- &childRs
-		}(k, ssp)
+		}(k, ssp, r)
 	}
 
 	for {

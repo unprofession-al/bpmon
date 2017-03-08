@@ -21,10 +21,17 @@ var writeCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		r := i.DefaultRules()
+		r.Merge(c.Rules)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		infl, _ := bpmon.NewInflux(c.Influx)
 		for _, bp := range b {
 			log.Println("Processing " + bp.Name)
-			rs := bp.Status(i)
+			rs := bp.Status(i, r)
 			err = infl.Write(rs)
 			if err != nil {
 				log.Fatal(err)

@@ -43,20 +43,6 @@ type IcingaFetcher interface {
 }
 
 func NewIcinga(conf IcingaConf, additionalRules rules.Rules) (Icinga, error) {
-	r := icingaDefaultRules()
-	for order, ar := range additionalRules {
-		s, err := status.FromString(ar.Then)
-		if err != nil {
-			return Icinga{}, errors.New(fmt.Sprintf("'%s' configured in rule with order '%d' is not a valid status", ar.Then, order))
-		}
-		rule := rules.Rule{
-			Must:       ar.Must,
-			MustNot:    ar.MustNot,
-			ThenStatus: s,
-		}
-		r[order] = rule
-	}
-
 	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
 	fetcher := IcingaAPI{
 		baseUrl: baseUrl,
@@ -66,16 +52,12 @@ func NewIcinga(conf IcingaConf, additionalRules rules.Rules) (Icinga, error) {
 
 	i := Icinga{
 		fecher: fetcher,
-		rules:  r,
 	}
+
 	return i, nil
 }
 
-func (i Icinga) Rules() rules.Rules {
-	return i.rules
-}
-
-func icingaDefaultRules() rules.Rules {
+func (i Icinga) DefaultRules() rules.Rules {
 	rules := rules.Rules{
 		10: rules.Rule{
 			Must:       []string{IcingaFlagFailed},

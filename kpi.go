@@ -3,6 +3,7 @@ package bpmon
 import (
 	"time"
 
+	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
 )
 
@@ -13,7 +14,7 @@ type KPI struct {
 	Services  []Service
 }
 
-func (k KPI) Status(ssp ServiceStatusProvider) ResultSet {
+func (k KPI) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	rs := ResultSet{
 		Kind:     "KPI",
 		Name:     k.Name,
@@ -25,10 +26,10 @@ func (k KPI) Status(ssp ServiceStatusProvider) ResultSet {
 	ch := make(chan *ResultSet)
 	var calcValues []bool
 	for _, s := range k.Services {
-		go func(s Service, ssp ServiceStatusProvider) {
-			childRs := s.Status(ssp)
+		go func(s Service, ssp ServiceStatusProvider, r rules.Rules) {
+			childRs := s.Status(ssp, r)
 			ch <- &childRs
-		}(s, ssp)
+		}(s, ssp, r)
 	}
 
 	for {

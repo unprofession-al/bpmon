@@ -27,8 +27,15 @@ var runCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		r := i.DefaultRules()
+		r.Merge(c.Rules)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		for _, bp := range b {
-			rs := bp.Status(i)
+			rs := bp.Status(i, r)
 			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues))
 		}
 	},

@@ -27,10 +27,17 @@ var triggerCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		r := i.DefaultRules()
+		r.Merge(c.Rules)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		stripBy := []status.Status{status.Unknown, status.Ok}
 		var sets []bpmon.ResultSet
 		for _, bp := range b {
-			rs := bp.Status(i)
+			rs := bp.Status(i, r)
 			set, stripped := rs.StripByStatus(stripBy)
 			if !stripped {
 				sets = append(sets, set)
