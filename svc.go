@@ -3,6 +3,8 @@ package bpmon
 import (
 	"fmt"
 	"time"
+
+	"github.com/unprofession-al/bpmon/rules"
 )
 
 type SvcResult struct {
@@ -12,9 +14,9 @@ type SvcResult struct {
 }
 
 type ServiceStatusProvider interface {
-	Status(Service) (SvcResult, error)
+	Status(string, string) (time.Time, string, map[string]bool, error)
 	Values() []string
-	Rules() Rules
+	Rules() rules.Rules
 }
 
 type Service struct {
@@ -29,12 +31,12 @@ func (s Service) Status(ssp ServiceStatusProvider) ResultSet {
 		Id:   name,
 		Kind: "SVC",
 	}
-	result, err := ssp.Status(s)
+	at, msg, vals, err := ssp.Status(s.Host, s.Service)
 	rs.Err = err
-	rs.At = result.At
-	rs.Output = result.Msg
-	rs.Vals = result.Vals
-	status, err := ssp.Rules().Analyze(result)
+	rs.At = at
+	rs.Output = msg
+	rs.Vals = vals
+	status, err := ssp.Rules().Analyze(vals)
 	rs.Status = status
 	if rs.Err != nil {
 		return rs

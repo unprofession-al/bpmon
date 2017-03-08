@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/rules"
+
 	"gopkg.in/yaml.v2"
 )
 
 type conf struct {
-	Icinga         IcingaConf         `yaml:"icinga"`
+	Icinga         icinga.IcingaConf  `yaml:"icinga"`
 	Influx         InfluxConf         `yaml:"influx"`
 	Availabilities AvailabilitiesConf `yaml:"availabilities"`
 	Trigger        Trigger            `yaml:"trigger"`
-	Rules          Rules              `yaml:"rules"`
+	Rules          rules.Rules        `yaml:"rules"`
 }
 
 type Trigger struct {

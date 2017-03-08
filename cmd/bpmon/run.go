@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/icinga"
 )
 
 var (
@@ -22,7 +23,7 @@ var runCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		i, err := bpmon.NewIcinga(c.Icinga, c.Rules)
+		i, err := icinga.NewIcinga(c.Icinga, c.Rules)
 		if err != nil {
 			log.Fatal(err)
 		}
