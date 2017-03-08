@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/icinga"
 )
 
 var configCmd = &cobra.Command{
@@ -18,6 +19,19 @@ var configCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		i, err := icinga.NewIcinga(c.Icinga, c.Rules)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		r := i.DefaultRules()
+		r.Merge(c.Rules)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		c.Rules = r
 
 		var out []byte
 		out, _ = yaml.Marshal(c)

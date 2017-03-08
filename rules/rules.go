@@ -11,22 +11,17 @@ import (
 type Rules map[int]Rule
 
 type Rule struct {
-	Must       []string      `yaml:"must"`
-	MustNot    []string      `yaml:"must_not"`
-	Then       string        `yaml:"then"`
-	ThenStatus status.Status `yaml:"-"`
+	Must    []string      `yaml:"must"`
+	MustNot []string      `yaml:"must_not"`
+	Then    status.Status `yaml:"then"`
 }
 
 func (r Rules) Merge(additional Rules) error {
 	for order, a := range additional {
-		s, err := status.FromString(a.Then)
-		if err != nil {
-			return errors.New(fmt.Sprintf("'%s' configured in rule with order '%d' is not a valid status", a.Then, order))
-		}
 		rule := Rule{
-			Must:       a.Must,
-			MustNot:    a.MustNot,
-			ThenStatus: s,
+			Must:    a.Must,
+			MustNot: a.MustNot,
+			Then:    a.Then,
 		}
 		r[order] = rule
 	}
@@ -68,7 +63,7 @@ func (rules Rules) Analyze(values map[string]bool) (status.Status, error) {
 		}
 
 		if matchMustCond && matchMustNotCond {
-			return rule.ThenStatus, nil
+			return rule.Then, nil
 		}
 	}
 	return status.Unknown, errors.New("No rule matched")

@@ -79,3 +79,11 @@ func (s Status) ToBool() bool {
 	}
 	return true
 }
+
+func (s *Status) UnmarshalYAML(func(interface{}) error) {
+	return func(b interface{}) error {
+		st, err := FromString(b.(string))
+		s = &st
+		return err
+	}
+}

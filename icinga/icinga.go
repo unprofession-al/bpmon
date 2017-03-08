@@ -60,24 +60,24 @@ func NewIcinga(conf IcingaConf, additionalRules rules.Rules) (Icinga, error) {
 func (i Icinga) DefaultRules() rules.Rules {
 	rules := rules.Rules{
 		10: rules.Rule{
-			Must:       []string{IcingaFlagFailed},
-			MustNot:    []string{},
-			ThenStatus: status.Unknown,
+			Must:    []string{IcingaFlagFailed},
+			MustNot: []string{},
+			Then:    status.Unknown,
 		},
 		20: rules.Rule{
-			Must:       []string{IcingaFlagUnknown},
-			MustNot:    []string{},
-			ThenStatus: status.Unknown,
+			Must:    []string{IcingaFlagUnknown},
+			MustNot: []string{},
+			Then:    status.Unknown,
 		},
 		30: rules.Rule{
-			Must:       []string{IcingaFlagCritical},
-			MustNot:    []string{IcingaFlagScheduledDowntime},
-			ThenStatus: status.Nok,
+			Must:    []string{IcingaFlagCritical},
+			MustNot: []string{IcingaFlagScheduledDowntime},
+			Then:    status.Nok,
 		},
 		9999: rules.Rule{
-			Must:       []string{},
-			MustNot:    []string{},
-			ThenStatus: status.Ok,
+			Must:    []string{},
+			MustNot: []string{},
+			Then:    status.Ok,
 		},
 	}
 	return rules
