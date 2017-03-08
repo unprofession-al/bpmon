@@ -80,10 +80,16 @@ func (s Status) ToBool() bool {
 	return true
 }
 
-func (s *Status) UnmarshalYAML(func(interface{}) error) {
-	return func(b interface{}) error {
-		st, err := FromString(b.(string))
-		s = &st
+func (s *Status) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var aux string
+	if err := unmarshal(&aux); err != nil {
 		return err
 	}
+	st, err := FromString(aux)
+	s = &st
+	return err
+}
+
+func (s Status) MarshalYAML() (interface{}, error) {
+	return s.String(), nil
 }
