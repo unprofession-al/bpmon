@@ -35,7 +35,7 @@ func (k KPI) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	for {
 		select {
 		case childRs := <-ch:
-			calcValues = append(calcValues, childRs.Status.ToBool())
+			calcValues = append(calcValues, childRs.Status.Bool())
 			rs.Children = append(rs.Children, *childRs)
 			if len(calcValues) == len(k.Services) {
 				ch = nil
@@ -47,7 +47,7 @@ func (k KPI) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	}
 
 	ok, err := calculate(k.Operation, calcValues)
-	rs.Status = status.BoolAsStatus(ok)
+	rs.Status = status.FromBool(ok)
 	rs.At = time.Now()
 	if err != nil {
 		rs.Err = err

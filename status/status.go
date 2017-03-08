@@ -48,7 +48,7 @@ func FromString(in string) (Status, error) {
 	}
 }
 
-func (s Status) ToInt() int {
+func (s Status) Int() int {
 	return int(s)
 }
 
@@ -65,7 +65,7 @@ func (s Status) Colorize(in string) string {
 	return out
 }
 
-func BoolAsStatus(ok bool) Status {
+func FromBool(ok bool) Status {
 	if ok {
 		return Ok
 	} else {
@@ -73,7 +73,7 @@ func BoolAsStatus(ok bool) Status {
 	}
 }
 
-func (s Status) ToBool() bool {
+func (s Status) Bool() bool {
 	if s == Nok {
 		return false
 	}

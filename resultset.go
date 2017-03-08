@@ -94,7 +94,7 @@ func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Po
 
 	if rs.Status != status.Ok || stringInSlice(rs.Kind, saveOK) {
 		fields := map[string]interface{}{
-			"status": rs.Status.ToInt(),
+			"status": rs.Status.Int(),
 		}
 		for key, value := range rs.Vals {
 			fields[key] = value

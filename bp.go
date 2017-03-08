@@ -90,7 +90,7 @@ func (bp BP) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	for {
 		select {
 		case childRs := <-ch:
-			calcValues = append(calcValues, childRs.Status.ToBool())
+			calcValues = append(calcValues, childRs.Status.Bool())
 			rs.Children = append(rs.Children, *childRs)
 			if len(calcValues) == len(bp.Kpis) {
 				ch = nil
@@ -102,7 +102,7 @@ func (bp BP) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	}
 
 	ok, err := calculate("AND", calcValues)
-	rs.Status = status.BoolAsStatus(ok)
+	rs.Status = status.FromBool(ok)
 	rs.At = time.Now()
 	rs.Vals["in_availability"] = bp.Availability.Contains(rs.At)
 	if err != nil {
