@@ -35,11 +35,10 @@ type IcingaConf struct {
 
 type Icinga struct {
 	fecher IcingaFetcher
-	rules  rules.Rules
 }
 
 type IcingaFetcher interface {
-	Fetch(string, string) ([]byte, error)
+	Fetch(string, string) (serviceStatusResponse, error)
 }
 
 func NewIcinga(conf IcingaConf, additionalRules rules.Rules) (Icinga, error) {
@@ -108,13 +107,8 @@ func (i Icinga) Status(host string, service string) (at time.Time, msg string, v
 	msg = ""
 	vals = icingaDefaultFlags()
 
-	body, err := i.fecher.Fetch(host, service)
+	response, err := i.fecher.Fetch(host, service)
 
-	var response serviceStatusResponse
-	err = json.Unmarshal(body, &response)
-	if err != nil {
-		return
-	}
 	at, msg, vals, err = response.status()
 	return
 }
@@ -207,8 +201,10 @@ type IcingaAPI struct {
 	pass    string
 }
 
-func (i IcingaAPI) Fetch(host, service string) ([]byte, error) {
+func (i IcingaAPI) Fetch(host, service string) (serviceStatusResponse, error) {
+	var response serviceStatusResponse
 	var body []byte
+
 	// proper encoding for the host string
 	hostUrl := &url.URL{Path: host}
 	host = hostUrl.String()
@@ -225,19 +221,21 @@ func (i IcingaAPI) Fetch(host, service string) ([]byte, error) {
 	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return body, err
+		return response, err
 	}
 	req.SetBasicAuth(i.user, i.pass)
 	resp, err := client.Do(req)
 	if err != nil {
-		return body, err
+		return response, err
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		err = errors.New("HTTP error " + resp.Status)
-		return body, err
+		return response, err
 	}
 	// parse response body
 	body, err = ioutil.ReadAll(resp.Body)
-	return body, err
+
+	err = json.Unmarshal(body, &response)
+	return response, err
 }
