@@ -9,14 +9,14 @@ import (
 
 type InfluxConf struct {
 	Connection struct {
-		Server string
-		Port   int
-		Pass   string
-		User   string
-		Proto  string
-	}
-	SaveOK   []string `yaml:"saveOK"`
-	Database string
+		Server string `yaml:"server"`
+		Port   int    `yaml:"port"`
+		Pass   string `yaml:"pass"`
+		User   string `yaml:"user"`
+		Proto  string `yaml:"proto"`
+	} `yaml:"connection"`
+	SaveOK   []string `yaml:"save_ok"`
+	Database string   `yaml:"database"`
 }
 
 type Influx struct {
