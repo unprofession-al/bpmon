@@ -2,13 +2,13 @@ package bpmon
 
 import "testing"
 
-type testsets struct {
+type testset struct {
 	op  string
 	val []bool
 	res bool
 }
 
-var TestSets = []testsets{
+var TestSets = []testset{
 	{"AND", []bool{true, true, true}, true},
 	{"AND", []bool{true}, true},
 	{"AND", []bool{}, true},
