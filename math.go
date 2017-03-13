@@ -87,10 +87,6 @@ func calculate(operation string, values []bool) (bool, error) {
 
 func parseOp(operation string) (op string, arg float64, err error) {
 	opParts := strings.Split(strings.ToLower(operation), " ")
-	if len(opParts) < 1 {
-		return "", 0.0, errors.New("No operation found")
-	}
-
 	op = opParts[0]
 
 	if len(opParts) > 1 {

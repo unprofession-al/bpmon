@@ -2,13 +2,13 @@ package bpmon
 
 import "testing"
 
-type testset struct {
+type mathTestSet struct {
 	op  string
 	val []bool
 	res bool
 }
 
-var TestSets = []testset{
+var MathTestSets = []mathTestSet{
 	{"AND", []bool{true, true, true}, true},
 	{"AND", []bool{true}, true},
 	{"AND", []bool{}, true},
@@ -34,10 +34,32 @@ var TestSets = []testset{
 }
 
 func TestOperations(t *testing.T) {
-	for _, test := range TestSets {
+	for _, test := range MathTestSets {
 		res, _ := calculate(test.op, test.val)
 		if res != test.res {
 			t.Errorf("Expected operation '%s' on data %v to be %v, is %v", test.op, test.val, test.res, res)
 		}
+	}
+}
+
+func TestUnknownOperation(t *testing.T) {
+	op := "UNKNOWN"
+	_, err := calculate(op, []bool{true, true})
+	if err == nil {
+		t.Errorf("Unknown operation '%s' did not fail", op)
+	}
+}
+
+func TestEmptyOperation(t *testing.T) {
+	_, err := calculate("", []bool{true, true})
+	if err == nil {
+		t.Errorf("Empty operation did not return error")
+	}
+}
+
+func TestMalformedOperation(t *testing.T) {
+	_, err := calculate("MIN 4,3", []bool{true, true})
+	if err == nil {
+		t.Errorf("Malformed operation did not return error")
 	}
 }

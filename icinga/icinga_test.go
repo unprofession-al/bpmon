@@ -3,6 +3,7 @@ package icinga
 import (
 	"encoding/json"
 	"errors"
+	"reflect"
 	"testing"
 )
 
@@ -16,9 +17,18 @@ type testset struct {
 
 var TestSets = []testset{
 	{
-		host:    "testhost",
-		service: "testservice",
+		host:    "Test Host",
+		service: "All Fine",
 		output:  "ok",
+		result: map[string]bool{
+			"ok":                 true,
+			"unknown":            false,
+			"warn":               false,
+			"critical":           false,
+			"scheduled_downtime": false,
+			"acknowledged":       false,
+			"failed":             false,
+		},
 		response: []byte(`
 {
   "results": [
@@ -30,6 +40,37 @@ var TestSets = []testset{
           "state": 0
         },
         "downtime_depth": 0,
+        "last_check": 1488793396.958048
+      }
+    }
+  ]
+}
+		`),
+	},
+	{
+		host:    "Test Host",
+		service: "Ack, Downtime, Critical",
+		output:  "failed",
+		result: map[string]bool{
+			"ok":                 false,
+			"unknown":            false,
+			"warn":               false,
+			"critical":           true,
+			"scheduled_downtime": true,
+			"acknowledged":       true,
+			"failed":             false,
+		},
+		response: []byte(`
+{
+  "results": [
+    {
+      "attrs": {
+        "acknowledgement": 1,
+        "last_check_result": {
+          "output": "failed",
+          "state": 2
+        },
+        "downtime_depth": 1,
         "last_check": 1488793396.958048
       }
     }
@@ -57,9 +98,16 @@ func (i IcingaMock) Fetch(host, service string) (serviceStatusResponse, error) {
 func TestStatusInterpreter(t *testing.T) {
 	i := Icinga{fecher: IcingaMock{endpoints: TestSets}}
 	for _, test := range TestSets {
-		_, output, _, _ := i.Status(test.host, test.service)
+		_, output, vals, err := i.Status(test.host, test.service)
+		if err != nil {
+			t.Errorf("Error returned: %s", err.Error())
+		}
 		if output != test.output {
 			t.Errorf("Failed")
+		}
+		eq := reflect.DeepEqual(vals, test.result)
+		if !eq {
+			t.Errorf("Results do not match: '%v' vs. '%v'", vals, test.result)
 		}
 	}
 }
