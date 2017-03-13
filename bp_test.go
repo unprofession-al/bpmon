@@ -2,9 +2,56 @@ package bpmon
 
 import (
 	"testing"
+	"time"
 
 	"github.com/unprofession-al/bpmon/status"
 )
+
+type bpTestSet struct {
+	bp     BP
+	status status.Status
+}
+
+var allDayLong = Availability{
+	time.Monday:    AvailabilityTime{AllDay: true},
+	time.Tuesday:   AvailabilityTime{AllDay: true},
+	time.Wednesday: AvailabilityTime{AllDay: true},
+	time.Thursday:  AvailabilityTime{AllDay: true},
+	time.Friday:    AvailabilityTime{AllDay: true},
+	time.Saturday:  AvailabilityTime{AllDay: true},
+	time.Sunday:    AvailabilityTime{AllDay: true},
+}
+
+var BpTestSets = []bpTestSet{
+	{
+		bp: BP{
+			Name:         "TestBP",
+			Id:           "test_bp",
+			Availability: allDayLong,
+			Kpis: []KPI{
+				KPI{
+					Name:      "TestKPI",
+					Id:        "test_kpi",
+					Operation: "OR",
+					Services: []Service{
+						Service{"Host", "good"},
+					},
+				},
+			},
+		},
+		status: status.Ok,
+	},
+}
+
+func TestBusinessProcess(t *testing.T) {
+	ssp := SSPMock{}
+	for _, bp := range BpTestSets {
+		rs := bp.bp.Status(ssp, ssp.DefaultRules())
+		if rs.Status != bp.status {
+			t.Errorf("Expected status to be '%s', got '%s'", bp.status, rs.Status)
+		}
+	}
+}
 
 type svcTestSet struct {
 	svc         Service
@@ -48,6 +95,5 @@ func TestServices(t *testing.T) {
 		if rs.Status != s.status {
 			t.Errorf("Expected status to be '%s', got '%s'", s.status, rs.Status)
 		}
-
 	}
 }
