@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/unprofession-al/bpmon",
 	"GoVersion": "go1.8",
-	"GodepVersion": "v74",
+	"GodepVersion": "v79",
 	"Deps": [
 		{
 			"ImportPath": "github.com/influxdata/influxdb/client/v2",
