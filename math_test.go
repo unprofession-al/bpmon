@@ -37,7 +37,7 @@ func TestOperations(t *testing.T) {
 	for _, test := range MathTestSets {
 		res, _ := calculate(test.op, test.val)
 		if res != test.res {
-			t.Errorf("Expected operation '%s' on data %v to be %v, is %v", test.op, test.val, test.res, res)
+			t.Errorf("Expected operation '%s' with data %v to be %v, is %v", test.op, test.val, test.res, res)
 		}
 	}
 }
