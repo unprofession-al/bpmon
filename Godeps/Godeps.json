@@ -1,0 +1,43 @@
+{
+	"ImportPath": "github.com/unprofession-al/bpmon",
+	"GoVersion": "go1.8",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/influxdata/influxdb/client/v2",
+			"Comment": "v1.1.0-223-g8c2cfd14",
+			"Rev": "8c2cfd14af2511580277ddfd7a834b6aaa5f19ab"
+		},
+		{
+			"ImportPath": "github.com/influxdata/influxdb/models",
+			"Comment": "v1.1.0-223-g8c2cfd14",
+			"Rev": "8c2cfd14af2511580277ddfd7a834b6aaa5f19ab"
+		},
+		{
+			"ImportPath": "github.com/influxdata/influxdb/pkg/escape",
+			"Comment": "v1.1.0-223-g8c2cfd14",
+			"Rev": "8c2cfd14af2511580277ddfd7a834b6aaa5f19ab"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Comment": "v0.0.6-9-gd228849",
+			"Rev": "d228849504861217f796da67fae4f6e347643f15"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-isatty",
+			"Rev": "30a891c33c7cde7b02a981314b4228ec99380cca"
+		},
+		{
+			"ImportPath": "github.com/mgutz/ansi",
+			"Rev": "9520e82c474b0a04dd04f8a40959027271bab992"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "d75a52659825e75fff6158388dddc6a5b04f9ba5"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "a5b47d31c556af34a302ce5d659e6fea44d90de0"
+		}
+	]
+}
