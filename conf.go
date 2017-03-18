@@ -25,7 +25,12 @@ type Trigger struct {
 }
 
 func Configure(cfgFile, cfgSection, bpPath, bpPattern string) (conf, BusinessProcesses, error) {
-	c, err := ReadConf(cfgFile, cfgSection)
+	cfgData, err := ioutil.ReadFile(cfgFile)
+	if err != nil {
+		return conf{}, nil, errors.New(fmt.Sprintf("Error while reading configuration file '%s': %s", cfgFile, err.Error()))
+	}
+
+	c, err := parseConf(cfgData, cfgSection)
 	if err != nil {
 		return c, nil, err
 	}
@@ -35,32 +40,30 @@ func Configure(cfgFile, cfgSection, bpPath, bpPattern string) (conf, BusinessPro
 		return c, nil, err
 	}
 
-	b, err := readBPs(bpPath, bpPattern, a)
-	if err != nil {
-		return c, nil, err
+	var b BusinessProcesses
+	if bpPath != "" {
+		b, err = readBPs(bpPath, bpPattern, a)
+		if err != nil {
+			return c, nil, err
+		}
 	}
 
 	return c, b, nil
 }
 
-func ReadConf(cfgFile, cfgSection string) (conf, error) {
+func parseConf(cfg []byte, cfgSection string) (conf, error) {
 	// TODO: validate cfg for mandatory configuration. For example bpmon will
 	// panic if influx.addr is not set.
 	allSections := map[string]conf{}
-	conf := conf{}
-	file, err := ioutil.ReadFile(cfgFile)
-	if err != nil {
-		return conf, errors.New(fmt.Sprintf("Error while reading %s: %s", cfgFile, err.Error()))
-	}
 
-	err = yaml.Unmarshal(file, &allSections)
+	err := yaml.Unmarshal(cfg, &allSections)
 	if err != nil {
-		return conf, errors.New(fmt.Sprintf("Error while parsing %s: %s", cfgFile, err.Error()))
+		return conf{}, errors.New(fmt.Sprintf("Error while parsing configuration: %s", err.Error()))
 	}
 
 	conf, ok := allSections[cfgSection]
 	if !ok {
-		return conf, errors.New(fmt.Sprintf("No section '%s' found in file %s", cfgSection, cfgFile))
+		return conf, errors.New(fmt.Sprintf("No section '%s' found in configuration", cfgSection))
 	}
 
 	return conf, nil
