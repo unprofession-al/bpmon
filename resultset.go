@@ -83,7 +83,12 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	return setOut, !keep
 }
 
-func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Point {
+func (rs ResultSet) AsInflux(saveOK []string) []Point {
+	tags := make(map[string]string)
+	return rs.toPoints(tags, saveOK)
+}
+
+func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []Point {
 	var out []Point
 
 	tags := make(map[string]string)
@@ -115,7 +120,7 @@ func (rs ResultSet) AsInflux(parentTags map[string]string, saveOK []string) []Po
 	}
 
 	for _, childRs := range rs.Children {
-		out = append(out, childRs.AsInflux(tags, saveOK)...)
+		out = append(out, childRs.toPoints(tags, saveOK)...)
 	}
 	return out
 }

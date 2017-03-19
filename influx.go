@@ -25,6 +25,10 @@ type Influx struct {
 	database string
 }
 
+type Influxable interface {
+	AsInflux([]string) []Point
+}
+
 func NewInflux(conf InfluxConf) (Influx, error) {
 	addr := fmt.Sprintf("%s://%s:%d", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
 	c, err := client.NewHTTPClient(client.HTTPConfig{
@@ -40,7 +44,7 @@ func NewInflux(conf InfluxConf) (Influx, error) {
 	return cli, err
 }
 
-func (i Influx) Write(rs ResultSet) error {
+func (i Influx) Write(in Influxable) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  i.database,
 		Precision: "s",
@@ -49,8 +53,7 @@ func (i Influx) Write(rs ResultSet) error {
 		return err
 	}
 
-	ns := make(map[string]string)
-	points := rs.AsInflux(ns, i.saveOK)
+	points := in.AsInflux(i.saveOK)
 
 	for _, p := range points {
 		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
