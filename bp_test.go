@@ -90,7 +90,7 @@ func TestServices(t *testing.T) {
 		if s.errExpected && rs.Err == nil {
 			t.Errorf("Error expected but got nil")
 		} else if !s.errExpected && rs.Err != nil {
-			t.Errorf("No error expected  but got error: %s", rs.Err.Error())
+			t.Errorf("No error expected but got error: %s", rs.Err.Error())
 		}
 		if rs.Status != s.status {
 			t.Errorf("Expected status to be '%s', got '%s'", s.status, rs.Status)
