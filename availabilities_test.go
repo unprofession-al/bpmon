@@ -70,6 +70,10 @@ func TestStringsToAvailabilityTime(t *testing.T) {
 			str:         []string{"12:00:00"},
 			errExpected: true,
 		},
+		{
+			str:         []string{"foo-bar"},
+			errExpected: true,
+		},
 		//{
 		//	str: []string{"ALLDAY", "09:00:00-12:00:00"},
 		//	at: AvailabilityTime{
@@ -92,4 +96,57 @@ func TestStringsToAvailabilityTime(t *testing.T) {
 			}
 		}
 	}
+}
+
+func ParseDate(str string) time.Time {
+	format := "Mon 2006/01/02 15:04:05.000"
+	t, err := time.Parse(format, str)
+	if err != nil {
+		panic(fmt.Sprintf("Time in test malformed, is '%s', must match '%s', error is: %s", str, format, err.Error()))
+	}
+	return t
+}
+
+func TestContains(t *testing.T) {
+	a := Availability{
+		time.Monday: AvailabilityTime{
+			TimeRanges: []TimeRange{
+				{Start: ParseTime("09:00:00.000"), End: ParseTime("12:00:00.000")},
+			},
+			AllDay: false,
+		},
+		time.Friday: AvailabilityTime{
+			AllDay: true,
+		},
+	}
+
+	tests := []struct {
+		inAvalilability bool
+		timestamp       time.Time
+	}{
+		{
+			timestamp:       ParseDate("Mon 2017/03/20 08:00:00.000"),
+			inAvalilability: false,
+		},
+		{
+			timestamp:       ParseDate("Mon 2017/03/20 09:00:00.001"),
+			inAvalilability: true,
+		},
+		{
+			timestamp:       ParseDate("Fri 2017/03/17 09:00:00.001"),
+			inAvalilability: true,
+		},
+	}
+
+	for _, test := range tests {
+		contained := a.Contains(test.timestamp)
+		if !contained && test.inAvalilability {
+			t.Errorf("Time %v is not in avalability but should", test.timestamp)
+		}
+		if contained && !test.inAvalilability {
+			t.Errorf("Time %v is in avalability but should not", test.timestamp)
+		}
+
+	}
+
 }
