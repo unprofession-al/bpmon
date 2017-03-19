@@ -74,6 +74,10 @@ func TestStringsToAvailabilityTime(t *testing.T) {
 			str:         []string{"foo-bar"},
 			errExpected: true,
 		},
+		{
+			str:         []string{"13:00:00-bar"},
+			errExpected: true,
+		},
 		//{
 		//	str: []string{"ALLDAY", "09:00:00-12:00:00"},
 		//	at: AvailabilityTime{
