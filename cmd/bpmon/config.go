@@ -15,7 +15,7 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Print the configurantion used to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, err := bpmon.ReadConf(cfgFile, cfgSection)
+		c, _, err := bpmon.Configure(cfgFile, cfgSection, "", bpPattern)
 		if err != nil {
 			log.Fatal(err)
 		}
