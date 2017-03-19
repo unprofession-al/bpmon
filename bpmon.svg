@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.1 r"
+   sodipodi:docname="bpmon.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.49497475"
+     inkscape:cx="-388.55246"
+     inkscape:cy="333.43572"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="3436"
+     inkscape:window-height="1404"
+     inkscape:window-x="0"
+     inkscape:window-y="16"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot4485"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:25px;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       transform="matrix(0.26458333,0,0,0.26458333,605.25581,28.273192)"><flowRegion
+         id="flowRegion4487"><rect
+           id="rect4489"
+           width="960"
+           height="551.42859"
+           x="-2025.7142"
+           y="153.94826" /></flowRegion><flowPara
+         id="flowPara4491"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:74.66666412px;font-family:'Akkurat OT';-inkscape-font-specification:'Akkurat OT, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:-5.04000235px;writing-mode:lr-tb;text-anchor:start"><flowSpan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Akkurat OT';-inkscape-font-specification:'Akkurat OT Bold';letter-spacing:-5.04000235px"
+           id="flowSpan4495">BP</flowSpan><flowSpan
+           style="font-style:normal;font-variant:normal;font-weight:300;font-stretch:normal;font-family:'Akkurat OT';-inkscape-font-specification:'Akkurat OT Light';letter-spacing:-5.04000235px"
+           id="flowSpan4497"><flowSpan
+             style="letter-spacing:-7.66000032px"
+             id="flowSpan4501">M</flowSpan><flowSpan
+             style="letter-spacing:-7.18000031px"
+             id="flowSpan4499">ON</flowSpan></flowSpan></flowPara></flowRoot>  </g>
+</svg>
