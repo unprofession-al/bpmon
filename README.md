@@ -3,7 +3,7 @@
 Business Process Monitor that uses Icinga as process health source.
 
 ## Install and Build
-go get -u github.com/unprofission-al/bpmon/...
+go get -u github.com/unprofession-al/bpmon/...
 
 ## run
 bpmon -h
