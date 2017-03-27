@@ -27,8 +27,8 @@ a look at an example:
     # notation; this is known an an 'anchor' and allows you to reuse the settings
     # in other sections...
     default: &default
-      # First BPMON needs to have access to your Icinga2 API. Learn more on by 
-      # reading the [docs](https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api).
+      # First BPMON needs to have access to your Icinga2 API. Learn more on by reading 
+      # https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
       icinga:
         server: icinga.example.com
         port: 5665
@@ -48,8 +48,8 @@ a look at an example:
         # a small amount of data). In that case BP 'OK' states are saved as 
         # 'heart beat' of BPMON.
         save_ok: [ BP ]
-      # Define your office hours et al. according to your *service level 
-      # agreements* (SLA). You can later reference them in your BP definitions.
+      # Define your office hours et al. according to your service level 
+      # agreements (SLA). You can later reference them in your BP definitions.
       availabilities:
         7x24:
           monday:    [ "allday" ]
