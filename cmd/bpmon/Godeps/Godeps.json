@@ -44,22 +44,6 @@
 			"Rev": "25f8b5b07aece3207895bf19f7ab517eb3b22a40"
 		},
 		{
-			"ImportPath": "github.com/unprofession-al/bpmon",
-			"Rev": "3dbcd01037100510c1c9aa8d5b58018aa33050e7"
-		},
-		{
-			"ImportPath": "github.com/unprofession-al/bpmon/icinga",
-			"Rev": "3dbcd01037100510c1c9aa8d5b58018aa33050e7"
-		},
-		{
-			"ImportPath": "github.com/unprofession-al/bpmon/rules",
-			"Rev": "3dbcd01037100510c1c9aa8d5b58018aa33050e7"
-		},
-		{
-			"ImportPath": "github.com/unprofession-al/bpmon/status",
-			"Rev": "3dbcd01037100510c1c9aa8d5b58018aa33050e7"
-		},
-		{
 			"ImportPath": "golang.org/x/sys/unix",
 			"Rev": "d75a52659825e75fff6158388dddc6a5b04f9ba5"
 		},

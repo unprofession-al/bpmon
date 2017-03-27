@@ -14,11 +14,12 @@ import (
 
 var triggerCmd = &cobra.Command{
 	Use:   "trigger",
-	Short: "Run all business process checks and trigger temploted command on BP issues",
+	Short: "Run all business process checks and trigger a custom command if issue occure",
 	Run: func(cmd *cobra.Command, args []string) {
 		c, b, err := bpmon.Configure(cfgFile, cfgSection, bpPath, bpPattern)
 		if err != nil {
-			log.Fatal(err)
+			msg := fmt.Sprintf("Could not read section %s form file %s, error was %s", cfgSection, cfgFile, err.Error())
+			log.Fatal(msg)
 		}
 
 		t := template.Must(template.New("t1").Parse(c.Trigger.Template))

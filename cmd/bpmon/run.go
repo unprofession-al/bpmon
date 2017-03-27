@@ -20,7 +20,8 @@ var runCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		c, b, err := bpmon.Configure(cfgFile, cfgSection, bpPath, bpPattern)
 		if err != nil {
-			log.Fatal(err)
+			msg := fmt.Sprintf("Could not read section %s form file %s, error was %s", cfgSection, cfgFile, err.Error())
+			log.Fatal(msg)
 		}
 
 		i, err := icinga.NewIcinga(c.Icinga, c.Rules)

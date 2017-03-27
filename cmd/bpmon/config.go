@@ -15,9 +15,10 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Print the configurantion used to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := bpmon.Configure(cfgFile, cfgSection, "", bpPattern)
+		c, _, err := bpmon.Configure(cfgFile, cfgSection, "", "")
 		if err != nil {
-			log.Fatal(err)
+			msg := fmt.Sprintf("Could not read section '%s' from file '%s':  %s", cfgSection, cfgFile, err.Error())
+			log.Fatal(msg)
 		}
 
 		i, err := icinga.NewIcinga(c.Icinga, c.Rules)

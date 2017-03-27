@@ -32,12 +32,12 @@ func Configure(cfgFile, cfgSection, bpPath, bpPattern string) (conf, BusinessPro
 
 	c, err := parseConf(cfgData, cfgSection)
 	if err != nil {
-		return c, nil, err
+		return c, nil, errors.New(fmt.Sprintf("Error while parsing section '%s' configuration file '%s': %s", cfgSection, cfgFile, err.Error()))
 	}
 
 	a, err := c.Availabilities.Parse()
 	if err != nil {
-		return c, nil, err
+		return c, nil, errors.New(fmt.Sprintf("Error while parsing availabilities from configuration file '%s': %s", cfgFile, err.Error()))
 	}
 
 	var bps BusinessProcesses
@@ -46,25 +46,23 @@ func Configure(cfgFile, cfgSection, bpPath, bpPattern string) (conf, BusinessPro
 	}
 	files, err := ioutil.ReadDir(bpPath)
 	if err != nil {
-		return c, bps, err
+		return c, bps, errors.New(fmt.Sprintf("Error while reading business configuration files from '%s': %s", bpPath, err.Error()))
 	}
 	for _, f := range files {
 		match, err := filepath.Match(bpPattern, f.Name())
 		if err != nil {
-			return c, bps, err
+			return c, bps, errors.New(fmt.Sprintf("Error while matching file pattern '%s' in '%s': %s", bpPattern, bpPath, err.Error()))
 		}
 		if !match {
 			continue
 		}
 		file, err := ioutil.ReadFile(bpPath + "/" + f.Name())
 		if err != nil {
-			err = errors.New(fmt.Sprintf("Error while reading %s/%s: %s", bpPath, f.Name(), err.Error()))
-			return c, bps, err
+			return c, bps, errors.New(fmt.Sprintf("Error while reading business process %s/%s: %s", bpPath, f.Name(), err.Error()))
 		}
 		bp, err := parseBP(file, a)
 		if err != nil {
-			err = errors.New(fmt.Sprintf("Error while parsing %s/%s: %s", bpPath, f.Name(), err.Error()))
-			return c, bps, err
+			return c, bps, errors.New(fmt.Sprintf("Error while parsing business process%s/%s: %s", bpPath, f.Name(), err.Error()))
 		}
 		bps = append(bps, bp)
 	}
@@ -94,19 +92,16 @@ func parseBP(bpconf []byte, a Availabilities) (BP, error) {
 	bp := BP{}
 	err := yaml.Unmarshal(bpconf, &bp)
 	if err != nil {
-		err = errors.New(fmt.Sprintf("Error while parsing: %s", err.Error()))
-		return bp, err
+		return bp, errors.New(fmt.Sprintf("Error while parsing: %s", err.Error()))
 	}
 
 	if bp.AvailabilityName == "" {
-		err = errors.New(fmt.Sprintf("There is no availability defined in business process config"))
-		return bp, err
+		return bp, errors.New(fmt.Sprintf("There is no availability defined in business process config"))
 	}
 
 	availability, ok := a[bp.AvailabilityName]
 	if !ok {
-		err = errors.New(fmt.Sprintf("The availability referenced '%s' does not exist", bp.AvailabilityName))
-		return bp, err
+		return bp, errors.New(fmt.Sprintf("The availability referenced '%s' does not exist", bp.AvailabilityName))
 	}
 	bp.Availability = availability
 
