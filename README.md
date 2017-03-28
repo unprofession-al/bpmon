@@ -43,7 +43,7 @@ default: &default
   # state for reporting and such. 
   influx:
     connection:
-      server: ***REMOVED***
+      server: influx.example.com
       port: 8086
       proto: http
     database: bpmon
@@ -96,7 +96,7 @@ alarming:
   # statement in your shell script.
   trigger:
     template: |
-        curl -X POST -u ***REMOVED*** https://***REMOVED***/alerts/new\?trigger_alert\=1 -d '[{{- range $index, $elem := . -}}
+        curl -X POST https://alarming.example.com/trigger -d '[{{- range $index, $elem := . -}}
           {{- if $index }},{{ end -}}
             {{- "{" }} "name": "{{ .Name }}", "services": ["
               {{- range $index, $elem := .Children -}}
