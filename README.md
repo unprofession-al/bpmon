@@ -120,7 +120,7 @@ together with the defaults set by BPMON:
 For example:
 
 ```
-# bpmon -c ./cfg.yaml -s default confic
+# bpmon -c ./cfg.yaml -s default config
 ```
 
 ## Define *Business Processes*
