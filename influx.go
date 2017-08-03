@@ -80,8 +80,12 @@ func (i Influx) GetOne(query string) (interface{}, error) {
 		return out, response.Error()
 	}
 
-	out = response.Results[0].Series[0].Values[0][1]
-	if r := recover(); r != nil {
+	if len(response.Results) >= 1 &&
+		len(response.Results[0].Series) >= 1 &&
+		len(response.Results[0].Series[0].Values) >= 1 &&
+		len(response.Results[0].Series[0].Values[0]) >= 2 {
+		out = response.Results[0].Series[0].Values[0][1]
+	} else {
 		err = errors.New("No earlier entry found")
 		return out, err
 	}

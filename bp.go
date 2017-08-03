@@ -23,7 +23,7 @@ func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 		Kind:     "BP",
 		Name:     bp.Name,
 		Id:       bp.Id,
-		Children: []ResultSet{},
+		Children: []*ResultSet{},
 		Vals:     make(map[string]bool),
 	}
 
@@ -40,7 +40,7 @@ func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 		select {
 		case childRs := <-ch:
 			calcValues = append(calcValues, childRs.Status.Bool())
-			rs.Children = append(rs.Children, *childRs)
+			rs.Children = append(rs.Children, childRs)
 			if len(calcValues) == len(bp.Kpis) {
 				ch = nil
 			}
@@ -71,7 +71,7 @@ func (k KPI) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 		Kind:     "KPI",
 		Name:     k.Name,
 		Id:       k.Id,
-		Children: []ResultSet{},
+		Children: []*ResultSet{},
 		Vals:     make(map[string]bool),
 	}
 
@@ -88,7 +88,7 @@ func (k KPI) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 		select {
 		case childRs := <-ch:
 			calcValues = append(calcValues, childRs.Status.Bool())
-			rs.Children = append(rs.Children, *childRs)
+			rs.Children = append(rs.Children, childRs)
 			if len(calcValues) == len(k.Services) {
 				ch = nil
 			}

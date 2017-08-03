@@ -24,7 +24,7 @@ type ResultSet struct {
 	StatusChanged bool
 	Err           error
 	Output        string
-	Children      []ResultSet
+	Children      []*ResultSet
 }
 
 func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
@@ -76,11 +76,11 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 		}
 	}
 	if keep {
-		var children []ResultSet
+		var children []*ResultSet
 		for _, child := range rs.Children {
 			set, stripped := child.StripByStatus(s)
 			if !stripped {
-				children = append(children, set)
+				children = append(children, &set)
 			}
 		}
 		setOut.Children = children
