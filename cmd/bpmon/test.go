@@ -32,14 +32,8 @@ var testCmd = &cobra.Command{
 
 		infl, _ := bpmon.NewInflux(c.Influx)
 		for _, bp := range b {
-			lastStatus, err := infl.GetLastStatus(bp.Id)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			out := fmt.Sprintf("BP %s was %v", bp.Name, lastStatus)
-			fmt.Println(out)
-			rs := bp.Status(i, r)
+			rs := bp.Status(i, infl, r)
+			rs.AddPreviousStatus(infl)
 			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues))
 		}
 	},

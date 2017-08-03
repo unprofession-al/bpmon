@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
-	"github.com/unprofession-al/bpmon/status"
 )
 
 type InfluxConf struct {
@@ -66,11 +65,10 @@ func (i Influx) Write(in Influxable) error {
 	return err
 }
 
-func (i Influx) GetLastStatus(bp string) (status.Status, error) {
-	var out status.Status
-	out = status.Unknown
+func (i Influx) GetOne(query string) (interface{}, error) {
+	var out interface{}
 	q := client.Query{
-		Command:  fmt.Sprintf("SELECT LAST(status) FROM BP WHERE BP = '%s'", bp),
+		Command:  query,
 		Database: i.database,
 	}
 
@@ -82,15 +80,12 @@ func (i Influx) GetLastStatus(bp string) (status.Status, error) {
 		return out, response.Error()
 	}
 
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New("No earlier entry found")
-			return
-		}
-	}()
+	out = response.Results[0].Series[0].Values[0][1]
+	if r := recover(); r != nil {
+		err = errors.New("No earlier entry found")
+		return out, err
+	}
 
-	bla := response.Results[0].Series[0].Values[0][1]
-	out = bla.(status.Status)
 	return out, nil
 }
 

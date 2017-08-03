@@ -33,7 +33,7 @@ var writeCmd = &cobra.Command{
 		infl, _ := bpmon.NewInflux(c.Influx)
 		for _, bp := range b {
 			log.Println("Processing " + bp.Name)
-			rs := bp.Status(i, r)
+			rs := bp.Status(i, infl, r)
 			err = infl.Write(rs)
 			if err != nil {
 				log.Fatal(err)

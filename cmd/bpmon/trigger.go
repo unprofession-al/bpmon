@@ -38,7 +38,7 @@ var triggerCmd = &cobra.Command{
 		stripBy := []status.Status{status.Unknown, status.Ok}
 		var sets []bpmon.ResultSet
 		for _, bp := range b {
-			rs := bp.Status(i, r)
+			rs := bp.Status(i, nil, r)
 			set, stripped := rs.StripByStatus(stripBy)
 			if !stripped {
 				sets = append(sets, set)

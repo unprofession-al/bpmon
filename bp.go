@@ -18,7 +18,7 @@ type BP struct {
 	Availability     Availability `yaml:"-"`
 }
 
-func (bp BP) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
+func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
 	rs := ResultSet{
 		Kind:     "BP",
 		Name:     bp.Name,
@@ -30,10 +30,10 @@ func (bp BP) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	ch := make(chan *ResultSet)
 	var calcValues []bool
 	for _, k := range bp.Kpis {
-		go func(k KPI, ssp ServiceStatusProvider, r rules.Rules) {
-			childRs := k.Status(ssp, r)
+		go func(k KPI, ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) {
+			childRs := k.Status(ssp, pp, r)
 			ch <- &childRs
-		}(k, ssp, r)
+		}(k, ssp, pp, r)
 	}
 
 	for {
@@ -52,6 +52,8 @@ func (bp BP) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 
 	ok, _ := calculate("AND", calcValues)
 	rs.Status = status.FromBool(ok)
+	rs.Was = status.Unknown
+	rs.StatusChanged = false
 	rs.At = time.Now()
 	rs.Vals["in_availability"] = bp.Availability.Contains(rs.At)
 	return rs
@@ -64,7 +66,7 @@ type KPI struct {
 	Services  []Service
 }
 
-func (k KPI) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
+func (k KPI) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
 	rs := ResultSet{
 		Kind:     "KPI",
 		Name:     k.Name,
@@ -76,10 +78,10 @@ func (k KPI) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	ch := make(chan *ResultSet)
 	var calcValues []bool
 	for _, s := range k.Services {
-		go func(s Service, ssp ServiceStatusProvider, r rules.Rules) {
-			childRs := s.Status(ssp, r)
+		go func(s Service, ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) {
+			childRs := s.Status(ssp, pp, r)
 			ch <- &childRs
-		}(s, ssp, r)
+		}(s, ssp, pp, r)
 	}
 
 	for {
@@ -98,6 +100,8 @@ func (k KPI) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 
 	ok, err := calculate(k.Operation, calcValues)
 	rs.Status = status.FromBool(ok)
+	rs.Was = status.Unknown
+	rs.StatusChanged = false
 	rs.At = time.Now()
 	if err != nil {
 		rs.Err = err
@@ -117,7 +121,7 @@ type Service struct {
 	Service string
 }
 
-func (s Service) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
+func (s Service) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := ResultSet{
 		Name: name,
@@ -129,8 +133,10 @@ func (s Service) Status(ssp ServiceStatusProvider, r rules.Rules) ResultSet {
 	rs.At = at
 	rs.Output = msg
 	rs.Vals = vals
-	status, err := r.Analyze(vals)
-	rs.Status = status
+	st, err := r.Analyze(vals)
+	rs.Status = st
+	rs.Was = status.Unknown
+	rs.StatusChanged = false
 	if rs.Err != nil {
 		return rs
 	}
