@@ -52,6 +52,12 @@ default: &default
     # a small amount of data). In that case BP 'OK' states are saved as 
     # 'heart beat' of BPMON.
     save_ok: [ BP ]
+    # This will tell BPMON to compare the current status against the last 
+    # status saved in InfluxDB and adds some values to the measurement 
+    # accordingly. This then allows to generate reports such as 'Tell me
+    # only when a status is changed from good to bad'. This only runs against
+    # types listed in 'save_ok' since only these are persisted 'correctly'.
+    get_last_status: true
   # Define your office hours et al. according to your service level 
   # agreements (SLA). You can later reference them in your BP definitions.
   availabilities:
@@ -91,6 +97,8 @@ alarming:
     25:
       must: [ critical, acknowledged ]
       then: ok
+  influx:
+    get_last_status: false
   # If a service is failed, this command (rendered as a golang template) is 
   # printed to the stdout. This allows to easily wrap BPMON into an eval
   # statement in your shell script.
