@@ -38,6 +38,9 @@ var runCmd = &cobra.Command{
 		infl, _ := bpmon.NewInflux(c.Influx)
 		for _, bp := range b {
 			rs := bp.Status(i, infl, r)
+			if c.Influx.GetLastStatus {
+				rs.AddPreviousStatus(infl, c.Influx.SaveOK)
+			}
 			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues))
 		}
 	},

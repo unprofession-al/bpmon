@@ -34,6 +34,9 @@ var writeCmd = &cobra.Command{
 		for _, bp := range b {
 			log.Println("Processing " + bp.Name)
 			rs := bp.Status(i, infl, r)
+			if c.Influx.GetLastStatus {
+				rs.AddPreviousStatus(infl, c.Influx.SaveOK)
+			}
 			err = infl.Write(rs)
 			if err != nil {
 				log.Fatal(err)

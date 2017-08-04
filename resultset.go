@@ -21,6 +21,7 @@ type ResultSet struct {
 	Vals          map[string]bool
 	Status        status.Status
 	Was           status.Status
+	WasChecked    bool
 	StatusChanged bool
 	Err           error
 	Output        string
@@ -29,7 +30,10 @@ type ResultSet struct {
 
 func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 	ident := strings.Repeat("   ", level)
-	out := rs.Status.Colorize(fmt.Sprintf("%s%s %s is %v (was %v)", ident, rs.Kind, rs.Name, rs.Status, rs.Was))
+	out := rs.Status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.Kind, rs.Name, rs.Status))
+	if rs.WasChecked {
+		out += rs.Status.Colorize(fmt.Sprintf(" (was %v)", rs.Was))
+	}
 
 	ident = strings.Repeat("   ", level+1)
 	if ts {
@@ -130,28 +134,31 @@ func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []Po
 	return out
 }
 
-func (rs *ResultSet) AddPreviousStatus(pp PersistenceProvider) {
+func (rs *ResultSet) AddPreviousStatus(pp PersistenceProvider, saveOK []string) {
 	tags := make(map[string]string)
-	rs.previousStatus(tags, pp)
+	rs.previousStatus(tags, pp, saveOK)
 }
 
-func (rs *ResultSet) previousStatus(parentTags map[string]string, pp PersistenceProvider) {
+func (rs *ResultSet) previousStatus(parentTags map[string]string, pp PersistenceProvider, saveOK []string) {
 	tags := make(map[string]string)
 	for k, v := range parentTags {
 		tags[k] = v
 	}
 	tags[rs.Kind] = rs.Id
 
-	was, err := getLastStatus(pp, rs.Kind, tags)
-	if err == nil {
-		rs.Was = was
-	}
-	if rs.Status != rs.Was {
-		rs.StatusChanged = true
+	if stringInSlice(rs.Kind, saveOK) {
+		was, err := getLastStatus(pp, rs.Kind, tags)
+		if err == nil {
+			rs.Was = was
+			rs.WasChecked = true
+			if rs.Status != rs.Was {
+				rs.StatusChanged = true
+			}
+		}
 	}
 
 	for _, childRs := range rs.Children {
-		childRs.previousStatus(tags, pp)
+		childRs.previousStatus(tags, pp, saveOK)
 	}
 }
 

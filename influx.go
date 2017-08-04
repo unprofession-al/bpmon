@@ -16,8 +16,9 @@ type InfluxConf struct {
 		User   string `yaml:"user"`
 		Proto  string `yaml:"proto"`
 	} `yaml:"connection"`
-	SaveOK   []string `yaml:"save_ok"`
-	Database string   `yaml:"database"`
+	SaveOK        []string `yaml:"save_ok"`
+	Database      string   `yaml:"database"`
+	GetLastStatus bool     `yaml:"get_last_status"`
 }
 
 type Influx struct {
