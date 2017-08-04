@@ -119,6 +119,10 @@ func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []Po
 		if rs.Err != nil {
 			fields["err"] = fmt.Sprintf("Error: %s", rs.Err.Error())
 		}
+		if rs.WasChecked {
+			fields["was"] = rs.Was.Int()
+			fields["changed"] = rs.StatusChanged
+		}
 		pt := Point{
 			Timestamp: rs.At,
 			Series:    rs.Kind,
