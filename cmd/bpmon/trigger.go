@@ -35,10 +35,14 @@ var triggerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		infl, _ := bpmon.NewInflux(c.Influx)
 		stripBy := []status.Status{status.Unknown, status.Ok}
 		var sets []bpmon.ResultSet
 		for _, bp := range b {
-			rs := bp.Status(i, r)
+			rs := bp.Status(i, nil, r)
+			if c.Influx.GetLastStatus {
+				rs.AddPreviousStatus(infl, c.Influx.SaveOK)
+			}
 			set, stripped := rs.StripByStatus(stripBy)
 			if !stripped {
 				sets = append(sets, set)

@@ -48,6 +48,19 @@ func FromString(in string) (Status, error) {
 	}
 }
 
+func FromInt64(in int64) (Status, error) {
+	switch in {
+	case Ok:
+		return Ok, nil
+	case Nok:
+		return Nok, nil
+	case Unknown:
+		return Unknown, nil
+	default:
+		return Unknown, errors.New(fmt.Sprintf("Integer '%d' is not a valid status", in))
+	}
+}
+
 func (s Status) Int() int {
 	return int(s)
 }

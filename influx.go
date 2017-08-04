@@ -1,6 +1,7 @@
 package bpmon
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -15,8 +16,9 @@ type InfluxConf struct {
 		User   string `yaml:"user"`
 		Proto  string `yaml:"proto"`
 	} `yaml:"connection"`
-	SaveOK   []string `yaml:"save_ok"`
-	Database string   `yaml:"database"`
+	SaveOK        []string `yaml:"save_ok"`
+	Database      string   `yaml:"database"`
+	GetLastStatus bool     `yaml:"get_last_status"`
 }
 
 type Influx struct {
@@ -62,6 +64,34 @@ func (i Influx) Write(in Influxable) error {
 	err = i.cli.Write(bp)
 
 	return err
+}
+
+func (i Influx) GetOne(query string) (interface{}, error) {
+	var out interface{}
+	q := client.Query{
+		Command:  query,
+		Database: i.database,
+	}
+
+	response, err := i.cli.Query(q)
+	if err != nil {
+		return out, err
+	}
+	if response.Error() != nil {
+		return out, response.Error()
+	}
+
+	if len(response.Results) >= 1 &&
+		len(response.Results[0].Series) >= 1 &&
+		len(response.Results[0].Series[0].Values) >= 1 &&
+		len(response.Results[0].Series[0].Values[0]) >= 2 {
+		out = response.Results[0].Series[0].Values[0][1]
+	} else {
+		err = errors.New("No earlier entry found")
+		return out, err
+	}
+
+	return out, nil
 }
 
 type Point struct {

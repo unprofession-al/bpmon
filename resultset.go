@@ -1,7 +1,10 @@
 package bpmon
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"reflect"
 	"sort"
 	"strings"
 	"time"
@@ -11,20 +14,26 @@ import (
 )
 
 type ResultSet struct {
-	Name     string
-	Id       string
-	Kind     string
-	At       time.Time
-	Vals     map[string]bool
-	Status   status.Status
-	Err      error
-	Output   string
-	Children []ResultSet
+	Name          string
+	Id            string
+	Kind          string
+	At            time.Time
+	Vals          map[string]bool
+	Status        status.Status
+	Was           status.Status
+	WasChecked    bool
+	StatusChanged bool
+	Err           error
+	Output        string
+	Children      []*ResultSet
 }
 
 func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool) string {
 	ident := strings.Repeat("   ", level)
 	out := rs.Status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.Kind, rs.Name, rs.Status))
+	if rs.WasChecked {
+		out += rs.Status.Colorize(fmt.Sprintf(" (was %v)", rs.Was))
+	}
 
 	ident = strings.Repeat("   ", level+1)
 	if ts {
@@ -71,11 +80,11 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 		}
 	}
 	if keep {
-		var children []ResultSet
+		var children []*ResultSet
 		for _, child := range rs.Children {
 			set, stripped := child.StripByStatus(s)
 			if !stripped {
-				children = append(children, set)
+				children = append(children, &set)
 			}
 		}
 		setOut.Children = children
@@ -125,6 +134,34 @@ func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []Po
 	return out
 }
 
+func (rs *ResultSet) AddPreviousStatus(pp PersistenceProvider, saveOK []string) {
+	tags := make(map[string]string)
+	rs.previousStatus(tags, pp, saveOK)
+}
+
+func (rs *ResultSet) previousStatus(parentTags map[string]string, pp PersistenceProvider, saveOK []string) {
+	tags := make(map[string]string)
+	for k, v := range parentTags {
+		tags[k] = v
+	}
+	tags[rs.Kind] = rs.Id
+
+	if stringInSlice(rs.Kind, saveOK) {
+		was, err := getLastStatus(pp, rs.Kind, tags)
+		if err == nil {
+			rs.Was = was
+			rs.WasChecked = true
+			if rs.Status != rs.Was {
+				rs.StatusChanged = true
+			}
+		}
+	}
+
+	for _, childRs := range rs.Children {
+		childRs.previousStatus(tags, pp, saveOK)
+	}
+}
+
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
 		if strings.ToUpper(b) == strings.ToUpper(a) {
@@ -132,4 +169,30 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func getLastStatus(pp PersistenceProvider, kind string, tags map[string]string) (status.Status, error) {
+	var wheres []string
+	for key, value := range tags {
+		wheres = append(wheres, fmt.Sprintf("%s = '%s'", key, value))
+	}
+	where := strings.Join(wheres, " AND ")
+	query := fmt.Sprintf("SELECT LAST(status) FROM %s WHERE %s", kind, where)
+	res, err := pp.GetOne(query)
+	if err != nil {
+		return status.Unknown, err
+	}
+
+	statusData, ok := res.(json.Number)
+	if !ok {
+		msg := fmt.Sprintf("Cannot convert %v (%s) to json.Number", res, reflect.TypeOf(res))
+		return status.Unknown, errors.New(msg)
+	}
+
+	statusCode, err := statusData.Int64()
+	if err != nil {
+		return status.Unknown, err
+	}
+
+	return status.FromInt64(statusCode)
 }
