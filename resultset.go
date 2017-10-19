@@ -25,6 +25,7 @@ type ResultSet struct {
 	StatusChanged bool
 	Err           error
 	Output        string
+	Responsible   string
 	Children      []*ResultSet
 }
 

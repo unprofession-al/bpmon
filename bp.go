@@ -16,20 +16,23 @@ type BP struct {
 	Kpis             []KPI        `yaml:"kpis"`
 	AvailabilityName string       `yaml:"availability"`
 	Availability     Availability `yaml:"-"`
+	Responsible      string       `yaml:"responsible"`
 }
 
 func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
 	rs := ResultSet{
-		Kind:     "BP",
-		Name:     bp.Name,
-		Id:       bp.Id,
-		Children: []*ResultSet{},
-		Vals:     make(map[string]bool),
+		Kind:        "BP",
+		Responsible: bp.Responsible,
+		Name:        bp.Name,
+		Id:          bp.Id,
+		Children:    []*ResultSet{},
+		Vals:        make(map[string]bool),
 	}
 
 	ch := make(chan *ResultSet)
 	var calcValues []bool
 	for _, k := range bp.Kpis {
+		k.Responsible = bp.Responsible
 		go func(k KPI, ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) {
 			childRs := k.Status(ssp, pp, r)
 			ch <- &childRs
@@ -60,24 +63,27 @@ func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 }
 
 type KPI struct {
-	Name      string
-	Id        string
-	Operation string
-	Services  []Service
+	Name        string
+	Id          string
+	Operation   string
+	Services    []Service
+	Responsible string
 }
 
 func (k KPI) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
 	rs := ResultSet{
-		Kind:     "KPI",
-		Name:     k.Name,
-		Id:       k.Id,
-		Children: []*ResultSet{},
-		Vals:     make(map[string]bool),
+		Kind:        "KPI",
+		Responsible: k.Responsible,
+		Name:        k.Name,
+		Id:          k.Id,
+		Children:    []*ResultSet{},
+		Vals:        make(map[string]bool),
 	}
 
 	ch := make(chan *ResultSet)
 	var calcValues []bool
 	for _, s := range k.Services {
+		s.Responsible = k.Responsible
 		go func(s Service, ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) {
 			childRs := s.Status(ssp, pp, r)
 			ch <- &childRs
@@ -117,16 +123,18 @@ type SvcResult struct {
 }
 
 type Service struct {
-	Host    string
-	Service string
+	Host        string
+	Service     string
+	Responsible string
 }
 
 func (s Service) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := ResultSet{
-		Name: name,
-		Id:   name,
-		Kind: "SVC",
+		Name:        name,
+		Responsible: s.Responsible,
+		Id:          name,
+		Kind:        "SVC",
 	}
 	at, msg, vals, err := ssp.Status(s.Host, s.Service)
 	rs.Err = err
