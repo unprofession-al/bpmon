@@ -32,7 +32,9 @@ func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 	ch := make(chan *ResultSet)
 	var calcValues []bool
 	for _, k := range bp.Kpis {
-		k.Responsible = bp.Responsible
+		if k.Responsible == "" {
+			k.Responsible = bp.Responsible
+		}
 		go func(k KPI, ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) {
 			childRs := k.Status(ssp, pp, r)
 			ch <- &childRs
@@ -83,7 +85,9 @@ func (k KPI) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 	ch := make(chan *ResultSet)
 	var calcValues []bool
 	for _, s := range k.Services {
-		s.Responsible = k.Responsible
+		if s.Responsible == "" {
+			s.Responsible = k.Responsible
+		}
 		go func(s Service, ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) {
 			childRs := s.Status(ssp, pp, r)
 			ch <- &childRs
