@@ -12,8 +12,11 @@ you to compose *Business Processes* (BPs) and their *Key Performance Indicators*
 BPMON does not need to be run as a server. Run BPMON via Jenkins, Cron or
 manually as needed.
 
-## Install and Build
+## Installation
 
+To install BPmon, you need Go 1.7.
+
+Simply run the following command (don't forget the three dots at the end!):
 ```
 # go get -u github.com/unprofession-al/bpmon/...
 ```
