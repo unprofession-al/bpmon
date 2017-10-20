@@ -147,6 +147,11 @@ id: app_x
 # the availabilities section from the global configuration...? This links 
 # there.
 availability: 9to5
+# You can also specify a 'responsible' string. This string can then be used in
+# the trigger template. This could be for example trigger a specific http
+# end point, pass some uri parameters, send an email to a specific address etc.
+# The 'responsible' string is inherited by its KPIs if not overwritten...
+responsible: app.team@example.com
 # Now the KPIs...
 kpis:
   - 
@@ -161,6 +166,9 @@ kpis:
     #                 need to be 'OK'
     # * MINPERCENT x:  As 'MIN', but in percent.
     operation: OR
+    # Again, a 'responsible' string can be specified in order not to inherit
+    # from the parent BP.
+    responsible: infra.team@example.com
     # And now the processes. Host and service relate to how you named those
     # things in your Icinga2 setup.
     services:
@@ -170,7 +178,7 @@ kpis:
     id: app_availability
     operation: MINPERCENT 50
     services:
-      - { host: app1.example.com, service: api_health } 
+      - { host: app1.example.com, service: api_health, responsible: engineering.team@example.com }
       - { host: app2.example.com, service: api_health }
       - { host: app3.example.com, service: api_health }
       - { host: app4.example.com, service: api_health }
