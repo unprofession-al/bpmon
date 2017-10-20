@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	printTimestamps bool
-	printValues     bool
+	printTimestamps  bool
+	printValues      bool
+	printResponsible bool
 )
 
 var runCmd = &cobra.Command{
@@ -41,7 +42,7 @@ var runCmd = &cobra.Command{
 			if c.Influx.GetLastStatus {
 				rs.AddPreviousStatus(infl, c.Influx.SaveOK)
 			}
-			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues))
+			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues, printResponsible))
 		}
 	},
 }
@@ -49,5 +50,6 @@ var runCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(runCmd)
 	runCmd.PersistentFlags().BoolVarP(&printTimestamps, "ts", "t", false, "print timestamps of measurement")
-	runCmd.PersistentFlags().BoolVarP(&printValues, "vals", "v", false, "print raw  measurement results if available")
+	runCmd.PersistentFlags().BoolVarP(&printValues, "vals", "v", false, "print raw measurement results if available")
+	runCmd.PersistentFlags().BoolVarP(&printResponsible, "resp", "r", false, "print responsible of measurement")
 }
