@@ -96,9 +96,8 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	return setOut, !keep
 }
 
-func (rs ResultSet) AsInflux(saveOK []string) []Point {
-	tags := make(map[string]string)
-	return rs.toPoints(tags, saveOK)
+func (rs ResultSet) AsInflux(saveOK []string, defaultTags map[string]string) []Point {
+	return rs.toPoints(defaultTags, saveOK)
 }
 
 func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []Point {

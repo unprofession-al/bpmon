@@ -16,19 +16,21 @@ type InfluxConf struct {
 		User   string `yaml:"user"`
 		Proto  string `yaml:"proto"`
 	} `yaml:"connection"`
-	SaveOK        []string `yaml:"save_ok"`
-	Database      string   `yaml:"database"`
-	GetLastStatus bool     `yaml:"get_last_status"`
+	SaveOK        []string          `yaml:"save_ok"`
+	Database      string            `yaml:"database"`
+	GetLastStatus bool              `yaml:"get_last_status"`
+	DefaultTags   map[string]string `yaml:"default_tags"`
 }
 
 type Influx struct {
-	cli      client.Client
-	saveOK   []string
-	database string
+	cli         client.Client
+	saveOK      []string
+	database    string
+	defaultTags map[string]string
 }
 
 type Influxable interface {
-	AsInflux([]string) []Point
+	AsInflux([]string, map[string]string) []Point
 }
 
 func NewInflux(conf InfluxConf) (Influx, error) {
@@ -39,9 +41,10 @@ func NewInflux(conf InfluxConf) (Influx, error) {
 		Password: conf.Connection.Pass,
 	})
 	cli := Influx{
-		cli:      c,
-		saveOK:   conf.SaveOK,
-		database: conf.Database,
+		cli:         c,
+		saveOK:      conf.SaveOK,
+		defaultTags: conf.DefaultTags,
+		database:    conf.Database,
 	}
 	return cli, err
 }
@@ -55,7 +58,7 @@ func (i Influx) Write(in Influxable) error {
 		return err
 	}
 
-	points := in.AsInflux(i.saveOK)
+	points := in.AsInflux(i.saveOK, i.defaultTags)
 
 	for _, p := range points {
 		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
