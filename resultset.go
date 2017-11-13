@@ -41,7 +41,7 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool, resp bool) string
 		timestamp := rs.At.Format("2006-01-02 15:04:05")
 		out += fmt.Sprintf(" (%s)", timestamp)
 	}
-	if resp {
+	if resp && rs.Responsible != "" {
 		out += fmt.Sprintf(" (Responsible: %s)", rs.Responsible)
 	}
 	if rs.Err != nil {
