@@ -96,11 +96,11 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	return setOut, !keep
 }
 
-func (rs ResultSet) AsInflux(saveOK []string, defaultTags map[string]string, defaultValues map[string]interface{}) []Point {
-	return rs.toPoints(defaultTags, defaultValues, saveOK)
+func (rs ResultSet) AsInflux(saveOK []string, defaultTags map[string]string, defaultFields map[string]interface{}) []Point {
+	return rs.toPoints(defaultTags, defaultFields, saveOK)
 }
 
-func (rs ResultSet) toPoints(parentTags map[string]string, defaultValues map[string]interface{}, saveOK []string) []Point {
+func (rs ResultSet) toPoints(parentTags map[string]string, defaultFields map[string]interface{}, saveOK []string) []Point {
 	var out []Point
 
 	tags := make(map[string]string)
@@ -113,7 +113,7 @@ func (rs ResultSet) toPoints(parentTags map[string]string, defaultValues map[str
 		fields := map[string]interface{}{
 			"status": rs.Status.Int(),
 		}
-		for key, value := range defaultValues {
+		for key, value := range defaultFields {
 			fields[key] = value
 		}
 		for key, value := range rs.Vals {
@@ -139,7 +139,7 @@ func (rs ResultSet) toPoints(parentTags map[string]string, defaultValues map[str
 	}
 
 	for _, childRs := range rs.Children {
-		out = append(out, childRs.toPoints(tags, defaultValues, saveOK)...)
+		out = append(out, childRs.toPoints(tags, defaultFields, saveOK)...)
 	}
 	return out
 }
