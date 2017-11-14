@@ -34,7 +34,7 @@ var BpTestSets = []bpTestSet{
 					Id:        "test_kpi",
 					Operation: "OR",
 					Services: []Service{
-						Service{"Host", "good"},
+						Service{Host: "Host", Service: "good"},
 					},
 				},
 			},
@@ -45,8 +45,9 @@ var BpTestSets = []bpTestSet{
 
 func TestBusinessProcess(t *testing.T) {
 	ssp := SSPMock{}
+	pp := PPMock{}
 	for _, bp := range BpTestSets {
-		rs := bp.bp.Status(ssp, ssp.DefaultRules())
+		rs := bp.bp.Status(ssp, pp, ssp.DefaultRules())
 		if rs.Status != bp.status {
 			t.Errorf("Expected status to be '%s', got '%s'", bp.status, rs.Status)
 		}
@@ -62,31 +63,32 @@ type svcTestSet struct {
 
 var SvcTestSets = []svcTestSet{
 	{
-		svc:         Service{"Host", "good"},
+		svc:         Service{Host: "Host", Service: "good"},
 		status:      status.Ok,
 		errExpected: false,
 	},
 	{
-		svc:         Service{"Host", "bad"},
+		svc:         Service{Host: "Host", Service: "bad"},
 		status:      status.Nok,
 		errExpected: false,
 	},
 	{
-		svc:         Service{"Host", "unknown"},
+		svc:         Service{Host: "Host", Service: "unknown"},
 		status:      status.Unknown,
 		errExpected: false,
 	},
 	{
-		svc:         Service{"Host", "error"},
+		svc:         Service{Host: "Host", Service: "error"},
 		status:      status.Ok,
 		errExpected: true,
 	},
 }
 
 func TestServices(t *testing.T) {
+	pp := PPMock{}
 	ssp := SSPMock{}
 	for _, s := range SvcTestSets {
-		rs := s.svc.Status(ssp, ssp.DefaultRules())
+		rs := s.svc.Status(ssp, pp, ssp.DefaultRules())
 		if s.errExpected && rs.Err == nil {
 			t.Errorf("Error expected but got nil")
 		} else if !s.errExpected && rs.Err != nil {
