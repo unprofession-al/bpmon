@@ -49,6 +49,9 @@ default: &default
       server: influx.example.com
       port: 8086
       proto: http
+      # the timeout is read as a go (golang) duration, please refer to 
+      # https://golang.org/pkg/time/#Duration for a detailed explanation.
+      timeout: 2s
     database: bpmon
     # If a state is 'OK' only save it to InfluxDB if its an BP measurement 
     # (e.g. do not persist 'OK' states for KPIs and services for the sake of
@@ -61,6 +64,18 @@ default: &default
     # only when a status is changed from good to bad'. This only runs against
     # types listed in 'save_ok' since only these are persisted 'correctly'.
     get_last_status: true
+    # default tags and default fields can be set in order to full allow you
+    # to add either tags or fields according to your need to all entries 
+    # that BPMON is going to persist to InfluxDB. In this example, the field 
+    # 'annotated' is false (boolean). With an some custom tool or script this 
+    # field can be used to query for example all status changes from 'good' 
+    # to 'bad', add an anntation such as a reason and toggle the 'annotated'
+    # field to true.
+    # 'default_tags' is read as a map of strings while 'default_fields' is
+    # a map of interface{}s
+    default_tags: {}
+    default_field:
+      annotated: false
   # Define your office hours et al. according to your service level 
   # agreements (SLA). You can later reference them in your BP definitions.
   availabilities:
