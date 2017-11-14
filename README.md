@@ -1,5 +1,7 @@
 ![BPMON](https://raw.githubusercontent.com/unprofession-al/bpmon/master/bpmon.png "BPMON")
 
+[![Build Status](https://travis-ci.org/unprofession-al/bpmon.svg?branch=master)](https://travis-ci.org/unprofession-al/bpmon)
+
 Business Process Monitor that uses Icinga as service health source. BPMON allows
 you to compose *Business Processes* (BPs) and their *Key Performance Indicators*
 (KPIs) using the services you already have in Icinga! BPMON ...
