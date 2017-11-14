@@ -10,11 +10,12 @@ import (
 
 type InfluxConf struct {
 	Connection struct {
-		Server string `yaml:"server"`
-		Port   int    `yaml:"port"`
-		Pass   string `yaml:"pass"`
-		User   string `yaml:"user"`
-		Proto  string `yaml:"proto"`
+		Server  string        `yaml:"server"`
+		Port    int           `yaml:"port"`
+		Pass    string        `yaml:"pass"`
+		User    string        `yaml:"user"`
+		Proto   string        `yaml:"proto"`
+		Timeout time.Duration `yaml:"timeout"`
 	} `yaml:"connection"`
 	SaveOK        []string               `yaml:"save_ok"`
 	Database      string                 `yaml:"database"`
@@ -41,6 +42,7 @@ func NewInflux(conf InfluxConf) (Influx, error) {
 		Addr:     addr,
 		Username: conf.Connection.User,
 		Password: conf.Connection.Pass,
+		Timeout:  conf.Connection.Timeout,
 	})
 	cli := Influx{
 		cli:           c,
