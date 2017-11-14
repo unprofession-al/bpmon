@@ -16,14 +16,16 @@ manually as needed.
 
 ## Installation
 
-To install BPmon, you need Go 1.7.
+To install BPMON, you need Go 1.6. (older versions could potentially work as 
+well but are not tested). Please refer to https://golang.org/doc/install to 
+do so...
 
 Simply run the following command (don't forget the three dots at the end!):
 ```
 # go get -u github.com/unprofession-al/bpmon/...
 ```
 
-## Configure BPMOM
+## Configure BPMON
 
 BPMONs global settings are configured via a simple config file written in YAML.
 The config file can hold multiple *sections* (separat configurations) that enables 
