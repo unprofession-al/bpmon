@@ -54,7 +54,7 @@ func NewInflux(conf InfluxConf) (Influx, error) {
 	return cli, err
 }
 
-func (i Influx) Write(in Influxable) error {
+func (i Influx) Write(in Influxable, debug bool) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  i.database,
 		Precision: "s",
@@ -69,7 +69,13 @@ func (i Influx) Write(in Influxable) error {
 		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
 		bp.AddPoint(pt)
 	}
-	err = i.cli.Write(bp)
+	if debug {
+		for _, p := range bp.Points() {
+			fmt.Println(p)
+		}
+	} else {
+		err = i.cli.Write(bp)
+	}
 
 	return err
 }
