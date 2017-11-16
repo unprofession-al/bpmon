@@ -12,6 +12,7 @@ var (
 	cfgSection string
 	bpPath     string
 	bpPattern  string
+	verbose    bool
 )
 
 var RootCmd = &cobra.Command{
@@ -24,6 +25,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&cfgSection, "section", "s", "default", "name of the section to be read")
 	RootCmd.PersistentFlags().StringVarP(&bpPath, "bp", "b", "/etc/bpmon/bp.d", "path to business process configuration files")
 	RootCmd.PersistentFlags().StringVarP(&bpPattern, "pattern", "p", "*.yaml", "pattern of business process configuration files to process")
+	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", true, "print log output")
 }
 
 func main() {
