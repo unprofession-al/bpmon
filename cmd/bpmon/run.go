@@ -50,6 +50,6 @@ var runCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(runCmd)
 	runCmd.PersistentFlags().BoolVarP(&printTimestamps, "ts", "t", false, "print timestamps of measurement")
-	runCmd.PersistentFlags().BoolVarP(&printValues, "vals", "v", false, "print raw measurement results if available")
+	runCmd.PersistentFlags().BoolVarP(&printValues, "measurements", "m", false, "print raw measurement results if available")
 	runCmd.PersistentFlags().BoolVarP(&printResponsible, "resp", "r", false, "print responsible of measurement")
 }
