@@ -1,0 +1,9 @@
+---
+mysql-01.demo.io:
+  mysql:
+    check_state: 0
+    check_output: "MySQL is up and running"
+    acknowledgement: false
+    downtime: false
+
+
