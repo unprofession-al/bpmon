@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -16,7 +17,6 @@ func ServiceHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	out := ""
 	hostSvcPair := req.URL.Query()["service"]
 
 	all := true
@@ -25,7 +25,7 @@ func ServiceHandler(res http.ResponseWriter, req *http.Request) {
 	if len(hostSvcPair) == 1 {
 		tokens := strings.SplitN(hostSvcPair[0], "!", 2)
 		if len(tokens) != 2 {
-			out = fmt.Sprintf("URL params `%s` unknown", req.URL.Query())
+			out := fmt.Sprintf("URL params `%s` unknown", req.URL.Query())
 			Respond(res, req, http.StatusInternalServerError, out)
 			return
 		}
@@ -33,21 +33,27 @@ func ServiceHandler(res http.ResponseWriter, req *http.Request) {
 		svc = tokens[1]
 		all = false
 	} else if len(hostSvcPair) > 1 {
-		out = fmt.Sprintf("To many URL params `serivce` found: %s", hostSvcPair)
+		out := fmt.Sprintf("To many URL params `serivce` found: %s", hostSvcPair)
 		Respond(res, req, http.StatusNotFound, out)
 		return
 	}
 
+	t := Timestamp{time.Now()}
+
+	data := IcingaStatusResponse{}
+	var err error
 	if all {
-		data, err := envs.ToIcinga(env)
+		data, err = envs.ToIcinga(env, t)
 		if err != nil {
 			Respond(res, req, http.StatusNotFound, "Environment not found ")
 			return
 		}
-		Respond(res, req, http.StatusOK, data)
-		return
 	} else {
-		out = fmt.Sprintf("Host: %s / Service: %s of env %s", host, svc, env)
+		data, err = envs.SingleToIcinga(env, host, svc)
+		if err != nil {
+			Respond(res, req, http.StatusNotFound, "Environment not found ")
+			return
+		}
 	}
-	Respond(res, req, http.StatusOK, out)
+	Respond(res, req, http.StatusOK, data)
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -34,7 +33,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(envs)
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.HandleFunc("/{env}/v1/objects/services", ServiceHandler)

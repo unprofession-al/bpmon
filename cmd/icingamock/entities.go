@@ -11,24 +11,53 @@ import (
 
 type Environments map[string]Hosts
 
-func (e Environments) ToIcinga(envName string) (IcingaStatusResponse, error) {
+func (e Environments) ToIcinga(envN string, t Timestamp) (IcingaStatusResponse, error) {
 	response := IcingaStatusResponse{}
 
-	env, ok := e[envName]
+	env, ok := e[envN]
 	if !ok {
-		return response, fmt.Errorf("Environment %s unknown", envName)
+		return response, fmt.Errorf("Environment %s unknown", envN)
 	}
 	for hostname, services := range env {
 		for servicename, service := range services {
 			result := IcingaStatusResult{
 				Attrs: IcingaStatusAttrs{
 					Acknowledgement: Btof(service.Acknowledgement),
+					DowntimeDepth:   Btof(service.Downtime),
+					LastCheck:       t,
+					LastCheckResult: IcingaStatusLastCheckResult{
+						State:  float64(service.CheckState),
+						Output: service.CheckOutput,
+					},
 				},
-				Name:        fmt.Sprintf("%s!%s", hostname, servicename),
-				HostName:    hostname,
-				ServiceName: servicename,
+				Name: fmt.Sprintf("%s!%s", hostname, servicename),
 			}
 			response.Results = append(response.Results, result)
+		}
+	}
+	return response, nil
+}
+
+func (e Environments) SingleToIcinga(envN, hostN, serviceN string) (IcingaStatusResponse, error) {
+	response := IcingaStatusResponse{}
+
+	env, ok := e[envN]
+	if !ok {
+		return response, fmt.Errorf("Environment %s unknown", envN)
+	}
+	for hostname, services := range env {
+		if hostname == hostN {
+			for servicename, service := range services {
+				if servicename == serviceN {
+					result := IcingaStatusResult{
+						Attrs: IcingaStatusAttrs{
+							Acknowledgement: Btof(service.Acknowledgement),
+						},
+						Name: fmt.Sprintf("%s!%s", hostname, servicename),
+					}
+					response.Results = append(response.Results, result)
+				}
+			}
 		}
 	}
 	return response, nil

@@ -5,5 +5,10 @@ mysql-01.demo.io:
     check_output: "MySQL is up and running"
     acknowledgement: false
     downtime: false
+  mysql-backup:
+    check_state: 2
+    check_output: "backup job is running"
+    acknowledgement: true
+    downtime: true
 
 

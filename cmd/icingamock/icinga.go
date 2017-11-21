@@ -20,17 +20,15 @@ type IcingaStatusResponse struct {
 }
 
 type IcingaStatusResult struct {
-	Attrs       IcingaStatusAttrs `json:"attrs"`
-	Name        string            `json:"name"`
-	HostName    string            `json:"-"`
-	ServiceName string            `json:"-"`
+	Attrs IcingaStatusAttrs `json:"attrs"`
+	Name  string            `json:"name"`
 }
 
 type IcingaStatusAttrs struct {
-	Acknowledgement  float64                     `json:"acknowledgement"`
-	LastCheckResults IcingaStatusLastCheckResult `json:"last_check_result"`
-	LastCheck        Timestamp                   `json:"last_check"`
-	DowntimeDepth    float64                     `json:"downtime_depth"`
+	Acknowledgement float64                     `json:"acknowledgement"`
+	LastCheckResult IcingaStatusLastCheckResult `json:"last_check_result"`
+	LastCheck       Timestamp                   `json:"last_check"`
+	DowntimeDepth   float64                     `json:"downtime_depth"`
 }
 
 type IcingaStatusLastCheckResult struct {
