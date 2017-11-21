@@ -30,18 +30,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	envs, err := LoadEnvs(envDir, "*.yaml")
+	envs, err = LoadEnvs(envDir, "*.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(envs)
 
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/v1/objects/services", ServiceHandler)
+	r.HandleFunc("/{env}/v1/objects/services", ServiceHandler)
 
 	chain := alice.New().Then(r)
 
 	log.Fatal(http.ListenAndServe(cfg.Listener.Address+":"+cfg.Listener.Port, chain))
 }
-
-// /objects/services?service=%s!%s

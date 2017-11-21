@@ -4,16 +4,20 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	yaml "gopkg.in/yaml.v2"
 )
 
 type Environments map[string]Hosts
 
-func (e Environments) ToIcinga(envName string) IcingaStatusResponse {
+func (e Environments) ToIcinga(envName string) (IcingaStatusResponse, error) {
 	response := IcingaStatusResponse{}
 
-	env := e[envName]
+	env, ok := e[envName]
+	if !ok {
+		return response, fmt.Errorf("Environment %s unknown", envName)
+	}
 	for hostname, services := range env {
 		for servicename, service := range services {
 			result := IcingaStatusResult{
@@ -27,8 +31,7 @@ func (e Environments) ToIcinga(envName string) IcingaStatusResponse {
 			response.Results = append(response.Results, result)
 		}
 	}
-
-	return response
+	return response, nil
 }
 
 type Hosts map[string]map[string]Service
@@ -72,7 +75,8 @@ func LoadEnvs(path, pattern string) (Environments, error) {
 		if err != nil {
 			return e, fmt.Errorf("Error while reading environment %s/%s: %s", path, f.Name(), err.Error())
 		}
-		e[f.Name()] = hosts
+		envName := strings.TrimSuffix(f.Name(), filepath.Ext(f.Name()))
+		e[envName] = hosts
 	}
 	return e, nil
 }
