@@ -38,7 +38,7 @@ func (e Environments) ToIcinga(envN string, t Timestamp) (IcingaStatusResponse, 
 	return response, nil
 }
 
-func (e Environments) SingleToIcinga(envN, hostN, serviceN string) (IcingaStatusResponse, error) {
+func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t Timestamp) (IcingaStatusResponse, error) {
 	response := IcingaStatusResponse{}
 
 	env, ok := e[envN]
@@ -52,6 +52,12 @@ func (e Environments) SingleToIcinga(envN, hostN, serviceN string) (IcingaStatus
 					result := IcingaStatusResult{
 						Attrs: IcingaStatusAttrs{
 							Acknowledgement: Btof(service.Acknowledgement),
+							DowntimeDepth:   Btof(service.Downtime),
+							LastCheck:       t,
+							LastCheckResult: IcingaStatusLastCheckResult{
+								State:  float64(service.CheckState),
+								Output: service.CheckOutput,
+							},
 						},
 						Name: fmt.Sprintf("%s!%s", hostname, servicename),
 					}

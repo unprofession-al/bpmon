@@ -49,7 +49,7 @@ func ServiceHandler(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 	} else {
-		data, err = envs.SingleToIcinga(env, host, svc)
+		data, err = envs.SingleToIcinga(env, host, svc, t)
 		if err != nil {
 			Respond(res, req, http.StatusNotFound, "Environment not found ")
 			return
