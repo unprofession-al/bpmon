@@ -84,8 +84,8 @@ type IcingaMock struct {
 	endpoints []testset
 }
 
-func (i IcingaMock) Fetch(host, service string) (serviceStatusResponse, error) {
-	var response serviceStatusResponse
+func (i IcingaMock) Fetch(host, service string) (IcingaStatusResponse, error) {
+	var response IcingaStatusResponse
 	for _, ep := range i.endpoints {
 		if ep.host == host && ep.service == service {
 			err := json.Unmarshal(ep.response, &response)

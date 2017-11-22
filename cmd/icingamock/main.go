@@ -12,6 +12,7 @@ import (
 var (
 	configFile string
 	envDir     string
+	bpDir      string
 	cfg        Configuration
 	envs       Environments
 )
@@ -19,6 +20,7 @@ var (
 func init() {
 	flag.StringVar(&configFile, "conf", "./config/icingamock.yaml", "path to config file")
 	flag.StringVar(&envDir, "env", "./config/env.d/", "environment setup files")
+	flag.StringVar(&bpDir, "bp", "", "bpmon bp files")
 }
 
 func main() {
@@ -34,8 +36,19 @@ func main() {
 		log.Fatal(err)
 	}
 
+	envs["_"], err = LoadEnvFromBP(bpDir, "*.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/{env}/v1/objects/services", ServiceHandler)
+	r.HandleFunc("/icinga/{env}/v1/objects/services", MockIcingaServicesHandler)
+	r.HandleFunc("/api/envs/", ListEnvsHandler)
+	r.HandleFunc("/api/envs/{env}", GetEnvHandler)
+	r.HandleFunc("/api/envs/{env}/hosts/", ListHostsHandler)
+	r.HandleFunc("/api/envs/{env}/hosts/{host}", GetHostHandler)
+	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/", ListServicesHandler)
+	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", GetServiceHandler)
 
 	chain := alice.New().Then(r)
 

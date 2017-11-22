@@ -38,7 +38,7 @@ type Icinga struct {
 }
 
 type IcingaFetcher interface {
-	Fetch(string, string) (serviceStatusResponse, error)
+	Fetch(string, string) (IcingaStatusResponse, error)
 }
 
 func NewIcinga(conf IcingaConf, additionalRules rules.Rules) (Icinga, error) {
@@ -113,21 +113,27 @@ func (i Icinga) Status(host string, service string) (at time.Time, msg string, v
 	return
 }
 
-// type serviceStatusResult describes the results returned by the icinga
+// IcingaStatusResult describes the results returned by the icinga
 // api when a service status is requested.
-type serviceStatusResponse struct {
-	Results []struct {
-		Attrs struct {
-			Acknowledgement float64 `json:"acknowledgement"`
-			//			AcknowledgementExpiry uts     `json:"acknowledgement_expiry"`
-			LastCheckResult struct {
-				State  float64 `json:"state"`
-				Output string  `json:"output"`
-			} `json:"last_check_result"`
-			LastCheck     Timestamp `json:"last_check"`
-			DowntimeDepth float64   `json:"downtime_depth"`
-		} `json:"attrs"`
-	} `json:"results"`
+type IcingaStatusResponse struct {
+	Results []IcingaStatusResult `json:"results"`
+}
+
+type IcingaStatusResult struct {
+	Attrs IcingaStatusAttrs `json:"attrs"`
+	Name  string            `json:"name"`
+}
+
+type IcingaStatusAttrs struct {
+	Acknowledgement float64                     `json:"acknowledgement"`
+	LastCheckResult IcingaStatusLastCheckResult `json:"last_check_result"`
+	LastCheck       Timestamp                   `json:"last_check"`
+	DowntimeDepth   float64                     `json:"downtime_depth"`
+}
+
+type IcingaStatusLastCheckResult struct {
+	State  float64 `json:"state"`
+	Output string  `json:"output"`
 }
 
 type Timestamp struct {
@@ -159,7 +165,7 @@ const (
 	IcingaStatusUnknown
 )
 
-func (r serviceStatusResponse) status() (at time.Time, msg string, vals map[string]bool, err error) {
+func (r IcingaStatusResponse) status() (at time.Time, msg string, vals map[string]bool, err error) {
 	at = time.Now()
 	msg = ""
 	vals = icingaDefaultFlags()
@@ -201,8 +207,8 @@ type IcingaAPI struct {
 	pass    string
 }
 
-func (i IcingaAPI) Fetch(host, service string) (serviceStatusResponse, error) {
-	var response serviceStatusResponse
+func (i IcingaAPI) Fetch(host, service string) (IcingaStatusResponse, error) {
+	var response IcingaStatusResponse
 	var body []byte
 
 	// proper encoding for the host string

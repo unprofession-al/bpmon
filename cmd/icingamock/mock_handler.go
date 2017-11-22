@@ -7,9 +7,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/unprofession-al/bpmon/icinga"
 )
 
-func ServiceHandler(res http.ResponseWriter, req *http.Request) {
+func MockIcingaServicesHandler(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	env, ok := vars["env"]
 	if !ok {
@@ -38,9 +39,9 @@ func ServiceHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	t := Timestamp{time.Now()}
+	t := icinga.Timestamp{time.Now()}
 
-	data := IcingaStatusResponse{}
+	data := icinga.IcingaStatusResponse{}
 	var err error
 	if all {
 		data, err = envs.ToIcinga(env, t)
