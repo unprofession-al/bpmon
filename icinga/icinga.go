@@ -26,11 +26,12 @@ const (
 )
 
 type IcingaConf struct {
-	Server string
-	Port   int
-	Pass   string
-	User   string
-	Proto  string
+	Server string `yaml: "server"`
+	Path   string `yaml: "path"`
+	Port   int    `yaml: "port"`
+	Pass   string `yaml: "pass"`
+	User   string `yaml: "user"`
+	Proto  string `yaml: "proto"`
 }
 
 type Icinga struct {
@@ -42,7 +43,12 @@ type IcingaFetcher interface {
 }
 
 func NewIcinga(conf IcingaConf, additionalRules rules.Rules) (Icinga, error) {
-	baseUrl := fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
+	var baseUrl string
+	if conf.Path != "" {
+		baseUrl = fmt.Sprintf("%s://%s:%d/%s/v1", conf.Proto, conf.Server, conf.Port, conf.Path)
+	} else {
+		baseUrl = fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
+	}
 	fetcher := IcingaAPI{
 		baseUrl: baseUrl,
 		pass:    conf.Pass,
