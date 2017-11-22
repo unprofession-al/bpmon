@@ -12,7 +12,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-type Environments map[string]Hosts
+type Environments map[string]*Hosts
 
 func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.IcingaStatusResponse, error) {
 	response := icinga.IcingaStatusResponse{}
@@ -21,8 +21,8 @@ func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.IcingaSt
 	if !ok {
 		return response, fmt.Errorf("Environment %s unknown", envN)
 	}
-	for hostname, services := range env {
-		for servicename, service := range services {
+	for hostname, services := range *env {
+		for servicename, service := range *services {
 			result := icinga.IcingaStatusResult{
 				Attrs: icinga.IcingaStatusAttrs{
 					Acknowledgement: Btof(service.Acknowledgement),
@@ -48,9 +48,9 @@ func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Time
 	if !ok {
 		return response, fmt.Errorf("Environment %s unknown", envN)
 	}
-	for hostname, services := range env {
+	for hostname, services := range *env {
 		if hostname == hostN {
-			for servicename, service := range services {
+			for servicename, service := range *services {
 				if servicename == serviceN {
 					result := icinga.IcingaStatusResult{
 						Attrs: icinga.IcingaStatusAttrs{
@@ -72,13 +72,13 @@ func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Time
 	return response, nil
 }
 
-func (e Environments) Get(name string) (Hosts, error) {
+func (e Environments) Get(name string) (*Hosts, error) {
 	for n, env := range e {
 		if n == name {
 			return env, nil
 		}
 	}
-	return Hosts{}, fmt.Errorf("Environment %s not found", name)
+	return &Hosts{}, fmt.Errorf("Environment %s not found", name)
 }
 
 func (e Environments) List() []string {
@@ -96,8 +96,8 @@ func Btof(b bool) float64 {
 	return 0.0
 }
 
-func LoadEnvs(path, pattern string) (Environments, error) {
-	e := Environments{}
+func LoadEnvs(path, pattern string) (*Environments, error) {
+	e := &Environments{}
 	if path == "" {
 		return e, nil
 	}
@@ -122,13 +122,13 @@ func LoadEnvs(path, pattern string) (Environments, error) {
 			return e, fmt.Errorf("Error while reading environment %s/%s: %s", path, f.Name(), err.Error())
 		}
 		envName := strings.TrimSuffix(f.Name(), filepath.Ext(f.Name()))
-		e[envName] = hosts
+		(*e)[envName] = hosts
 	}
 	return e, nil
 }
 
-func parseEnv(data []byte) (Hosts, error) {
-	var env Hosts
+func parseEnv(data []byte) (*Hosts, error) {
+	var env *Hosts
 	err := yaml.Unmarshal(data, &env)
 	if err != nil {
 		return env, fmt.Errorf("Error while parsing: %s", err.Error())
@@ -136,8 +136,8 @@ func parseEnv(data []byte) (Hosts, error) {
 	return env, nil
 }
 
-func LoadEnvFromBP(path, pattern string) (Hosts, error) {
-	e := Hosts{}
+func LoadEnvFromBP(path, pattern string) (*Hosts, error) {
+	e := &Hosts{}
 	if path == "" {
 		return e, nil
 	}
@@ -165,7 +165,7 @@ func LoadEnvFromBP(path, pattern string) (Hosts, error) {
 	return e, nil
 }
 
-func parseBP(bpconf []byte, env Hosts) (Hosts, error) {
+func parseBP(bpconf []byte, env *Hosts) (*Hosts, error) {
 	bp := bpmon.BP{}
 	err := yaml.Unmarshal(bpconf, &bp)
 	if err != nil {
@@ -174,13 +174,13 @@ func parseBP(bpconf []byte, env Hosts) (Hosts, error) {
 
 	for _, kpi := range bp.Kpis {
 		for _, svc := range kpi.Services {
-			_, ok := env[svc.Host]
+			_, ok := (*env)[svc.Host]
 			if !ok {
-				env[svc.Host] = make(map[string]Service)
+				(*env)[svc.Host] = &Services{}
 			}
-			_, ok = env[svc.Host][svc.Service]
+			_, ok = (*(*env)[svc.Host])[svc.Service]
 			if !ok {
-				env[svc.Host][svc.Service] = Service{CheckOutput: "ok"}
+				(*(*env)[svc.Host])[svc.Service] = &Service{CheckOutput: "ok"}
 			}
 
 		}

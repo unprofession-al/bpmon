@@ -14,7 +14,7 @@ var (
 	envDir     string
 	bpDir      string
 	cfg        Configuration
-	envs       Environments
+	envs       *Environments
 )
 
 func init() {
@@ -36,19 +36,20 @@ func main() {
 		log.Fatal(err)
 	}
 
-	envs["_"], err = LoadEnvFromBP(bpDir, "*.yaml")
+	(*envs)["_"], err = LoadEnvFromBP(bpDir, "*.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/icinga/{env}/v1/objects/services", MockIcingaServicesHandler)
-	r.HandleFunc("/api/envs/", ListEnvsHandler)
-	r.HandleFunc("/api/envs/{env}", GetEnvHandler)
-	r.HandleFunc("/api/envs/{env}/hosts/", ListHostsHandler)
-	r.HandleFunc("/api/envs/{env}/hosts/{host}", GetHostHandler)
-	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/", ListServicesHandler)
-	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", GetServiceHandler)
+	r.HandleFunc("/icinga/{env}/v1/objects/services", MockIcingaServicesHandler).Methods("GET")
+	r.HandleFunc("/api/envs/", ListEnvsHandler).Methods("GET")
+	r.HandleFunc("/api/envs/{env}", GetEnvHandler).Methods("GET")
+	r.HandleFunc("/api/envs/{env}/hosts/", ListHostsHandler).Methods("GET")
+	r.HandleFunc("/api/envs/{env}/hosts/{host}", GetHostHandler).Methods("GET")
+	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/", ListServicesHandler).Methods("GET")
+	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", GetServiceHandler).Methods("GET")
+	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", UpdateServiceHandler).Methods("POST")
 
 	chain := alice.New().Then(r)
 

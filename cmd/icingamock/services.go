@@ -2,15 +2,15 @@ package main
 
 import "fmt"
 
-type Services map[string]Service
+type Services map[string]*Service
 
-func (s Services) Get(name string) (Service, error) {
-	for n, service := range s {
+func (s *Services) Get(name string) (*Service, error) {
+	for n, service := range *s {
 		if n == name {
 			return service, nil
 		}
 	}
-	return Service{}, fmt.Errorf("Service %s not found", name)
+	return &Service{}, fmt.Errorf("Service %s not found", name)
 }
 
 func (s Services) List() []string {
