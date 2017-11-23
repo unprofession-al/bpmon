@@ -123,9 +123,30 @@ func UpdateServiceHandler(res http.ResponseWriter, req *http.Request) {
 
 	stateParam := req.URL.Query()["state"]
 	if len(stateParam) > 0 {
-		i, err := strconv.Atoi(stateParam[0])
+		v, err := strconv.Atoi(stateParam[0])
 		if err == nil {
-			service.CheckState = i
+			service.CheckState = v
+		}
+	}
+
+	outputParam := req.URL.Query()["output"]
+	if len(outputParam) > 0 {
+		service.CheckOutput = outputParam[0]
+	}
+
+	ackParam := req.URL.Query()["acknowledgement"]
+	if len(ackParam) > 0 {
+		v, err := strconv.ParseBool(ackParam[0])
+		if err == nil {
+			service.Acknowledgement = v
+		}
+	}
+
+	downtimeParam := req.URL.Query()["downtime"]
+	if len(downtimeParam) > 0 {
+		v, err := strconv.ParseBool(downtimeParam[0])
+		if err == nil {
+			service.Downtime = v
 		}
 	}
 

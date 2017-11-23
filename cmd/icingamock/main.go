@@ -13,14 +13,16 @@ var (
 	configFile string
 	envDir     string
 	bpDir      string
+	staticDir  string
 	cfg        Configuration
 	envs       *Environments
 )
 
 func init() {
 	flag.StringVar(&configFile, "conf", "./config/icingamock.yaml", "path to config file")
-	flag.StringVar(&envDir, "env", "./config/env.d/", "environment setup files")
+	flag.StringVar(&envDir, "env", "", "environment setup files")
 	flag.StringVar(&bpDir, "bp", "", "bpmon bp files")
+	flag.StringVar(&staticDir, "static", "./static/", "static html served at http root")
 }
 
 func main() {
@@ -50,6 +52,7 @@ func main() {
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/", ListServicesHandler).Methods("GET")
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", GetServiceHandler).Methods("GET")
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", UpdateServiceHandler).Methods("POST")
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir(staticDir)))
 
 	chain := alice.New().Then(r)
 

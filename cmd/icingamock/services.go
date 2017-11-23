@@ -22,8 +22,8 @@ func (s Services) List() []string {
 }
 
 type Service struct {
-	CheckState      int    `yaml:"check_state"`
-	CheckOutput     string `yaml:"check_output"`
-	Acknowledgement bool   `yaml:"acknowledgement"`
-	Downtime        bool   `yaml:"downtime"`
+	CheckState      int    `yaml:"check_state" json:"check_state"`
+	CheckOutput     string `yaml:"check_output" json:"check_output"`
+	Acknowledgement bool   `yaml:"acknowledgement" json:"acknowledgement"`
+	Downtime        bool   `yaml:"downtime" json:"downtime"`
 }

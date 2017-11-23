@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>icingamock</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>icinamock</h1>
+
+    <div id="data"></div>
+</div>
+
+<script type="text/html" id="host_tmpl">
+    <div class="host pannel" id="<%=hostname%>">
+        <div class="hostname">
+            <%=hostname%>
+        </div>
+        <div class="services">
+            <% for (var i in s) { %>
+            <% var state = ( s[i].check_state == 0 ) ? 'good' : 'bad'; %>
+            <div id="<%=hostname%>_<%=i%>" class="service <%=state%>" onclick="toggleState(&#39;_&#39;, &#39;<%=hostname%>&#39;, &#39;<%=i%>&#39;)">
+                <div class="servicename property"><%=i%></div>
+                <div class="state property"><%=s[i].check_state%></div>
+                <div class="output property"><%=s[i].check_output%></div>
+                <div class="acknowledgement property <%=s[i].acknowledgement%>"><%=s[i].acknowledgement%></div>
+                <div class="downtime property <%=s[i].downtime%>"><%=s[i].downtime%></div>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</script>
+
+<script src="jquery-3.2.1.min.js"></script>
+<script src="templating.js"></script>
+<script src="main.js"></script>
+<script>
+    init();
+</script>
+
+</body>
+</html>
