@@ -75,9 +75,10 @@ function getClassName(host, service) {
 }
 
 function init() {
-    $('#filter').keyup(function() {
+    $(document).on( 'keyup', '#filter', function() {
         var data = $('#data .panel');
-        var re = new RegExp($(this).val(), "i");
+        console.log($(this).text())
+        var re = new RegExp($(this).text(), "i");
         data.show().filter(function() {
             var name = $(this).find(".hostname").text();
             return !re.test(name);

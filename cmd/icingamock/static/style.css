@@ -220,6 +220,40 @@ body {
     transform: scale(1.04, 1.04);
 }
 
+.input {
+    height: 20px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.input br {
+    display:none;
+}
+
+.input * {
+    display: inline;
+    white-space: nowrap;
+}
+
+.input.regular {
+    background-color: #afd1ca;
+}
+
+.input.input-header {
+    margin-top: 8px;
+    width: 300px;
+    background-color: #ffffff;
+}
+
+.input:empty:before {
+    color: #999;
+    font-size: 80%;
+    content: attr(data-placeholder);
+}
+
 /* special */
 
 .hostname {
