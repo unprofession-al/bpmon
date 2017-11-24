@@ -45,6 +45,7 @@ func main() {
 
 	r := mux.NewRouter().StrictSlash(true)
 	r.HandleFunc("/icinga/{env}/v1/objects/services", MockIcingaServicesHandler).Methods("GET")
+	r.HandleFunc("/icinga/{env}/v1/actions/acknowledge-problem", MockIcingaAcknowledgeHandler).Methods("POST")
 	r.HandleFunc("/api/envs/", ListEnvsHandler).Methods("GET")
 	r.HandleFunc("/api/envs/{env}", GetEnvHandler).Methods("GET")
 	r.HandleFunc("/api/envs/{env}/hosts/", ListHostsHandler).Methods("GET")
