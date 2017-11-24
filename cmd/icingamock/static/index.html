@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>icingamock</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div class="container">
+    <div class="header"><div class="header-inner">
+        <div class="header-section left">
+            <div class="logo">
+                <img class= "logo-img" src="bpmon.png" alt="icingamock">
+                <span>&nbsp;ICINGA MOCK</span>
+            </div>
+        </div>
+        <div class="header-section right">
+            <div contenteditable="true" class="input input-header" id="filter" data-placeholder="Filter for hostname..."></div>
+        </div>
+    </div></div>
+
+    <div id="data">
+        <div class="loading" id="loading"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<script type="text/html" id="host_tmpl">
+    <div class="element panel" id="<%=hostname%>">
+        <div class="hostname">
+            <%=hostname%>
+        </div>
+        <div class="services">
+            <% for (var i in s) { %>
+            <div
+                    id="<%=s[i].classname%>"
+                    class="service"
+                    data-downtime="<%=s[i].downtime%>"
+                    data-acknowledgement="<%=s[i].acknowledgement%>"
+                    data-check-state="<%=s[i].check_state%>">
+                <div class="servicename property"><%=i%></div>
+                <div class="flags">
+                    <span class="state property button <%=s[i].color%>"
+                          onclick="toggleState(&#39;<%=env%>&#39;, &#39;<%=hostname%>&#39;, &#39;<%=i%>&#39;)">
+                        <%=s[i].color%>
+                    </span>
+                    <span class="acknowledgement property button <%=s[i].acknowledgement%>"
+                          onclick="toggleBool(&#39;<%=env%>&#39;, &#39;<%=hostname%>&#39;, &#39;<%=i%>&#39;, &#39;acknowledgement&#39;)">
+                        Ack
+                    </span>
+                    <span class="downtime property button <%=s[i].downtime%>"
+                          onclick="toggleBool(&#39;<%=env%>&#39;, &#39;<%=hostname%>&#39;, &#39;<%=i%>&#39;, &#39;downtime&#39;)">
+                        Down
+                    </span>
+                </div>
+            </div>
+            <% } %>
+        </div>
+    </div>
+</script>
+
+<script src="jquery-3.2.1.min.js"></script>
+<script src="templating.js"></script>
+<script src="main.js"></script>
+<script>
+    init();
+</script>
+
+</body>
+</html>
