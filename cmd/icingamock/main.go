@@ -1,3 +1,5 @@
+//go:generate statik -src=./static
+
 package main
 
 import (
@@ -7,6 +9,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
+	"github.com/rakyll/statik/fs"
+
+	_ "github.com/unprofession-al/bpmon/cmd/icingamock/statik"
 )
 
 var (
@@ -22,7 +27,7 @@ func init() {
 	flag.StringVar(&configFile, "conf", "./config/icingamock.yaml", "path to config file")
 	flag.StringVar(&envDir, "env", "", "environment setup files")
 	flag.StringVar(&bpDir, "bp", "", "bpmon bp files")
-	flag.StringVar(&staticDir, "static", "./static/", "static html served at http root")
+	flag.StringVar(&staticDir, "static", "", "static html served at http root")
 }
 
 func main() {
@@ -44,6 +49,7 @@ func main() {
 	}
 
 	r := mux.NewRouter().StrictSlash(true)
+
 	r.HandleFunc("/icinga/{env}/v1/objects/services", MockIcingaServicesHandler).Methods("GET")
 	r.HandleFunc("/icinga/{env}/v1/actions/acknowledge-problem", MockIcingaAcknowledgeHandler).Methods("POST")
 	r.HandleFunc("/api/envs/", ListEnvsHandler).Methods("GET")
@@ -53,7 +59,16 @@ func main() {
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/", ListServicesHandler).Methods("GET")
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", GetServiceHandler).Methods("GET")
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", UpdateServiceHandler).Methods("POST")
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir(staticDir)))
+
+	if staticDir == "" {
+		statikFS, err := fs.New()
+		if err != nil {
+			log.Fatal(err)
+		}
+		r.PathPrefix("/").Handler(http.FileServer(statikFS))
+	} else {
+		r.PathPrefix("/").Handler(http.FileServer(http.Dir(staticDir)))
+	}
 
 	chain := alice.New().Then(r)
 

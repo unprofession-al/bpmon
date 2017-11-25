@@ -30,9 +30,7 @@ function hideSpinner() {
 function toggleState(env, host, service) {
     var classname = getClassName(host, service);
     var before = $("#" + classname).data("check-state");
-    console.log(classname);
     var after = ( Number(before) + 1 ) % 4;
-    console.log("before " + before + " / after " + after);
     $.ajax({
         type: "POST",
         url: "/api/envs/" + env + "/hosts/" + host + "/services/" + service + "?state=" + after,
