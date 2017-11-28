@@ -120,7 +120,7 @@ connection.onopen = function () {
 
 connection.onerror = function (error) {
     wsopen = false;
-    $("<div class='notification panel'>WebSocket closed...</div>").hide().appendTo("#data").fadeIn();
+    notify("WebSocket closed...");
 };
 
 connection.onmessage = function (e) {
