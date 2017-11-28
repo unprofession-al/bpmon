@@ -1,4 +1,6 @@
 var stateNames = [ "ok", "warn", "critical", "unknown" ];
+var wsopen = false;
+var connection = new WebSocket('ws://' + window.location.host + '/ws');
 
 function loadEnv(name) {
     $.getJSON("/api/envs/" + name, function(data) {
@@ -31,6 +33,16 @@ function toggleState(env, host, service) {
     var classname = getClassName(host, service);
     var before = $("#" + classname).data("check-state");
     var after = ( Number(before) + 1 ) % 4;
+    var data = {
+        env: env,
+        host: host,
+        service: service,
+        attrs: {
+            state: after
+        },
+    };
+    connection.send(JSON.stringify(data));
+    /*
     $.ajax({
         type: "POST",
         url: "/api/envs/" + env + "/hosts/" + host + "/services/" + service + "?state=" + after,
@@ -42,12 +54,22 @@ function toggleState(env, host, service) {
             setStateClass(subelem, after);
         }
     });
+    */
 }
 
 function toggleBool(env, host, service, field) {
     var classname = getClassName(host, service);
     var before = $("#" + classname).data(field);
     var after = ( before != true );
+    var data = {
+        env: env,
+        host: host,
+        service: service,
+        attrs: {},
+    };
+    data.attrs[field] = after;
+    connection.send(JSON.stringify(data));
+    /*
     $.ajax({
         type: "POST",
         url: "/api/envs/" + env + "/hosts/" + host + "/services/" + service + "?" + field + "=" + after,
@@ -58,6 +80,7 @@ function toggleBool(env, host, service, field) {
             elem.find("." + field).addClass(after.toString());
         }
     });
+    */
 }
 
 function setStateClass(elem, state) {
@@ -91,3 +114,66 @@ function init() {
     loadEnv(env)
 }
 
+connection.onopen = function () {
+    wsopen = true;
+};
+
+connection.onerror = function (error) {
+    wsopen = false;
+    notify("WebSocket closed...");
+};
+
+connection.onmessage = function (e) {
+    var instr = JSON.parse(e.data);
+    var classname = getClassName(instr.host, instr.service);
+    var elem = $("#" + classname);
+
+    for (var attr in instr.attrs) {
+        switch(attr) {
+            case "state":
+                setState(elem, instr.attrs[attr]);
+                break;
+            case "downtime":
+                setBool(elem, attr, instr.attrs[attr]);
+                break;
+            case "acknowledgement":
+                setBool(elem, attr, instr.attrs[attr]);
+                break;
+            default:
+                var message = "Unknown instruction recieved: <br><pre>" + e.data + "</pre>";
+                notify(message);
+        }
+    }
+};
+
+function setState(elem, state) {
+    var before = elem.data("check-state");
+    elem.data("check-state", state);
+    var subelem = elem.find(".state");
+    subelem.text(stateNames[state]);
+    setStateClass(subelem, state);
+}
+
+function setBool(elem, field, state) {
+    var before = elem.data(field);
+    elem.data(field, state)
+    elem.find("." + field).removeClass(before.toString());
+    elem.find("." + field).addClass(state.toString());
+}
+
+function notify(message) {
+    var id = makeid();
+    var out = "<div class='notification panel' id='"+id+"'>"+message+"</div>";
+    $("#data").prepend(out);
+    $('#'+id).delay(5000).fadeOut('slow');
+}
+
+function makeid() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 5; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}

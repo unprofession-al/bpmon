@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -54,37 +55,39 @@ func MockIcingaServicesHandler(res http.ResponseWriter, req *http.Request) {
 
 func MockIcingaAcknowledgeHandler(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	env, ok := vars["env"]
-	if !ok {
-		Respond(res, req, http.StatusNotFound, "No environment passed")
-		return
-	}
 
-	host, svc, err := splitHostServicePair(req.URL.Query()["service"])
+	host, service, err := splitHostServicePair(req.URL.Query()["service"])
 	if err != nil {
 		Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	e, err := envs.Get(env)
+	env := vars["env"]
+	attrs := map[string]interface{}{
+		"acknowledgement": true,
+	}
+
+	instructions := Instruction{
+		Env:     env,
+		Host:    host,
+		Service: service,
+		Attrs:   attrs,
+	}
+
+	err = instructions.Apply()
 	if err != nil {
-		Respond(res, req, http.StatusNotFound, err.Error())
+		Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	h, err := e.Get(host)
+	message, err := json.Marshal(instructions)
 	if err != nil {
-		Respond(res, req, http.StatusNotFound, err.Error())
+		Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	s, err := h.Get(svc)
-	if err != nil {
-		Respond(res, req, http.StatusNotFound, err.Error())
-		return
-	}
+	hub.broadcast <- message
 
-	s.Acknowledgement = true
 	Respond(res, req, http.StatusOK, "ok")
 }
 

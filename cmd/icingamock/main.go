@@ -19,6 +19,8 @@ var (
 	envDir     string
 	bpDir      string
 	staticDir  string
+	hub        *Hub
+	restClient *Client
 	cfg        Configuration
 	envs       *Environments
 )
@@ -48,6 +50,9 @@ func main() {
 		log.Fatal(err)
 	}
 
+	hub = newHub()
+	go hub.run()
+
 	r := mux.NewRouter().StrictSlash(true)
 
 	r.HandleFunc("/icinga/{env}/v1/objects/services", MockIcingaServicesHandler).Methods("GET")
@@ -59,6 +64,7 @@ func main() {
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/", ListServicesHandler).Methods("GET")
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", GetServiceHandler).Methods("GET")
 	r.HandleFunc("/api/envs/{env}/hosts/{host}/services/{service}", UpdateServiceHandler).Methods("POST")
+	r.HandleFunc("/ws", WsHandler).Methods("GET")
 
 	if staticDir == "" {
 		statikFS, err := fs.New()

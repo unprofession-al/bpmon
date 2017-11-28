@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -101,44 +102,27 @@ func GetServiceHandler(res http.ResponseWriter, req *http.Request) {
 }
 
 func UpdateServiceHandler(res http.ResponseWriter, req *http.Request) {
+	var attrs = make(map[string]interface{})
+
 	vars := mux.Vars(req)
 
-	env, err := envs.Get(vars["env"])
-	if err != nil {
-		Respond(res, req, http.StatusNotFound, err.Error())
-		return
-	}
-
-	host, err := env.Get(vars["host"])
-	if err != nil {
-		Respond(res, req, http.StatusNotFound, err.Error())
-		return
-	}
-
-	service, err := host.Get(vars["service"])
-	if err != nil {
-		Respond(res, req, http.StatusNotFound, err.Error())
-		return
-	}
+	env := vars["env"]
+	host := vars["host"]
+	service := vars["service"]
 
 	stateParam := req.URL.Query()["state"]
 	if len(stateParam) > 0 {
 		v, err := strconv.Atoi(stateParam[0])
 		if err == nil {
-			service.CheckState = v
+			attrs["state"] = v
 		}
-	}
-
-	outputParam := req.URL.Query()["output"]
-	if len(outputParam) > 0 {
-		service.CheckOutput = outputParam[0]
 	}
 
 	ackParam := req.URL.Query()["acknowledgement"]
 	if len(ackParam) > 0 {
 		v, err := strconv.ParseBool(ackParam[0])
 		if err == nil {
-			service.Acknowledgement = v
+			attrs["acknowledgement"] = v
 		}
 	}
 
@@ -146,9 +130,29 @@ func UpdateServiceHandler(res http.ResponseWriter, req *http.Request) {
 	if len(downtimeParam) > 0 {
 		v, err := strconv.ParseBool(downtimeParam[0])
 		if err == nil {
-			service.Downtime = v
+			attrs["downtime"] = v
 		}
 	}
 
+	instructions := Instruction{
+		Env:     env,
+		Host:    host,
+		Service: service,
+		Attrs:   attrs,
+	}
+
+	err := instructions.Apply()
+	if err != nil {
+		Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	message, err := json.Marshal(instructions)
+	if err != nil {
+		Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	hub.broadcast <- message
 	Respond(res, req, http.StatusOK, service)
 }
