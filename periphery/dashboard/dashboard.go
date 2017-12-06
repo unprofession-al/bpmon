@@ -1,4 +1,4 @@
-//go:generate statik -src=./static -f
+//go:generate esc -o static.go -pkg dashboard -prefix static static
 
 package dashboard
 
@@ -7,13 +7,16 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
-	"github.com/rakyll/statik/fs"
 
-	_ "github.com/unprofession-al/bpmon/periphery/dashboard/statik"
+	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/configs"
 	"github.com/unprofession-al/bpmon/periphery/webhelpers"
 )
 
-func Router(conf Conf) (http.Handler, error) {
+var bps bpmon.BusinessProcesses
+
+func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses) (http.Handler, error) {
+	bps = bpin
 	r := mux.NewRouter().StrictSlash(true)
 
 	r.HandleFunc("/api/bps/", ListBPsHandler).Methods("GET")
@@ -23,14 +26,9 @@ func Router(conf Conf) (http.Handler, error) {
 
 	if conf.Static == "" {
 		assetHandler := webhelpers.GetAssetHandler("/assets/")
-
-		//assetHandler := webhelpers.GetDummyHandler("/assets/")
 		r.PathPrefix("/assets/").Handler(assetHandler)
 
-		statikFS, err := fs.New()
-		if err != nil {
-			return nil, err
-		}
+		statikFS := FS(false)
 		r.PathPrefix("/").Handler(http.FileServer(statikFS))
 	} else {
 		r.PathPrefix("/").Handler(http.FileServer(http.Dir(conf.Static)))

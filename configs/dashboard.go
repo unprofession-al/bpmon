@@ -1,16 +1,16 @@
-package dashboard
+package configs
 
-type Conf struct {
+type DashboardConf struct {
 	Address string `yaml:"address"`
 	Port    int    `yaml:"port"`
 	Static  string `yaml:"static"`
 }
 
-func GetConf(conf Conf) Conf {
+func GetDashboardConf(conf DashboardConf) DashboardConf {
 	var zeroString string
 	var zeroInt int
 
-	out := Conf{
+	out := DashboardConf{
 		Address: "127.0.0.1",
 		Port:    8910,
 		Static:  conf.Static,

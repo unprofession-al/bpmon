@@ -14,13 +14,13 @@ var dashboardCmd = &cobra.Command{
 	Use:   "dashboard",
 	Short: "Run all business process checks and print to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := bpmon.Configure(cfgFile, cfgSection, bpPath, bpPattern)
+		c, bp, err := bpmon.Configure(cfgFile, cfgSection, bpPath, bpPattern)
 		if err != nil {
 			msg := fmt.Sprintf("Could not read section %s form file %s, error was %s", cfgSection, cfgFile, err.Error())
 			log.Fatal(msg)
 		}
 
-		router, err := dashboard.Router(c.Dashboard)
+		router, err := dashboard.Setup(c.Dashboard, bp)
 		if err != nil {
 			msg := fmt.Sprintf("Could not build router for server: %s", err.Error())
 			log.Fatal(msg)

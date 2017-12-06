@@ -193,7 +193,7 @@ var _escData = map[string]*_escFile{
 	"/bpmon.png": {
 		local:   "static/bpmon.png",
 		size:    4875,
-		modtime: 1512574137,
+		modtime: 1512584517,
 		compressed: `
 H4sIAAAAAAAC/wALE/TsiVBORw0KGgoAAAANSUhEUgAAARgAAABECAYAAABatSq0AAAABHNCSVQICAgI
 fAhkiAAAAAlwSFlzAAASOgAAEjoBhc4W7wAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vu
@@ -283,7 +283,7 @@ wft3yqueUEv+B+A6kG2jlRpKAAAAAElFTkSuQmCCAQAA///9LIw4CxMAAA==
 	"/jquery-3.2.1.min.js": {
 		local:   "static/jquery-3.2.1.min.js",
 		size:    86659,
-		modtime: 1512574137,
+		modtime: 1512584517,
 		compressed: `
 H4sIAAAAAAAC/8z9e5ebOLYwDv//fIoyk0OjWKbsdPc8p3EprHSnM5OZvk0nfZnBpJcAgXFhcAGuqrRh
 Pvu7tCWBwDjpOed91vqtrJQB3aWtrb239uX66exq948jK99f3X9qP7NXV82VFaKrv725elUc84jWaZFf
@@ -797,7 +797,7 @@ ExSDUgEA
 	"/main.js": {
 		local:   "static/main.js",
 		size:    532,
-		modtime: 1512574212,
+		modtime: 1512584517,
 		compressed: `
 H4sIAAAAAAAC/1yRa2/TMBSGv+dXHHlIsTEK4VIuSjNp3G9jwLh/83JOmsNcO9hOt4L476hZmyL8yTq2
 nvd97HZwTWLvoGOk056doyAV/M5gu65JcWC9QXYLoYomRimQY2/NWtwQzjsSqsr+ZNkEcj5xu5ZLitEs
@@ -812,7 +812,7 @@ PH32/MXLV6/fHL89eff+w+nHT5+/fP323Zw1SO2i4x/ndul8/zPENKwuLte/ylu379yd3bv/4KGospHa
 	"/style.css": {
 		local:   "static/style.css",
 		size:    4984,
-		modtime: 1512574828,
+		modtime: 1512584517,
 		compressed: `
 H4sIAAAAAAAC/6RYW2/juhF+Xv2KwTlY7CYY2ZJzQaK89Know2kfiv4BShxZrClSISnH3m3+e0HqYvmi
 5HiPAtjycIac+ebKLG+hcq7Jlsua9mTeKF8Uul6SEcXSaS3tsrB2aciSW0YAsF0tEvgfrJI0TdLVoyf9
@@ -847,7 +847,7 @@ BvpmWDNXpA8q5eZkRj5Eecdwe3mG/uDIUXZhaN1KZuYL51AYDiLhMz661k2b3jgi99F49+FVrwzPZPuM
 	"/templating.js": {
 		local:   "static/templating.js",
 		size:    1173,
-		modtime: 1512574137,
+		modtime: 1512584517,
 		compressed: `
 H4sIAAAAAAAC/3RTUW/bNhh816+4CTUstYqIvkZzAmxYtxQtMKwB9mA5AC19lmjIJEF+shEk/u8DJVt2
 hvSNIu/uu+/OFgI/1M52hK9yL39UTlnGI+1sJ1npJhICX02r8Q951eAGLbP1t0JsTatduMsrsxO4wfeH
