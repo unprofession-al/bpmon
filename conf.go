@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/periphery/dashboard"
 	"github.com/unprofession-al/bpmon/rules"
 
 	"gopkg.in/yaml.v2"
@@ -18,6 +19,7 @@ type conf struct {
 	Availabilities AvailabilitiesConf `yaml:"availabilities"`
 	Trigger        Trigger            `yaml:"trigger"`
 	Rules          rules.Rules        `yaml:"rules"`
+	Dashboard      dashboard.Conf     `yaml:"dashboard"`
 }
 
 type Trigger struct {
@@ -84,6 +86,8 @@ func parseConf(cfg []byte, cfgSection string) (conf, error) {
 	if !ok {
 		return conf, errors.New(fmt.Sprintf("No section '%s' found in configuration", cfgSection))
 	}
+
+	conf.Dashboard = dashboard.GetConf(conf.Dashboard)
 
 	return conf, nil
 }

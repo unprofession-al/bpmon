@@ -20,12 +20,18 @@ var RootCmd = &cobra.Command{
 	Short: "Montior business processes composed of Icinga checks",
 }
 
+var betaCmd = &cobra.Command{
+	Use:   "beta",
+	Short: "Access beta features of BPMON",
+}
+
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "cfg", "c", "/etc/bpmon/cfg.yaml", "path to the configuration file")
 	RootCmd.PersistentFlags().StringVarP(&cfgSection, "section", "s", "default", "name of the section to be read")
 	RootCmd.PersistentFlags().StringVarP(&bpPath, "bp", "b", "/etc/bpmon/bp.d", "path to business process configuration files")
 	RootCmd.PersistentFlags().StringVarP(&bpPattern, "pattern", "p", "*.yaml", "pattern of business process configuration files to process")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", true, "print log output")
+	RootCmd.AddCommand(betaCmd)
 }
 
 func main() {
