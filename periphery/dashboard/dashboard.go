@@ -14,22 +14,23 @@ import (
 )
 
 var bps bpmon.BusinessProcesses
+var influx bpmon.Influx
 
-func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses) (http.Handler, error) {
+func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, infl bpmon.Influx) (http.Handler, error) {
+	influx = infl
 	bps = bpin
 	r := mux.NewRouter().StrictSlash(true)
 
 	r.HandleFunc("/api/bps/", ListBPsHandler).Methods("GET")
-	r.HandleFunc("/api/bps/{bp}", GetBPHandler).Methods("GET")
+	r.HandleFunc("/api/bps/{bp}", GetBPTimelineHandler).Methods("GET")
 	r.HandleFunc("/api/bps/{bp}/kpis", ListKPIsHandler).Methods("GET")
-	r.HandleFunc("/api/bps/{bp}/kpis/{kpi}", GetKPIHandler).Methods("GET")
+	r.HandleFunc("/api/bps/{bp}/kpis/{kpi}", GetKPITimelineHandler).Methods("GET")
 
 	if conf.Static == "" {
 		assetHandler := webhelpers.GetAssetHandler("/assets/")
 		r.PathPrefix("/assets/").Handler(assetHandler)
 
-		statikFS := FS(false)
-		r.PathPrefix("/").Handler(http.FileServer(statikFS))
+		r.PathPrefix("/").Handler(http.FileServer(FS(false)))
 	} else {
 		r.PathPrefix("/").Handler(http.FileServer(http.Dir(conf.Static)))
 	}

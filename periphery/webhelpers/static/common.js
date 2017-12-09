@@ -18,3 +18,13 @@ function makeid() {
 
     return text;
 }
+
+function formatTimestamp(ts) {
+	var options = {
+    	day: "numeric", year: "numeric", month: "short",
+        day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"
+    };
+    var date = new Date(ts);
+    var dateString =  date.toLocaleTimeString("de-ch", options)
+	return dateString
+}

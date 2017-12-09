@@ -20,7 +20,9 @@ var dashboardCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		router, err := dashboard.Setup(c.Dashboard, bp)
+		infl, _ := bpmon.NewInflux(c.Influx)
+
+		router, err := dashboard.Setup(c.Dashboard, bp, infl)
 		if err != nil {
 			msg := fmt.Sprintf("Could not build router for server: %s", err.Error())
 			log.Fatal(msg)
