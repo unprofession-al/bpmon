@@ -57,12 +57,20 @@ function loadBPEvents(bpid) {
         				status = "unknown";
 				}
 
+                var percent =  frame.fields.duration_percent;
+
                 if (percentages[status] == null || percentages[status] == undefined) {
                     percentages[status] = 0;
                 }
-				percentages[status] = percentages[status] + frame.fields.duration_percent;
+				percentages[status] = percentages[status] + percent;
 
-                var f = { state: status, percent: frame.fields.duration_percent, start: frame.timestamp };
+                // make sure data is visible
+                //if (percent < 0.1) {
+                //    visible_percent = 0.1
+                //}
+                //
+                // https://codepen.io/cbracco/pen/qzukg
+                var f = { state: status, percent: percent, start: frame.timestamp };
                 var chart = tmpl("chart_frame_tmpl", f);
                 $(chart).hide().appendTo("#" + bpid +"_chart").fadeIn("fast");
 
