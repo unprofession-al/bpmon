@@ -3,6 +3,7 @@ package bpmon
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
@@ -22,6 +23,7 @@ type InfluxConf struct {
 	GetLastStatus bool                   `yaml:"get_last_status"`
 	DefaultTags   map[string]string      `yaml:"default_tags"`
 	DefaultFields map[string]interface{} `yaml:"default_fields"`
+	PrintQueries  bool                   `yaml:"print_queries"`
 }
 
 type Influx struct {
@@ -30,6 +32,7 @@ type Influx struct {
 	database      string
 	defaultTags   map[string]string
 	defaultFields map[string]interface{}
+	printQueries  bool
 }
 
 type Influxable interface {
@@ -57,6 +60,7 @@ func NewInflux(conf InfluxConf) (Influx, error) {
 		defaultTags:   conf.DefaultTags,
 		defaultFields: conf.DefaultFields,
 		database:      conf.Database,
+		printQueries:  conf.PrintQueries,
 	}
 	return cli, err
 }
@@ -87,8 +91,15 @@ func (i Influx) Write(in Influxable, debug bool) error {
 	return err
 }
 
-func (i Influx) GetOne(query string) (interface{}, error) {
-	var out interface{}
+func (i Influx) GetOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+
+	fields = prependTimeIfMissing(fields)
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s %s;", strings.Join(fields, ", "), from, strings.Join(where, " AND "), additional)
+	if i.printQueries {
+		fmt.Println(query)
+	}
+
 	q := client.Query{
 		Command:  query,
 		Database: i.database,
@@ -106,31 +117,71 @@ func (i Influx) GetOne(query string) (interface{}, error) {
 		len(response.Results[0].Series) >= 1 &&
 		len(response.Results[0].Series[0].Values) >= 1 &&
 		len(response.Results[0].Series[0].Values[0]) >= 2 {
-		out = response.Results[0].Series[0].Values[0][1]
+		row := response.Results[0].Series[0].Values[0]
+		for i, data := range row {
+			out[fields[i]] = data
+		}
 	} else {
-		err = errors.New("No earlier entry found")
+		err = errors.New("No matching entry found")
 		return out, err
 	}
 
 	return out, nil
 }
 
-func getInfluxTimestamp(t time.Time) int64 {
-	return t.UnixNano()
+func (i Influx) GetAll(fields []string, from string, where []string, additional string) ([]map[string]interface{}, error) {
+	var out []map[string]interface{}
+
+	fields = prependTimeIfMissing(fields)
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s %s;", strings.Join(fields, ", "), from, strings.Join(where, " AND "), additional)
+	if i.printQueries {
+		fmt.Println(query)
+	}
+
+	q := client.Query{
+		Command:  query,
+		Database: i.database,
+	}
+
+	response, err := i.cli.Query(q)
+	if err != nil {
+		return out, err
+	}
+	if response.Error() != nil {
+		return out, response.Error()
+	}
+
+	if len(response.Results) >= 1 &&
+		len(response.Results[0].Series) >= 1 &&
+		len(response.Results[0].Series[0].Values) >= 1 {
+		rows := response.Results[0].Series[0].Values
+		for _, row := range rows {
+			set := make(map[string]interface{})
+			for i, data := range row {
+				set[fields[i]] = data
+			}
+			out = append(out, set)
+		}
+
+	}
+
+	return out, nil
 }
 
-func queryDB(clnt client.Client, db string, cmd string) (res []client.Result, err error) {
-	q := client.Query{
-		Command:  cmd,
-		Database: db,
-	}
-	if response, err := clnt.Query(q); err == nil {
-		if response.Error() != nil {
-			return res, response.Error()
+func prependTimeIfMissing(fields []string) []string {
+	for i, field := range fields {
+		if field == "time" {
+			if i != 0 {
+				tmp := fields[0]
+				fields[0] = "time"
+				fields[i] = tmp
+			}
+			return fields
 		}
-		res = response.Results
-	} else {
-		return res, err
 	}
-	return res, nil
+	return append([]string{"time"}, fields...)
+}
+
+func getInfluxTimestamp(t time.Time) int64 {
+	return t.UnixNano()
 }

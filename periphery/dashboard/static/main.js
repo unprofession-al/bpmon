@@ -43,21 +43,18 @@ function loadBPEvents(bpid) {
                 frame = data[key];
 
         		var status = "unknown";
-                switch(frame.fields.status) {
+                switch(frame.status) {
     				case 0:
         				status = "ok";
         				break;
     				case 1:
         				status = "nok";
         				break;
-    				case 9:
-        				status = "inexisting";
-        				break;
     				default:
         				status = "unknown";
 				}
 
-                var percent =  frame.fields.duration_percent;
+                var percent =  frame.duration_percent;
 
                 if (percentages[status] == null || percentages[status] == undefined) {
                     percentages[status] = 0;
@@ -70,13 +67,13 @@ function loadBPEvents(bpid) {
                 //}
                 //
                 // https://codepen.io/cbracco/pen/qzukg
-                var f = { state: status, percent: percent, start: frame.timestamp };
+                var f = { state: status, percent: percent, start: frame.start };
                 var chart = tmpl("chart_frame_tmpl", f);
                 $(chart).hide().appendTo("#" + bpid +"_chart").fadeIn("fast");
 
-				if (frame.fields.status == 1) {
-					var annotation = (frame.fields.annotation != null) ? frame.fields.annotation : "<i>[not yet annotated]</i>";
-					var i = { timestamp: formatTimestamp(frame.timestamp), annotation: annotation }
+				if (frame.status == 1) {
+					var annotation = (frame.annotation != "") ? frame.annotation : "<i>-</i>";
+					var i = { timestamp: formatTimestamp(frame.start), annotation: annotation, duration: frame.duration };
                 	var interruption = tmpl("interruption_tmpl", i);
                 	$(interruption).hide().appendTo("#" + bpid +"_interruptions").fadeIn("fast");
 				}
@@ -114,15 +111,12 @@ function loadKPIEvents(bpid, kpiid) {
                 frame = data[key];
 
         		var status = "unknown";
-                switch(frame.fields.status) {
+                switch(frame.status) {
     				case 0:
         				status = "ok";
         				break;
     				case 1:
         				status = "nok";
-        				break;
-    				case 9:
-        				status = "inexisting";
         				break;
     				default:
         				status = "unknown";
@@ -131,16 +125,29 @@ function loadKPIEvents(bpid, kpiid) {
                 if (percentages[status] == null || percentages[status] == undefined) {
                     percentages[status] = 0;
                 }
-				percentages[status] = percentages[status] + frame.fields.duration_percent;
+				percentages[status] = percentages[status] + frame.duration_percent;
 
-                var f = { bpid: bpid, state: status, percent: frame.fields.duration_percent, start: frame.timestamp };
+                var f = { bpid: bpid, state: status, percent: frame.duration_percent, start: frame.start };
                 var chart = tmpl("chart_frame_tmpl", f);
                 $(chart).hide().appendTo("#" + bpid + "_" + kpiid + "_chart").fadeIn("fast");
             }
             if (percentages["ok"] != null || percentages["ok"] != undefined) {
                 var out = Number((percentages["ok"]).toFixed(3));
-                $("#" + bpid + "_" + kpiid + "_availability").text(out);
+                $("#" + bpid + "_" + kpiid + "_availability").text("~" + out);
             }
         }
     });
+}
+
+
+function showDetails(bpid) {
+    var id = "#"+bpid+"_details";
+    $(id).parent().find(".bp").find(".bitch").find(".show-details").fadeOut(200);
+    $(id).slideDown();
+}
+
+function hideDetails(bpid) {
+    var id = "#"+bpid+"_details";
+    $(id).parent().find(".bp").find(".bitch").find(".show-details").fadeIn(200);
+    $(id).slideUp();
 }

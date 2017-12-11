@@ -4,14 +4,59 @@
     margin-bottom: 10px;
 }
 
-.title {
+.heading {
+    width: 100%;
+    display: inline-block;
+    padding-bottom: 10px;
+}
+
+.bpname {
     font-size: 130%;
 }
 
 .chart {
     width: 100%;
     height: 40px;
+    clear: both;
 }
+
+.details {
+    display: none;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+.kpis .availability .chart {
+    height: 10px;
+}
+
+.chart .frame {
+    height: 100%;
+    float: left;
+}
+
+.chart .ok {
+    background-color: #7dcc76;
+}
+
+.chart .nok {
+    background-color: #ef8775;
+}
+
+.chart .unknown {
+    background-color: #e3b5f2;
+}
+
+.chart .inexisting {
+    background-color: #eee;
+}
+
+.frame:hover {
+    background-color: #ffff99;
+}
+
 
 .kpis .availability .chart {
     height: 10px;

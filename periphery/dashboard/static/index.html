@@ -33,13 +33,14 @@
 <script type="text/html" id="interruption_tmpl">
     <tr>
 		<td><%=timestamp%></td>
+		<td><%=duration%>s</td>
 		<td><%=annotation%></td>
     </tr>
 </script>
 
 <script type="text/html" id="kpi_tmpl">
     <div id="<%=kpiid%>">
-        <div class="kpiname subtitle"><%=kpiname%> &mdash; <span id="<%=bpid%>_<%=kpiid%>_availability">?</span>% available</div>
+        <div class="kpiname subtitle"><%=kpiname%> &mdash; <span id="<%=bpid%>_<%=kpiid%>_availability">...</span>% available</div>
         <div class="availability">
             <div class="chart" id="<%=bpid%>_<%=kpiid%>_chart">
             </div>
@@ -50,25 +51,26 @@
 <script type="text/html" id="bp_tmpl">
     <div class="element panel" id="<%=bpid%>">
         <div class="bp">
-            <div class="bpname title"><%=bpname%> &mdash; <span id="<%=bpid%>_availability">?</span>% available</div>
+            <div class="heading">
+                <div class="bpname title left"><%=bpname%> &mdash; <span id="<%=bpid%>_availability">...</span>% available</span></div>
+                <div class="bitch right"><span class="show-details button" onclick="showDetails(&#39;<%=bpid%>&#39);">Show Details</span></div>
+            </div>
             <div class="availability">
                 <div class="chart" id="<%=bpid%>_chart"></div>
             </div>
         </div>
-        <div class="kpis" id="<%=bpid%>_kpis">
-        </div>
-        <div class="interruptions">
-            <div class="subtitle">Interruptions</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Annotation</th>
-                    </tr>
-                </thead>
-                <tbody id="<%=bpid%>_interruptions">
-                </tbody>
-            </table>
+        <div class="details" id="<%=bpid%>_details">
+            <div class="kpis" id="<%=bpid%>_kpis"></div>
+            <div class="interruptions">
+                <div class="subtitle" id="<%=bpid%>_interruption_table">Interruptions</div>
+                <table>
+                    <thead>
+                        <tr><th>Time</th><th>Duration</th><th>Annotation</th></tr>
+                    </thead>
+                    <tbody id="<%=bpid%>_interruptions"></tbody>
+                </table>
+            </div>
+            <div class="buttons right"><span onclick="hideDetails(&#39;<%=bpid%>&#39;)" class="button">Hide Details</span></div>
         </div>
     </div>
 </script>
