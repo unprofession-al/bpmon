@@ -1,12 +1,13 @@
 package bpmon
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
+	"github.com/unprofession-al/bpmon/status"
 )
 
 type InfluxConf struct {
@@ -116,21 +117,36 @@ func (i Influx) GetOne(query string) (interface{}, error) {
 	return out, nil
 }
 
-func (i Influx) GetEvents(kind string, where map[string]string, start time.Time, end time.Time) ([]Point, error) {
+func getKind(spec map[string]string) string {
+	kind := "UNKNOWN"
+	if _, ok := spec[IdentifierBusinessProcess]; ok {
+		kind = IdentifierBusinessProcess
+	}
+	if _, ok := spec[IdentifierKeyPerformanceIndicator]; ok {
+		kind = IdentifierKeyPerformanceIndicator
+	}
+	if _, ok := spec[IdentifierService]; ok {
+		kind = IdentifierService
+	}
+	return kind
+}
+
+func (i Influx) GetEvents(spec map[string]string, start time.Time, end time.Time) ([]Point, error) {
+	kind := getKind(spec)
 	out := []Point{}
 	startTs := getInfluxTimestamp(start)
 	endTs := getInfluxTimestamp(end)
-	duration := (end.Sub(start)) / 1000000000
+	duration := end.Sub(start).Seconds()
 
-	whereString := ""
-	for key, value := range where {
-		if whereString != "" {
-			whereString = fmt.Sprintf("%s AND ", whereString)
+	where := ""
+	for key, value := range spec {
+		if where != "" {
+			where = fmt.Sprintf("%s AND ", where)
 		}
-		whereString = fmt.Sprintf("%s%s = %s", whereString, key, value)
+		where = fmt.Sprintf("%s%s = '%s'", where, key, value)
 	}
 
-	q := fmt.Sprintf("SELECT time, status, annotation FROM %s WHERE %s AND time < %d AND time > %d", kind, whereString, endTs, startTs)
+	q := fmt.Sprintf("SELECT time, status, annotation FROM %s WHERE %s AND changed = true AND time < %d AND time > %d", kind, where, endTs, startTs)
 	res, err := queryDB(i.cli, i.database, q)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query `%s`, error is: %s", q, err.Error())
@@ -159,7 +175,7 @@ func (i Influx) GetEvents(kind string, where map[string]string, start time.Time,
 				}
 			}
 
-			eventDuration := (tEnd.Sub(t)) / 1000000000
+			eventDuration := tEnd.Sub(t).Seconds()
 			eventDurationPercent := 100.0 / float64(duration) * float64(eventDuration)
 
 			fields := make(map[string]interface{})
@@ -180,10 +196,7 @@ func (i Influx) GetEvents(kind string, where map[string]string, start time.Time,
 	}
 
 	// get last state before the time window specified by 'start' and 'end'
-	// FIX: the "changed = true" criteria is obsolete here
-	whereString = strings.Replace(whereString, "AND changed = true", "", -1)
-	whereString = strings.Replace(whereString, "changed = true AND", "", -1)
-	q = fmt.Sprintf("SELECT time, status, annotation FROM %s WHERE %s AND time < %d ORDER by time DESC LIMIT 1", kind, whereString, getInfluxTimestamp(earliestEvent))
+	q = fmt.Sprintf("SELECT time, status, annotation FROM %s WHERE %s AND time < %d ORDER by time DESC LIMIT 1", kind, where, getInfluxTimestamp(earliestEvent))
 	res, err = queryDB(i.cli, i.database, q)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query `%s`, error is: %s", q, err.Error())
@@ -195,7 +208,7 @@ func (i Influx) GetEvents(kind string, where map[string]string, start time.Time,
 		last := res[0].Series[0].Values[0]
 		tEnd := earliestEvent
 
-		eventDuration := (tEnd.Sub(start)) / 1000000000
+		eventDuration := tEnd.Sub(start).Seconds()
 		eventDurationPercent := 100.0 / float64(duration) * float64(eventDuration)
 
 		fields := make(map[string]interface{})
@@ -227,6 +240,134 @@ func (i Influx) GetEvents(kind string, where map[string]string, start time.Time,
 		out = append([]Point{point}, out...)
 	}
 
+	return out, nil
+}
+
+type ev struct {
+	Status          status.Status `json:"status"`
+	Annotation      string        `json:"annotation"`
+	Start           time.Time     `json:"start"`
+	End             time.Time     `json:"end"`
+	Duration        float64       `json:"duration"`
+	DurationPercent float64       `json:"duration_percent"`
+}
+
+func (i Influx) AssumeEvents(spec map[string]string, start time.Time, end time.Time, interval time.Duration) ([]Point, error) {
+	kind := getKind(spec)
+	startTs := getInfluxTimestamp(start)
+	endTs := getInfluxTimestamp(end)
+	duration := end.Sub(start).Seconds()
+	events := []ev{
+		ev{Status: status.Ok,
+			Annotation: "",
+			Start:      start,
+			End:        end,
+		},
+	}
+	out := []Point{}
+
+	where := ""
+	for key, value := range spec {
+		if where != "" {
+			where = fmt.Sprintf("%s AND ", where)
+		}
+		where = fmt.Sprintf("%s%s = '%s'", where, key, value)
+	}
+
+	q := fmt.Sprintf("SELECT time, status, annotation FROM %s WHERE %s AND time < %d AND time > %d", kind, where, endTs, startTs)
+	res, err := queryDB(i.cli, i.database, q)
+	if err != nil {
+		msg := fmt.Sprintf("Cannot run query `%s`, error is: %s", q, err.Error())
+		return out, errors.New(msg)
+	}
+
+	if len(res) >= 1 &&
+		len(res[0].Series) >= 1 &&
+		len(res[0].Series[0].Values) >= 1 {
+
+		vals := res[0].Series[0].Values
+
+		lastIndex := len(events) - 1
+
+		for _, row := range vals {
+			last := events[lastIndex]
+			replace := false
+
+			current := ev{}
+			current.Status, _ = status.FromString(row[1].(json.Number).String())
+			current.Start, err = time.Parse(time.RFC3339, row[0].(string))
+			if err != nil {
+				return out, err
+			}
+			current.End = current.Start.Add(interval)
+			if row[2] != nil {
+				current.Annotation = row[2].(string)
+			} else {
+				current.Annotation = ""
+			}
+
+			if current.Start.Before(last.End) {
+				if last.Status == current.Status {
+					current.Start = last.Start
+					current.Annotation = last.Annotation
+					replace = true
+				} else {
+					last.End = current.Start
+					events[lastIndex] = last
+				}
+			} else if current.Start.After(last.End) {
+				filler := ev{
+					Start:      last.End,
+					End:        current.Start,
+					Status:     status.Ok,
+					Annotation: "",
+				}
+				events = append(events, filler)
+			}
+
+			// igrnore that case for now
+			// if current.End.Before(last.End) {}
+
+			if replace {
+				events[lastIndex] = current
+			} else {
+				events = append(events, current)
+			}
+
+			lastIndex = len(events) - 1
+		}
+	}
+
+	lastEvent := events[len(events)-1]
+	if lastEvent.End != end {
+		filler := ev{
+			Start:      lastEvent.End,
+			End:        end,
+			Status:     status.Ok,
+			Annotation: "",
+		}
+		events = append(events, filler)
+	}
+
+	for _, ev := range events {
+		ev.Duration = ev.End.Sub(ev.Start).Seconds()
+		ev.DurationPercent = 100.0 / float64(duration) * ev.Duration
+
+		fields := make(map[string]interface{})
+		fields["status"] = ev.Status
+		fields["annotation"] = ev.Annotation
+		fields["end"] = ev.End
+		fields["duration"] = ev.Duration
+		fields["duration_percent"] = ev.DurationPercent
+
+		point := Point{
+			Timestamp: ev.Start,
+			Series:    kind,
+			Fields:    fields,
+		}
+
+		out = append(out, point)
+	}
 	return out, nil
 }
 

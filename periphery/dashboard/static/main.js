@@ -5,7 +5,7 @@ function init() {
         console.log($(this).text())
         var re = new RegExp($(this).text(), "i");
         data.show().filter(function() {
-            var name = $(this).find(".hostname").text();
+            var name = $(this).find(".bpname").text();
             return !re.test(name);
         }).hide();
     });

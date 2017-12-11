@@ -41,10 +41,9 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 	start := end.AddDate(0, -1, 0)
 
 	where := map[string]string{
-		"BP":      fmt.Sprintf("'%s'", bpid),
-		"changed": "true",
+		"BP": bpid,
 	}
-	points, err := influx.GetEvents("BP", where, start, end)
+	points, err := influx.GetEvents(where, start, end)
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
@@ -114,10 +113,11 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	start := end.AddDate(0, -1, 0)
 
 	where := map[string]string{
-		"BP":  fmt.Sprintf("'%s'", bpid),
-		"KPI": fmt.Sprintf("'%s'", kpiid),
+		"BP":  bpid,
+		"KPI": kpiid,
 	}
-	points, err := influx.GetEvents("KPI", where, start, end)
+	interval, _ := time.ParseDuration("120s")
+	points, err := influx.AssumeEvents(where, start, end, interval)
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
