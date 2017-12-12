@@ -18,7 +18,29 @@ type Event struct {
 	DurationPercent float64       `json:"duration_percent"`
 }
 
-func (i Influx) GetEvents(spec map[string]string, start time.Time, end time.Time) ([]Event, error) {
+type EventProvider struct {
+	PersistenceProvider
+	saveOk        []string
+	getLastStatus bool
+}
+
+func NewEventProvider(pp PersistenceProvider, saveOk []string, getLastStatus bool) EventProvider {
+	return EventProvider{pp, saveOk, getLastStatus}
+}
+
+func (ep EventProvider) GetEvents(spec map[string]string, start time.Time, end time.Time, interval time.Duration) ([]Event, error) {
+	kind := getKind(spec)
+	if ep.getLastStatus {
+		for _, saveOkKind := range ep.saveOk {
+			if saveOkKind == kind {
+				return ep.getEvents(spec, start, end)
+			}
+		}
+	}
+	return ep.assumeEvents(spec, start, end, interval)
+}
+
+func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end time.Time) ([]Event, error) {
 	out := []Event{}
 	totalDuration := end.Sub(start).Seconds()
 
@@ -34,7 +56,7 @@ func (i Influx) GetEvents(spec map[string]string, start time.Time, end time.Time
 
 	fields := []string{"time", "status", "annotation"}
 
-	rows, err := i.GetAll(fields, kind, where, "")
+	rows, err := ep.GetAll(fields, kind, where, "")
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
 		return out, errors.New(msg)
@@ -86,7 +108,7 @@ func (i Influx) GetEvents(spec map[string]string, start time.Time, end time.Time
 	whereLast = append(whereLast, fmt.Sprintf("time < %d", getInfluxTimestamp(end)))
 	whereLast = append(whereLast, fmt.Sprintf("time > %d", getInfluxTimestamp(start)))
 	additional := "ORDER BY time DESC LIMIT 1"
-	last, err := i.GetOne(fields, kind, whereLast, additional)
+	last, err := ep.GetOne(fields, kind, whereLast, additional)
 	if err != nil {
 		// if no state at all is found
 		complete := Event{
@@ -126,7 +148,7 @@ func (i Influx) GetEvents(spec map[string]string, start time.Time, end time.Time
 	return out, nil
 }
 
-func (i Influx) AssumeEvents(spec map[string]string, start time.Time, end time.Time, interval time.Duration) ([]Event, error) {
+func (ep EventProvider) assumeEvents(spec map[string]string, start time.Time, end time.Time, interval time.Duration) ([]Event, error) {
 	duration := end.Sub(start).Seconds()
 	events := []Event{
 		Event{
@@ -148,7 +170,7 @@ func (i Influx) AssumeEvents(spec map[string]string, start time.Time, end time.T
 
 	fields := []string{"time", "status", "annotation"}
 
-	rows, err := i.GetAll(fields, kind, where, "")
+	rows, err := ep.GetAll(fields, kind, where, "")
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
 		return events, errors.New(msg)

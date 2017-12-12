@@ -14,10 +14,10 @@ import (
 )
 
 var bps bpmon.BusinessProcesses
-var influx bpmon.Influx
+var ep bpmon.EventProvider
 
-func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, infl bpmon.Influx) (http.Handler, error) {
-	influx = infl
+func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, epin bpmon.EventProvider) (http.Handler, error) {
+	ep = epin
 	bps = bpin
 	r := mux.NewRouter().StrictSlash(true)
 
