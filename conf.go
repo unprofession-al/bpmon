@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/unprofession-al/bpmon/configs"
 	"github.com/unprofession-al/bpmon/icinga"
 	"github.com/unprofession-al/bpmon/rules"
 
@@ -13,11 +14,12 @@ import (
 )
 
 type conf struct {
-	Icinga         icinga.IcingaConf  `yaml:"icinga"`
-	Influx         InfluxConf         `yaml:"influx"`
-	Availabilities AvailabilitiesConf `yaml:"availabilities"`
-	Trigger        Trigger            `yaml:"trigger"`
-	Rules          rules.Rules        `yaml:"rules"`
+	Icinga         icinga.IcingaConf     `yaml:"icinga"`
+	Influx         InfluxConf            `yaml:"influx"`
+	Availabilities AvailabilitiesConf    `yaml:"availabilities"`
+	Trigger        Trigger               `yaml:"trigger"`
+	Rules          rules.Rules           `yaml:"rules"`
+	Dashboard      configs.DashboardConf `yaml:"dashboard"`
 }
 
 type Trigger struct {
@@ -84,6 +86,8 @@ func parseConf(cfg []byte, cfgSection string) (conf, error) {
 	if !ok {
 		return conf, errors.New(fmt.Sprintf("No section '%s' found in configuration", cfgSection))
 	}
+
+	conf.Dashboard = configs.GetDashboardConf(conf.Dashboard)
 
 	return conf, nil
 }

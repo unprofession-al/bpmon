@@ -8,6 +8,26 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
+const (
+	IdentifierBusinessProcess         = "BP"
+	IdentifierKeyPerformanceIndicator = "KPI"
+	IdentifierService                 = "SVC"
+)
+
+func getKind(spec map[string]string) string {
+	kind := "UNKNOWN"
+	if _, ok := spec[IdentifierBusinessProcess]; ok {
+		kind = IdentifierBusinessProcess
+	}
+	if _, ok := spec[IdentifierKeyPerformanceIndicator]; ok {
+		kind = IdentifierKeyPerformanceIndicator
+	}
+	if _, ok := spec[IdentifierService]; ok {
+		kind = IdentifierService
+	}
+	return kind
+}
+
 type BusinessProcesses []BP
 
 type BP struct {
@@ -21,7 +41,7 @@ type BP struct {
 
 func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
 	rs := ResultSet{
-		Kind:        "BP",
+		Kind:        IdentifierBusinessProcess,
 		Responsible: bp.Responsible,
 		Name:        bp.Name,
 		Id:          bp.Id,
@@ -74,7 +94,7 @@ type KPI struct {
 
 func (k KPI) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
 	rs := ResultSet{
-		Kind:        "KPI",
+		Kind:        IdentifierKeyPerformanceIndicator,
 		Responsible: k.Responsible,
 		Name:        k.Name,
 		Id:          k.Id,
@@ -138,7 +158,7 @@ func (s Service) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rul
 		Name:        name,
 		Responsible: s.Responsible,
 		Id:          name,
-		Kind:        "SVC",
+		Kind:        IdentifierService,
 	}
 	at, msg, vals, err := ssp.Status(s.Host, s.Service)
 	rs.Err = err

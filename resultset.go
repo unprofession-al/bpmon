@@ -182,20 +182,27 @@ func stringInSlice(a string, list []string) bool {
 }
 
 func getLastStatus(pp PersistenceProvider, kind string, tags map[string]string) (status.Status, error) {
-	var wheres []string
+	var where []string
 	for key, value := range tags {
-		wheres = append(wheres, fmt.Sprintf("%s = '%s'", key, value))
+		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
 	}
-	where := strings.Join(wheres, " AND ")
-	query := fmt.Sprintf("SELECT LAST(status) FROM %s WHERE %s", kind, where)
-	res, err := pp.GetOne(query)
+	fields := []string{"status"}
+	additional := "ORDER BY time DESC LIMIT 1"
+
+	row, err := pp.GetOne(fields, kind, where, additional)
 	if err != nil {
 		return status.Unknown, err
 	}
 
-	statusData, ok := res.(json.Number)
+	stat, ok := row["status"]
 	if !ok {
-		msg := fmt.Sprintf("Cannot convert %v (%s) to json.Number", res, reflect.TypeOf(res))
+		msg := fmt.Sprintf("'status' not present in %v", row)
+		return status.Unknown, errors.New(msg)
+	}
+
+	statusData, ok := stat.(json.Number)
+	if !ok {
+		msg := fmt.Sprintf("Cannot convert %v (%s) to json.Number", row["status"], reflect.TypeOf(row["status"]))
 		return status.Unknown, errors.New(msg)
 	}
 

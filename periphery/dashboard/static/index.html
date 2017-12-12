@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BPMON Dashboard</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="assets/common.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<div class="container">
+    <div class="header"><div class="header-inner">
+        <div class="header-section left">
+            <div class="logo">
+                <img class= "logo-img" src="assets/bpmon.png" alt="icingamock">
+                <span>&nbsp;DASHBOARD</span>
+            </div>
+        </div>
+        <div class="header-section right">
+            <div contenteditable="true" class="input input-header" id="filter" data-placeholder="Filter for Business Process..."></div>
+        </div>
+    </div></div>
+
+    <div id="data">
+        <div class="loading" id="loading"><div class="spinner"></div></div>
+    </div>
+</div>
+
+<script type="text/html" id="chart_frame_tmpl">
+    <div class="frame <%=state%>" style="width: <%=percent%>%;" data-start="<%=start%>"></div>
+</script>
+
+<script type="text/html" id="interruption_tmpl">
+    <tr>
+		<td><%=timestamp%></td>
+		<td><%=duration%>s</td>
+		<td><%=annotation%></td>
+    </tr>
+</script>
+
+<script type="text/html" id="kpi_tmpl">
+    <div id="<%=kpiid%>">
+        <div class="kpiname subtitle"><%=kpiname%> &mdash; <span id="<%=bpid%>_<%=kpiid%>_availability">...</span>% available</div>
+        <div class="availability">
+            <div class="chart" id="<%=bpid%>_<%=kpiid%>_chart">
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="bp_tmpl">
+    <div class="element panel" id="<%=bpid%>">
+        <div class="bp">
+            <div class="heading">
+                <div class="bpname title left"><%=bpname%> &mdash; <span id="<%=bpid%>_availability">...</span>% available</span></div>
+                <div class="bitch right"><span class="show-details button" onclick="showDetails(&#39;<%=bpid%>&#39);">Show Details</span></div>
+            </div>
+            <div class="availability">
+                <div class="chart" id="<%=bpid%>_chart"></div>
+            </div>
+        </div>
+        <div class="details" id="<%=bpid%>_details">
+            <div class="kpis" id="<%=bpid%>_kpis"></div>
+            <div class="interruptions">
+                <div class="subtitle" id="<%=bpid%>_interruption_table">Interruptions</div>
+                <table>
+                    <thead>
+                        <tr><th>Time</th><th>Duration</th><th>Annotation</th></tr>
+                    </thead>
+                    <tbody id="<%=bpid%>_interruptions"></tbody>
+                </table>
+            </div>
+            <div class="buttons right"><span onclick="hideDetails(&#39;<%=bpid%>&#39;)" class="button">Hide Details</span></div>
+        </div>
+    </div>
+</script>
+
+<script src="assets/jquery-3.2.1.min.js"></script>
+<script src="assets/templating.js"></script>
+<script src="assets/common.js"></script>
+<script src="main.js"></script>
+<script>init();</script>
+
+</body>
+</html>
+

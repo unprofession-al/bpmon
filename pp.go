@@ -1,5 +1,6 @@
 package bpmon
 
 type PersistenceProvider interface {
-	GetOne(string) (interface{}, error)
+	GetOne([]string, string, []string, string) (map[string]interface{}, error)
+	GetAll([]string, string, []string, string) ([]map[string]interface{}, error)
 }
