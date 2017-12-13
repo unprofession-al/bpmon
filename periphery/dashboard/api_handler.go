@@ -43,7 +43,7 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 	where := map[string]string{
 		"BP": bpid,
 	}
-	interval, _ := time.ParseDuration("120s")
+	interval, _ := time.ParseDuration("300s")
 	points, err := ep.GetEvents(where, start, end, interval)
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
@@ -117,7 +117,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 		"BP":  bpid,
 		"KPI": kpiid,
 	}
-	interval, _ := time.ParseDuration("120s")
+	interval, _ := time.ParseDuration("300s")
 	points, err := ep.GetEvents(where, start, end, interval)
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
