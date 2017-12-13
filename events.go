@@ -10,12 +10,13 @@ import (
 )
 
 type Event struct {
-	Status          status.Status `json:"status"`
-	Annotation      string        `json:"annotation"`
-	Start           time.Time     `json:"start"`
-	End             time.Time     `json:"end"`
-	Duration        float64       `json:"duration"`
-	DurationPercent float64       `json:"duration_percent"`
+	Status          status.Status     `json:"status"`
+	Annotation      string            `json:"annotation"`
+	Start           time.Time         `json:"start"`
+	End             time.Time         `json:"end"`
+	Duration        float64           `json:"duration"`
+	DurationPercent float64           `json:"duration_percent"`
+	Tags            map[string]string `json:"tags"`
 }
 
 type EventProvider struct {
@@ -55,6 +56,9 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 	where = append(where, "changed = true")
 
 	fields := []string{"time", "status", "annotation"}
+	for tag, _ := range spec {
+		fields = append(fields, tag)
+	}
 
 	rows, err := ep.GetAll(fields, kind, where, "")
 	if err != nil {
@@ -64,7 +68,7 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 
 	earliestEvent := end
 	for i, row := range rows {
-		current := Event{}
+		current := Event{Tags: make(map[string]string)}
 		current.Start, err = time.Parse(time.RFC3339, row["time"].(string))
 		if err != nil {
 			return out, err
@@ -97,6 +101,10 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 			current.Annotation = ""
 		}
 
+		for tag, _ := range spec {
+			current.Tags[tag] = row[tag].(string)
+		}
+
 		out = append(out, current)
 	}
 
@@ -118,6 +126,7 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 			DurationPercent: 100.0,
 			Start:           start,
 			End:             end,
+			Tags:            spec,
 		}
 		out = append([]Event{complete}, out...)
 	} else {
@@ -128,6 +137,7 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 			End:             earliestEvent,
 			Duration:        duration,
 			DurationPercent: durationPercent,
+			Tags:            make(map[string]string),
 		}
 		statusNumber, err := last["status"].(json.Number).Int64()
 		if err != nil {
@@ -141,6 +151,9 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 			first.Annotation = last["annotation"].(string)
 		} else {
 			first.Annotation = ""
+		}
+		for tag, _ := range spec {
+			first.Tags[tag] = last[tag].(string)
 		}
 		out = append([]Event{first}, out...)
 	}
@@ -156,6 +169,7 @@ func (ep EventProvider) assumeEvents(spec map[string]string, start time.Time, en
 			Annotation: "",
 			Start:      start,
 			End:        end,
+			Tags:       spec,
 		},
 	}
 
@@ -169,6 +183,9 @@ func (ep EventProvider) assumeEvents(spec map[string]string, start time.Time, en
 	where = append(where, fmt.Sprintf("time > %d", getInfluxTimestamp(start)))
 
 	fields := []string{"time", "status", "annotation"}
+	for tag, _ := range spec {
+		fields = append(fields, tag)
+	}
 
 	rows, err := ep.GetAll(fields, kind, where, "")
 	if err != nil {
@@ -182,7 +199,7 @@ func (ep EventProvider) assumeEvents(spec map[string]string, start time.Time, en
 		last := events[lastIndex]
 		replace := false
 
-		current := Event{}
+		current := Event{Tags: make(map[string]string)}
 		statusNumber, err := row["status"].(json.Number).Int64()
 		if err != nil {
 			return events, err
@@ -200,6 +217,10 @@ func (ep EventProvider) assumeEvents(spec map[string]string, start time.Time, en
 			current.Annotation = row["annotation"].(string)
 		} else {
 			current.Annotation = ""
+		}
+
+		for tag, _ := range spec {
+			current.Tags[tag] = row[tag].(string)
 		}
 
 		if current.Start.Before(last.End) {
