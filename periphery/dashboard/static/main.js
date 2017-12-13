@@ -33,51 +33,49 @@ function loadBPs() {
     });
 }
 
+                // https://codepen.io/cbracco/pen/qzukg
 function loadBPEvents(bpid) {
     $.getJSON("/api/bps/" + bpid, function(data) {
         if (data == 0 || data == null || data == undefined) {
             $("<div class='notification panel'>Could not fetch events for business process '" + bpid + "'...</div>").hide().appendTo("#data").fadeIn("slow");
         } else {
             var percentages = {};
+            var frames = [];
+            var events = [];
             for (var key in data) {
-                frame = data[key];
-
-        		var status = "unknown";
-                switch(frame.status) {
-    				case 0:
-        				status = "ok";
-        				break;
-    				case 1:
-        				status = "nok";
-        				break;
-    				default:
-        				status = "unknown";
-				}
-
+                var frame = data[key];
+                var status = getStatusString(frame.status);
                 var percent =  frame.duration_percent;
 
                 if (percentages[status] == null || percentages[status] == undefined) {
                     percentages[status] = 0;
                 }
 				percentages[status] = percentages[status] + percent;
-
-                // make sure data is visible
-                //if (percent < 0.1) {
-                //    visible_percent = 0.1
-                //}
-                //
-                // https://codepen.io/cbracco/pen/qzukg
-                var f = { state: status, percent: percent, start: frame.start };
-                var chart = tmpl("chart_frame_tmpl", f);
-                $(chart).hide().appendTo("#" + bpid +"_chart").fadeIn("fast");
+                var tooltip = "Status: " + status + " &#xa;Start: " + formatTimestamp(frame.start) + " &#xa;End: " + formatTimestamp(frame.end);
+                var f = { state: status, displayPercent: percent, percent: percent, start: frame.start, tooltip: tooltip};
+                frames.push(f);
 
 				if (frame.status == 1) {
 					var annotation = (frame.annotation != "") ? frame.annotation : "<i>-</i>";
-					var i = { timestamp: formatTimestamp(frame.start), annotation: annotation, duration: frame.duration };
-                	var interruption = tmpl("interruption_tmpl", i);
-                	$(interruption).hide().appendTo("#" + bpid +"_interruptions").fadeIn("fast");
+					var e = { timestamp: formatTimestamp(frame.start), annotation: annotation, duration: frame.duration };
+                    events.push(e);
 				}
             }
+
+            frames = ensureMinimalDisplayPercentage(frames);
+
+            for (var i in frames) {
+                var f = frames[i];
+                var chart = tmpl("chart_frame_tmpl", f);
+                $(chart).hide().appendTo("#" + bpid +"_chart").fadeIn("fast");
+            }
+
+            if (events.length > 0) {
+                var data = { interruptions: events };
+                var interruption = tmpl("interruptions_tmpl", data);
+                $(interruption).hide().appendTo("#" + bpid +"_interruptions").fadeIn("fast");
+            }
+
             if (percentages["ok"] != null || percentages["ok"] != undefined) {
                 var out = Number((percentages["ok"]).toFixed(3));
                 $("#" + bpid + "_availability").text(out);
@@ -106,37 +104,66 @@ function loadKPIEvents(bpid, kpiid) {
         if (data == 0 || data == null || data == undefined) {
             $("<div class='notification panel'>Could not fetch events for KPI "+ kpiid + " of business process " + bpid + "'...</div>").hide().appendTo("#data").fadeIn("slow");
         } else {
-            var percentages = {};
+            var percentages = {}
+            var frames = [];
             for (var key in data) {
-                frame = data[key];
-
-        		var status = "unknown";
-                switch(frame.status) {
-    				case 0:
-        				status = "ok";
-        				break;
-    				case 1:
-        				status = "nok";
-        				break;
-    				default:
-        				status = "unknown";
-				}
+                var frame = data[key];
+                var status = getStatusString(frame.status);
+                var percent =  frame.duration_percent;
 
                 if (percentages[status] == null || percentages[status] == undefined) {
                     percentages[status] = 0;
                 }
-				percentages[status] = percentages[status] + frame.duration_percent;
+				percentages[status] = percentages[status] + percent;
 
-                var f = { bpid: bpid, state: status, percent: frame.duration_percent, start: frame.start };
+                var tooltip = "Status: " + status + " &#xa;Start: " + formatTimestamp(frame.start) + " &#xa;End: " + formatTimestamp(frame.end);
+                var f = { state: status, displayPercent: percent, percent: percent, start: frame.start, tooltip: tooltip};
+                frames.push(f);
+            }
+
+            frames = ensureMinimalDisplayPercentage(frames);
+
+            for (var i in frames) {
+                var f = frames[i];
                 var chart = tmpl("chart_frame_tmpl", f);
                 $(chart).hide().appendTo("#" + bpid + "_" + kpiid + "_chart").fadeIn("fast");
             }
+
             if (percentages["ok"] != null || percentages["ok"] != undefined) {
                 var out = Number((percentages["ok"]).toFixed(3));
                 $("#" + bpid + "_" + kpiid + "_availability").text("~" + out);
             }
         }
     });
+}
+
+function getStatusString(statusNum) {
+    switch(statusNum) {
+		case 0:
+			return "ok";
+		case 1:
+			return "nok";
+		default:
+			return "unknown";
+	}
+}
+
+function ensureMinimalDisplayPercentage(frames) {
+    var minDisplayPercent = 0.2;
+    for (var i in frames) {
+        var f = frames[i];
+        if (f.displayPercent < minDisplayPercent) {
+            for (var j in frames) {
+                var v = frames[j];
+                if (v.displayPercent > (2 * minDisplayPercent)) {
+                    frames[j].displayPercent = v.displayPercent - minDisplayPercent;
+                    frames[i].displayPercent = f.displayPercent + minDisplayPercent;
+                    break;
+                }
+            }
+        }
+    }
+    return frames;
 }
 
 

@@ -27,15 +27,25 @@
 </div>
 
 <script type="text/html" id="chart_frame_tmpl">
-    <div class="frame <%=state%>" style="width: <%=percent%>%;" data-start="<%=start%>"></div>
+    <div class="frame <%=state%>" style="width: <%=displayPercent%>%;" data-tooltip='<%=tooltip%>' data-percent="<%=percent%>" data-start="<%=start%>"></div>
 </script>
 
-<script type="text/html" id="interruption_tmpl">
-    <tr>
-		<td><%=timestamp%></td>
-		<td><%=duration%>s</td>
-		<td><%=annotation%></td>
-    </tr>
+<script type="text/html" id="interruptions_tmpl">
+    <div class="subtitle">Interruptions</div>
+    <table>
+        <thead>
+            <tr><th>Time</th><th>Duration</th><th>Annotation</th></tr>
+        </thead>
+        <tbody>
+            <% for (var i in interruptions) { %>
+            <tr>
+                <td><%=interruptions[i].timestamp%></td>
+                <td><%=interruptions[i].duration%>s</td>
+                <td><%=interruptions[i].annotation%></td>
+            </tr>
+            <% } %>
+        </tbody>
+    </table>
 </script>
 
 <script type="text/html" id="kpi_tmpl">
@@ -61,15 +71,7 @@
         </div>
         <div class="details" id="<%=bpid%>_details">
             <div class="kpis" id="<%=bpid%>_kpis"></div>
-            <div class="interruptions">
-                <div class="subtitle" id="<%=bpid%>_interruption_table">Interruptions</div>
-                <table>
-                    <thead>
-                        <tr><th>Time</th><th>Duration</th><th>Annotation</th></tr>
-                    </thead>
-                    <tbody id="<%=bpid%>_interruptions"></tbody>
-                </table>
-            </div>
+            <div class="interruptions" id="<%=bpid%>_interruptions"></div>
             <div class="buttons right"><span onclick="hideDetails(&#39;<%=bpid%>&#39;)" class="button">Hide Details</span></div>
         </div>
     </div>
