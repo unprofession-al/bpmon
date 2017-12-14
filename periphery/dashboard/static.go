@@ -193,7 +193,7 @@ var _escData = map[string]*_escFile{
 	"/index.html": {
 		local:   "static/index.html",
 		size:    3229,
-		modtime: 1513124043,
+		modtime: 1513160622,
 		compressed: `
 H4sIAAAAAAAC/5xXXW/bNhe+z6/gyxdKE2CWsnXAtljikMwruostQZtdDMMQUBJtnZoiOfI4mTHsvw+k
 aFuyrcTdTSudj+d8PedYyf83u/vh4bf7H0mDrWRnuf+PSK4WBRWKeoHgNTsjhJC8FchJ1XDrBBb014d3
@@ -218,7 +218,7 @@ UNXG55gLitZIjqAWJxjHj+gXDFs+FpWBAry4nPZLyOIndNb9LXL2bwAAAP//Cna+OZ0MAAA=
 	"/main.js": {
 		local:   "static/main.js",
 		size:    6756,
-		modtime: 1513124185,
+		modtime: 1513160622,
 		compressed: `
 H4sIAAAAAAAC/+xZX2/bOBJ/jj/FlAnOUu3Kbou7BzvKAXfNAtli22DTfQqCgJZGNmuZ5IpUnGzr/ewL
 kpItybLjFLtIH+onmjOcf/zN8Jc4yXmkmeDAONOeD186AAAzFuOVZJxj5vlju3XixSLKF8i1HwjuQXeO
@@ -250,16 +250,16 @@ RiCbtemSzVfj6lVpww2kj7n23gyHftWiSlmM78SSN382MGPv+UK94O2R/iZdnH8FAAD//0qaAs9kGgAA
 
 	"/style.css": {
 		local:   "static/style.css",
-		size:    1060,
-		modtime: 1513123429,
+		size:    1085,
+		modtime: 1513251718,
 		compressed: `
-H4sIAAAAAAAC/4ST8Y6bMAzG/+9TRJombdKBSlvGXfY0TmJIRGojcNvrpr37lIO2x6ml/6F838/2R+Jc
-gkR8UflwMB+f6u9KKaVqJslOGBovWhmO7vfH8R76JlAm3GlVrLv32alhEd5fhH+rVe4RXKBmqnkKTnyS
-199HzoWhi3DWKlAMhJmJbNtR6sAl8k5N0xHsZ2MO4Q9qVWxT2eSwHnp51NNPmXbX6W1E6FNI8eOBAds2
-PR/IZZYj91p9Q8SxtkOBEIep+jUAMU0GcxBhuhg+/6/NNULbhUHlcIQQwYQY5KxmQ19mvIUe1bzub9Fv
-pku0OjKIVhFrmVHcTsidYJWztvr1xa49H7F/DJU7eNvZGURLTbB+raryq/9ZF7cud1ucUQdqiU+00Glr
-ynpzj3nWDVy1tiMpYK57MHs/SfMvStwkTo9Uq9fpnsQvr4/gu2QQQ0OfrknSljwerABj38afLYbdWUmv
-SXxmfYjuBzv3cyFU7QoLib2D4hFpgXUbLLFI7P8AAAD//+hkQWkkBAAA
+H4sIAAAAAAAC/4ST4W6jMAzHv/cpIp1OupNGVdoyttzTOIkhEamNwG3XO927Txm0HRNl35D//tn+m3gt
+QSI+qXV/NB+f6t9KKaUqJsnOGGovWhmO7s9H+ABdHSgTbrXKN+3bJGpYhA9X4f9qtfYILlA91jwHJz7J
+m58D50LfRrhoFSgGwsxEts0gteASOVPTtASHyZh9+Ita5btUNmVYD5086ulHT/vb9DYidMmk+CFgwDZ1
+x0dymeXInVY/EHGo7VAgxH6sfjNATDi7i+f73EcRpiv5eZHbW07Thl6t4QQhggkxyEVN3FyHv29jUNdV
+d9/JPenquYoMolXESiYUNyMy47h01pbPX9K15xN2j6FiD697O4FoqQlWL2VZfM3/rovbFPsdTqgjNcRn
+Wui0M0W1nWO+6wau3NiBFDC3A5k8rKT5JyVuFMfXq9XL+J/EL9+V4JtkEENNn36TpPN5PFgOxr4OyxbD
+7qKk0yQ+sz5E94ud+71gqnK5hcTOoHhCWmDdFgvME/seAAD//+RJZ7Y9BAAA
 `,
 	},
 
