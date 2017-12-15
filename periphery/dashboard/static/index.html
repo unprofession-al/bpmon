@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BPMON Dashboard</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="assets/common.css">
@@ -17,7 +18,19 @@
             </div>
         </div>
         <div class="header-section right">
-            <div contenteditable="true" class="input input-header" id="filter" data-placeholder="Filter for Business Process..."></div>
+
+
+<div class="dropdown">
+    <div class="button button-header">Select Timerange</div>
+    <div class="dropdown-content-wrapper">
+    <div class="dropdown-content">
+    <span>Last 30 Days</span>
+    <span>Last 3 Month</span>
+    <span>This Year so far</span>
+  </div>
+  </div>
+</div>
+            <!-- "<div contenteditable="true" class="input input-header" id="filter" data-placeholder="Filter for Business Process..."></div> -->
         </div>
     </div></div>
 
@@ -31,7 +44,7 @@
 </script>
 
 <script type="text/html" id="interruptions_tmpl">
-    <div class="subtitle">Interruptions</div>
+    <h2 class="subtitle">Interruptions</h2>
     <table>
         <thead>
             <tr><th>Time</th><th>Duration</th><th>Annotation</th></tr>
@@ -50,7 +63,7 @@
 
 <script type="text/html" id="kpi_tmpl">
     <div id="<%=kpiid%>">
-        <div class="kpiname subtitle"><%=kpiname%> &mdash; <span id="<%=bpid%>_<%=kpiid%>_availability">...</span>% available</div>
+        <h2 class="kpiname subtitle"><%=kpiname%> &mdash; <span id="<%=bpid%>_<%=kpiid%>_availability">...</span>% available</h2>
         <div class="availability">
             <div class="chart" id="<%=bpid%>_<%=kpiid%>_chart">
             </div>
@@ -59,25 +72,30 @@
 </script>
 
 <script type="text/html" id="bp_tmpl">
-    <div class="element panel" id="<%=bpid%>">
-        <div class="bp">
-            <div class="heading">
-                <div class="bpname title left"><%=bpname%> &mdash; <span id="<%=bpid%>_availability">...</span>% available</span></div>
-                <div class="bitch right"><span class="show-details button" onclick="showDetails(&#39;<%=bpid%>&#39);">Show Details</span></div>
+    <div class="panel" id="<%=bpid%>">
+        <div class="panel-content">
+            <div class="bp">
+                <div class="heading">
+                    <h1><%=bpname%> &mdash; <span id="<%=bpid%>_availability">...</span>% available</span></h1>
+                </div>
+                <div class="availability">
+                    <div class="chart" id="<%=bpid%>_chart"></div>
+                </div>
             </div>
-            <div class="availability">
-                <div class="chart" id="<%=bpid%>_chart"></div>
+            <div class="details" id="<%=bpid%>_details">
+                <div class="kpis" id="<%=bpid%>_kpis"></div>
+                <div class="interruptions" id="<%=bpid%>_interruptions"></div>
             </div>
         </div>
-        <div class="details" id="<%=bpid%>_details">
-            <div class="kpis" id="<%=bpid%>_kpis"></div>
-            <div class="interruptions" id="<%=bpid%>_interruptions"></div>
-            <div class="buttons right"><span onclick="hideDetails(&#39;<%=bpid%>&#39;)" class="button">Hide Details</span></div>
+        <div class="panel-collapser" onclick="toggleDetails(&#39;<%=bpid%>&#39);">
+            <i id="<%=bpid%>_collapser_symbol" class="fas fa-angle-down"></i>
         </div>
     </div>
+
 </script>
 
 <script src="assets/jquery-3.2.1.min.js"></script>
+<script src="assets/fontawesome-all.js"></script>
 <script src="assets/templating.js"></script>
 <script src="assets/common.js"></script>
 <script src="main.js"></script>

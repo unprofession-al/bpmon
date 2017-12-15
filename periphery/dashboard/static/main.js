@@ -33,7 +33,6 @@ function loadBPs() {
     });
 }
 
-                // https://codepen.io/cbracco/pen/qzukg
 function loadBPEvents(bpid) {
     $.getJSON("/api/bps/" + bpid, function(data) {
         if (data == 0 || data == null || data == undefined) {
@@ -45,18 +44,18 @@ function loadBPEvents(bpid) {
             for (var key in data) {
                 var frame = data[key];
                 var status = getStatusString(frame.status);
+				var annotation = (frame.annotation != "") ? frame.annotation : "-";
                 var percent =  frame.duration_percent;
 
                 if (percentages[status] == null || percentages[status] == undefined) {
                     percentages[status] = 0;
                 }
 				percentages[status] = percentages[status] + percent;
-                var tooltip = "Status: " + status + " &#xa;Start: " + formatTimestamp(frame.start) + " &#xa;End: " + formatTimestamp(frame.end);
+                var tooltip = "Status: " + status + " &#xa;Start: " + formatTimestamp(frame.start) + " &#xa;End: " + formatTimestamp(frame.end) + "&#xa;&#xa;" + annotation;
                 var f = { state: status, displayPercent: percent, percent: percent, start: frame.start, tooltip: tooltip};
                 frames.push(f);
 
 				if (frame.status == 1) {
-					var annotation = (frame.annotation != "") ? frame.annotation : "<i>-</i>";
 					var e = { timestamp: formatTimestamp(frame.start), annotation: annotation, duration: frame.duration };
                     events.push(e);
 				}
@@ -166,15 +165,16 @@ function ensureMinimalDisplayPercentage(frames) {
     return frames;
 }
 
-
-function showDetails(bpid) {
+function toggleDetails(bpid) {
     var id = "#"+bpid+"_details";
-    $(id).parent().find(".bp").find(".bitch").find(".show-details").fadeOut(200);
-    $(id).slideDown();
-}
 
-function hideDetails(bpid) {
-    var id = "#"+bpid+"_details";
-    $(id).parent().find(".bp").find(".bitch").find(".show-details").fadeIn(200);
-    $(id).slideUp();
+    if ($(id).is(":visible")) {
+        $(id).slideUp();
+    } else {
+        $(id).slideDown();
+
+    }
+
+    id = "#"+bpid+"_collapser_symbol";
+    $(id).toggleClass("fa-angle-up fa-angle-down");
 }

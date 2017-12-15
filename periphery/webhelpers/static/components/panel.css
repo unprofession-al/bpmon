@@ -1,0 +1,31 @@
+.panel {
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 5px 2px rgba(0,0,0,0.25);
+    background-color: #fff;
+    float: left;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    display: table;
+    -webkit-column-break-inside: avoid;
+}
+
+.panel-content {
+    padding: 20px 30px;
+}
+
+.panel-collapser {
+    width: 100%;
+    background-color: var(--main-color-bright);
+    border-top: solid var(--main-color-brighter) 1px;
+    margin: 0 auto;
+    text-align: center;
+    height: 14px;
+    color: var(--main-color-dark);
+    cursor: pointer;
+}
+
+.notification {
+    background-color: var(--color-notify);
+}

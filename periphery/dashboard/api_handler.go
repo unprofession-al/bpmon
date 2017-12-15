@@ -3,6 +3,7 @@ package dashboard
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -37,8 +38,7 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	end := time.Now()
-	start := end.AddDate(0, -1, 0)
+	start, end := getStartEnd(req)
 
 	where := map[string]string{
 		"BP": bpid,
@@ -110,8 +110,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	end := time.Now()
-	start := end.AddDate(0, -1, 0)
+	start, end := getStartEnd(req)
 
 	where := map[string]string{
 		"BP":  bpid,
@@ -126,4 +125,27 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	}
 
 	wh.Respond(res, req, http.StatusOK, points)
+}
+
+func getStartEnd(req *http.Request) (start time.Time, end time.Time) {
+	end = time.Now()
+	start = end.AddDate(0, -1, 0)
+
+	startStr := req.URL.Query()["start"]
+	if len(startStr) > 0 {
+		i, err := strconv.ParseInt(startStr[0], 10, 64)
+		if err == nil {
+			start = time.Unix(i, 0)
+		}
+	}
+
+	endStr := req.URL.Query()["end"]
+	if len(endStr) > 0 {
+		i, err := strconv.ParseInt(endStr[0], 10, 64)
+		if err == nil {
+			end = time.Unix(i, 0)
+		}
+	}
+
+	return
 }
