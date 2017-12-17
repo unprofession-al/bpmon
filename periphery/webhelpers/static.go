@@ -476,6 +476,39 @@ EgPH8zh8c4k3b9D2zd/bdL+bZjfqGQAA//8oZwvW4QAAAA==
 `,
 	},
 
+	"/favicon.ico": {
+		local:   "static/favicon.ico",
+		size:    45842,
+		modtime: 1513506881,
+		compressed: `
+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
+`,
+	},
+
 	"/fontawesome-all.js": {
 		local:   "static/fontawesome-all.js",
 		size:    685624,
