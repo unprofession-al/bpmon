@@ -7,56 +7,56 @@
 
 /* Add this attribute to the element that needs a tooltip */
 [data-tooltip] {
-  position: relative;
-  cursor: pointer;
+	position: relative;
+	cursor: pointer;
 }
 
 /* Hide the tooltip content by default */
 [data-tooltip]:before,
 [data-tooltip]:after {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
+	visibility: hidden;
+	opacity: 0;
+	pointer-events: none;
 }
 
 /* Position tooltip above the element */
 [data-tooltip]:before {
-  position: absolute;
-  bottom: 60%;
-  left: 50%;
-  margin-bottom: 5px;
-  margin-left: -100px;
-  padding: 7px;
-  width: 200px;
-  border-radius: 3px;
-  background-color: #000;
-  color: #fff;
-  content: attr(data-tooltip);
-  text-align: center;
-  font-size: 14px;
-  line-height: 1.2;
-  white-space: pre;
+	position: absolute;
+	bottom: 60%;
+	left: 50%;
+	margin-bottom: 5px;
+	margin-left: -100px;
+	padding: 7px;
+	width: 200px;
+	border-radius: 3px;
+	background-color: var(--main-color-brighter);
+	content: attr(data-tooltip);
+	text-align: center;
+	font-size: 14px;
+	line-height: 1.2;
+	white-space: pre;
+	box-shadow: 0 2px 5px 2px rgba(0,0,0,0.25);
 }
 
 /* Triangle hack to make tooltip look like a speech bubble */
 [data-tooltip]:after {
-  position: absolute;
-  bottom: 60%;
-  left: 50%;
-  margin-left: -5px;
-  width: 0;
-  border-top: 5px solid #000;
-  border-right: 5px solid transparent;
-  border-left: 5px solid transparent;
-  content: " ";
-  font-size: 0;
-  line-height: 0;
+	position: absolute;
+	bottom: 60%;
+	left: 50%;
+	margin-left: -5px;
+	width: 0;
+	border-top: 5px solid var(--main-color-brighter);
+	border-right: 5px solid transparent;
+	border-left: 5px solid transparent;
+	content: " ";
+	font-size: 0;
+	line-height: 0;
 }
 
 /* Show tooltip content on hover */
 [data-tooltip]:hover:before,
 [data-tooltip]:hover:after {
-  visibility: visible;
-  opacity: 1;
-  z-index: 4;
+	visibility: visible;
+	opacity: 1;
+	z-index: 100;
 }

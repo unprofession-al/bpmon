@@ -1,17 +1,12 @@
+.details {
+    display: none;
+}
 
 .chart {
     width: 100%;
     height: 40px;
     clear: both;
     background-color: #eee;
-}
-
-.details {
-    display: none;
-}
-
-.buttons {
-    margin-top: 20px;
 }
 
 .kpis .availability .chart {
@@ -24,26 +19,26 @@
 }
 
 .chart .ok {
-    background-color: #7dcc76;
+    background-color: var(--ok-color-bright);
 }
 
 .chart .ok:hover {
-    background-color: #54a94c;
+    background-color: var(--ok-color-dark);
 }
 
 .chart .nok {
-    background-color: #ef8775;
+    background-color: var(--nok-color-bright);
 }
 
 .chart .nok:hover {
-    background-color: #d0543e;
+    background-color: var(--nok-color-dark);
 }
 
 .chart .unknown {
-    background-color: #e3b5f2;
+    background-color: var(--unknown-color-bright);
 }
 
 .chart .unknown:hover {
-    background-color: #ad70c2;
+    background-color: var(--unknown-color-dark);
 }
 

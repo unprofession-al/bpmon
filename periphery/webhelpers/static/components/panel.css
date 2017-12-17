@@ -27,5 +27,5 @@
 }
 
 .notification {
-    background-color: var(--color-notify);
+    background-color: var(--notify-color);
 }
