@@ -17,8 +17,8 @@
 
 .panel-collapser {
     width: 100%;
-    background-color: var(--main-color-bright);
-    border-top: solid var(--main-color-brighter) 1px;
+    background-color: var(--main-color-brighter);
+    border-top: solid var(--main-color-bright) 1px;
     margin: 0 auto;
     text-align: center;
     height: 14px;
