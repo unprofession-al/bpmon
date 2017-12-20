@@ -21,6 +21,7 @@ func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, epin bpmon.
 	bps = bpin
 	r := mux.NewRouter().StrictSlash(true)
 
+	r.HandleFunc("/api/annotate", AnnotateEventHandler).Methods("POST")
 	r.HandleFunc("/api/bps/", ListBPsHandler).Methods("GET")
 	r.HandleFunc("/api/bps/{bp}", GetBPTimelineHandler).Methods("GET")
 	r.HandleFunc("/api/bps/{bp}/kpis", ListKPIsHandler).Methods("GET")

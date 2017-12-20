@@ -127,6 +127,26 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	wh.Respond(res, req, http.StatusOK, points)
 }
 
+func AnnotateEventHandler(res http.ResponseWriter, req *http.Request) {
+	id := ""
+	ids := req.URL.Query()["id"]
+
+	if len(ids) > 0 {
+		id = ids[0]
+	} else {
+		wh.Respond(res, req, http.StatusNotFound, "event not found")
+		return
+	}
+
+	event, err := ep.AnnotateEvent(id, "testannotation")
+	if err != nil {
+		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	wh.Respond(res, req, http.StatusOK, event)
+}
+
 func getStartEnd(req *http.Request) (start time.Time, end time.Time) {
 	end = time.Now()
 	start = end.AddDate(0, -1, 0)

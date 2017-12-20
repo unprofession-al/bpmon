@@ -193,7 +193,7 @@ var _escData = map[string]*_escFile{
 	"/index.html": {
 		local:   "static/index.html",
 		size:    3678,
-		modtime: 1513506450,
+		modtime: 1513516127,
 		compressed: `
 H4sIAAAAAAAC/5wX247btvJ9v4LhgXIBImk3OcA5zUoqkrpBCzTNItk+BEWxGEm0NDFFsuTYG6PovxfU
 xZZleeP0xRbnfh8yebR4/8Ptp5sfWU2NzC4S/8ckqCrlQnEPEFBmF4wxljSCgBU1WCco5b/dvg3/z8co
@@ -221,7 +221,7 @@ nG5ECFKewUGiMRIIVXUGcf/seICwgVN2Zv4B9/TZ9djpuH90xN1j8uKfAAAA//8+MnyDXg4AAA==
 	"/main.js": {
 		local:   "static/main.js",
 		size:    6645,
-		modtime: 1513359809,
+		modtime: 1513356783,
 		compressed: `
 H4sIAAAAAAAC/+xZX2/bOBJ/jj/FlAnOVO0oaYu7B7vKAdfmgG6x3WDTfQoCg7ZGNmuaFETKSdB6P/uC
 pGRLsuz8wS6Sh/qhoDnD4fz5zfAXN8nlxHAlgUtuaADfOwAAMx7jZcqlxIwGQ7d1RGM1yRcoTRAqSaE7
@@ -254,7 +254,7 @@ JkoIlmrMRvpuMVaClP8zY634kD5Ywman3TGTU4HHeQrrdWyby/X8XwEAAP///2/EzPUZAAA=
 	"/style.css": {
 		local:   "static/style.css",
 		size:    637,
-		modtime: 1513506078,
+		modtime: 1513516127,
 		compressed: `
 H4sIAAAAAAAC/4yO0WrDMAxF3/MVgjHYHhJS2JP7NUqs1MaeFBQ3XRn797HGpXiFJI++vvfoNJYS+jjB
 dwUAYP00RrwaYGE6Vj9V1fQONeXvi7fJGTi07evxFjjyJ5cMfLTj15L0kVANdJLcEnTYh5PKmW3dSxQ1

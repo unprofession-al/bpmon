@@ -1,15 +1,19 @@
 package bpmon
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/unprofession-al/bpmon/status"
 )
 
 type Event struct {
+	ID              string            `json:"id"`
 	Status          status.Status     `json:"status"`
 	Annotation      string            `json:"annotation"`
 	Start           time.Time         `json:"start"`
@@ -105,6 +109,8 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 			current.Tags[tag] = row[tag].(string)
 		}
 
+		current.setID()
+
 		out = append(out, current)
 	}
 
@@ -128,6 +134,8 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 			End:             end,
 			Tags:            spec,
 		}
+
+		complete.setID()
 		out = append([]Event{complete}, out...)
 	} else {
 		duration := earliestEvent.Sub(start).Seconds()
@@ -139,6 +147,7 @@ func (ep EventProvider) getEvents(spec map[string]string, start time.Time, end t
 			DurationPercent: durationPercent,
 			Tags:            make(map[string]string),
 		}
+		first.setID()
 		statusNumber, err := last["status"].(json.Number).Int64()
 		if err != nil {
 			return out, err
@@ -268,7 +277,86 @@ func (ep EventProvider) assumeEvents(spec map[string]string, start time.Time, en
 	for i, e := range events {
 		e.Duration = e.End.Sub(e.Start).Seconds()
 		e.DurationPercent = 100.0 / float64(duration) * e.Duration
+		e.setID()
 		events[i] = e
 	}
 	return events, nil
+}
+
+func (ep EventProvider) AnnotateEvent(id string, annotation string) (Event, error) {
+	e, err := ep.EventByID(id)
+	if err != nil {
+		return e, err
+	}
+
+	// get all fields of e, must not be as static
+	fields := []string{"annotation", "annotated", "status"}
+
+	where := []string{}
+	for key, value := range e.Tags {
+		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
+	}
+	where = append(where, fmt.Sprintf("time = %d", getInfluxTimestamp(e.Start)))
+
+	kind := getKind(e.Tags)
+	point, err := ep.GetOne(fields, kind, where, "")
+	if err != nil {
+		return e, err
+	}
+
+	fmt.Println(point)
+
+	e.Annotation = annotation
+
+	// update annotated flag
+	// persist
+	return e, err
+}
+
+const (
+	pairSeparator    = "="
+	tagSeparator     = ";"
+	timeTagSeparator = " "
+)
+
+func (e *Event) setID() {
+	var pairs []string
+	for key, value := range e.Tags {
+		pairs = append(pairs, key+pairSeparator+value)
+	}
+	s := fmt.Sprintf("%v%s%s", e.Start.UnixNano(), timeTagSeparator, strings.Join(pairs, tagSeparator))
+	e.ID = base64.RawURLEncoding.EncodeToString([]byte(s))
+}
+
+func (ep EventProvider) EventByID(id string) (Event, error) {
+	e := Event{
+		Tags: make(map[string]string),
+	}
+	data, err := base64.RawURLEncoding.DecodeString(id)
+	if err != nil {
+		return e, err
+	}
+
+	elements := strings.SplitN(string(data), timeTagSeparator, 2)
+	if len(elements) != 2 {
+		return e, errors.New("Malformed Event ID")
+	}
+
+	nanos, err := strconv.ParseInt(elements[0], 10, 64)
+	if err != nil {
+		return e, err
+	}
+
+	e.Start = time.Unix(0, nanos)
+
+	tags := strings.Split(elements[1], tagSeparator)
+	for _, pair := range tags {
+		touple := strings.SplitN(pair, pairSeparator, 2)
+		if len(touple) != 2 {
+			return e, errors.New("Malformed Event ID")
+		}
+		e.Tags[touple[0]] = touple[1]
+	}
+
+	return e, nil
 }
