@@ -43,7 +43,8 @@ var writeCmd = &cobra.Command{
 			if c.Persistence.GetLastStatus {
 				rs.AddPreviousStatus(p, c.Persistence.SaveOK)
 			}
-			err = p.Write(rs)
+			points := rs.GetPoints(c.Persistence.SaveOK)
+			err = p.Write(points)
 			if err != nil {
 				log.Fatal(err)
 			}

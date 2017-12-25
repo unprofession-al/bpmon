@@ -98,7 +98,7 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	return setOut, !keep
 }
 
-func (rs ResultSet) AsInflux(saveOK []string) []persistence.Point {
+func (rs ResultSet) GetPoints(saveOK []string) []persistence.Point {
 	parentTags := make(map[string]string)
 	return rs.toPoints(parentTags, saveOK)
 }

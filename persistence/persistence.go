@@ -40,8 +40,7 @@ func New(conf Conf) (Persistence, error) {
 type Persistence interface {
 	GetOne([]string, string, []string, string) (map[string]interface{}, error)
 	GetAll([]string, string, []string, string) ([]map[string]interface{}, error)
-	WritePoints([]Point, bool) error
-	Write(in Influxable) error
+	Write([]Point) error
 }
 
 type Point struct {
@@ -49,8 +48,4 @@ type Point struct {
 	Series    string                 `json:"series"`
 	Tags      map[string]string      `json:"tags"`
 	Fields    map[string]interface{} `json:"fields"`
-}
-
-type Influxable interface {
-	AsInflux([]string) []Point
 }

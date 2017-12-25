@@ -332,7 +332,7 @@ func (ep EventProvider) AnnotateEvent(id string, annotation string) (Event, erro
 	e.Annotation = annotation
 	toPersist.Fields["annotation"] = annotation
 	toPersist.Fields["annotated"] = true
-	err = ep.WritePoints([]persistence.Point{toPersist}, true)
+	err = ep.Write([]persistence.Point{toPersist})
 
 	return e, err
 }

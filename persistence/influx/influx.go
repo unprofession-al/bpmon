@@ -47,7 +47,7 @@ func Setup(conf persistence.Conf) (persistence.Persistence, error) {
 	return cli, err
 }
 
-func (i Influx) Write(in persistence.Influxable) error {
+func (i Influx) Write(points []persistence.Point) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  i.database,
 		Precision: "s",
@@ -55,38 +55,12 @@ func (i Influx) Write(in persistence.Influxable) error {
 	if err != nil {
 		return err
 	}
-
-	points := in.AsInflux(i.saveOK)
 
 	for _, p := range points {
 		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
 		bp.AddPoint(pt)
 	}
 	if i.printQueries {
-		for _, p := range bp.Points() {
-			fmt.Println(p)
-		}
-	} else {
-		err = i.cli.Write(bp)
-	}
-
-	return err
-}
-
-func (i Influx) WritePoints(points []persistence.Point, debug bool) error {
-	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  i.database,
-		Precision: "s",
-	})
-	if err != nil {
-		return err
-	}
-
-	for _, p := range points {
-		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
-		bp.AddPoint(pt)
-	}
-	if debug {
 		for _, p := range bp.Points() {
 			fmt.Println(p)
 		}
