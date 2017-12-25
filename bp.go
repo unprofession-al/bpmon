@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
 )
@@ -39,7 +40,7 @@ type BP struct {
 	Responsible      string       `yaml:"responsible"`
 }
 
-func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
+func (bp BP) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) ResultSet {
 	rs := ResultSet{
 		Kind:        IdentifierBusinessProcess,
 		Responsible: bp.Responsible,
@@ -55,7 +56,7 @@ func (bp BP) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 		if k.Responsible == "" {
 			k.Responsible = bp.Responsible
 		}
-		go func(k KPI, ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) {
+		go func(k KPI, ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) {
 			childRs := k.Status(ssp, pp, r)
 			ch <- &childRs
 		}(k, ssp, pp, r)
@@ -92,7 +93,7 @@ type KPI struct {
 	Responsible string
 }
 
-func (k KPI) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
+func (k KPI) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) ResultSet {
 	rs := ResultSet{
 		Kind:        IdentifierKeyPerformanceIndicator,
 		Responsible: k.Responsible,
@@ -108,7 +109,7 @@ func (k KPI) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.R
 		if s.Responsible == "" {
 			s.Responsible = k.Responsible
 		}
-		go func(s Service, ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) {
+		go func(s Service, ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) {
 			childRs := s.Status(ssp, pp, r)
 			ch <- &childRs
 		}(s, ssp, pp, r)
@@ -152,7 +153,7 @@ type Service struct {
 	Responsible string
 }
 
-func (s Service) Status(ssp ServiceStatusProvider, pp PersistenceProvider, r rules.Rules) ResultSet {
+func (s Service) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := ResultSet{
 		Name:        name,

@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/periphery/dashboard"
+	"github.com/unprofession-al/bpmon/persistence"
+	_ "github.com/unprofession-al/bpmon/persistence/influx"
 )
 
 var dashboardCmd = &cobra.Command{
@@ -20,8 +22,8 @@ var dashboardCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		infl, _ := bpmon.NewInflux(c.Influx)
-		ep := bpmon.NewEventProvider(infl, c.Influx.SaveOK, c.Influx.GetLastStatus)
+		p, _ := persistence.New(c.Persistence)
+		ep := bpmon.NewEventProvider(p, c.Persistence.SaveOK, c.Persistence.GetLastStatus)
 
 		router, err := dashboard.Setup(c.Dashboard, bp, ep)
 		if err != nil {

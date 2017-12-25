@@ -1,4 +1,4 @@
-package bpmon
+package persistence
 
 import "errors"
 

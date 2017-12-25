@@ -1,28 +1,14 @@
-package bpmon
+package influx
 
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
-	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
+	"github.com/unprofession-al/bpmon/persistence"
 )
-
-type InfluxConf struct {
-	Connection struct {
-		Server  string        `yaml:"server"`
-		Port    int           `yaml:"port"`
-		Pass    string        `yaml:"pass"`
-		User    string        `yaml:"user"`
-		Proto   string        `yaml:"proto"`
-		Timeout time.Duration `yaml:"timeout"`
-	} `yaml:"connection"`
-	SaveOK        []string `yaml:"save_ok"`
-	Database      string   `yaml:"database"`
-	GetLastStatus bool     `yaml:"get_last_status"`
-	PrintQueries  bool     `yaml:"print_queries"`
-}
 
 type Influx struct {
 	cli          client.Client
@@ -31,35 +17,37 @@ type Influx struct {
 	printQueries bool
 }
 
-type Influxable interface {
-	AsInflux([]string) []Point
+func init() {
+	persistence.Register("influx", Setup)
 }
 
-type Point struct {
-	Timestamp time.Time              `json:"timestamp"`
-	Series    string                 `json:"series"`
-	Tags      map[string]string      `json:"tags"`
-	Fields    map[string]interface{} `json:"fields"`
-}
+func Setup(conf persistence.Conf) (persistence.Persistence, error) {
+	u, err := url.Parse(conf.Connection)
+	if err != nil {
+		panic(err)
+	}
+	database := strings.TrimLeft(u.Path, "/")
+	username := u.User.Username()
+	password, _ := u.User.Password()
 
-func NewInflux(conf InfluxConf) (Influx, error) {
-	addr := fmt.Sprintf("%s://%s:%d", conf.Connection.Proto, conf.Connection.Server, conf.Connection.Port)
+	addr := fmt.Sprintf("%s://%s", u.Scheme, u.Host)
 	c, err := client.NewHTTPClient(client.HTTPConfig{
 		Addr:     addr,
-		Username: conf.Connection.User,
-		Password: conf.Connection.Pass,
-		Timeout:  conf.Connection.Timeout,
+		Username: username,
+		Password: password,
+		Timeout:  conf.Timeout,
 	})
 	cli := Influx{
 		cli:          c,
 		saveOK:       conf.SaveOK,
-		database:     conf.Database,
-		printQueries: conf.PrintQueries,
+		database:     database,
+		printQueries: conf.Debug,
 	}
+
 	return cli, err
 }
 
-func (i Influx) Write(in Influxable, debug bool) error {
+func (i Influx) Write(in persistence.Influxable) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  i.database,
 		Precision: "s",
@@ -74,7 +62,7 @@ func (i Influx) Write(in Influxable, debug bool) error {
 		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
 		bp.AddPoint(pt)
 	}
-	if debug {
+	if i.printQueries {
 		for _, p := range bp.Points() {
 			fmt.Println(p)
 		}
@@ -84,7 +72,8 @@ func (i Influx) Write(in Influxable, debug bool) error {
 
 	return err
 }
-func (i Influx) WritePoints(points []Point, debug bool) error {
+
+func (i Influx) WritePoints(points []persistence.Point, debug bool) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  i.database,
 		Precision: "s",
@@ -212,8 +201,4 @@ func prependTimeIfMissing(fields []string) []string {
 		}
 	}
 	return append([]string{"time"}, fields...)
-}
-
-func getInfluxTimestamp(t time.Time) int64 {
-	return t.UnixNano()
 }

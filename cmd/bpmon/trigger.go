@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/persistence"
+	_ "github.com/unprofession-al/bpmon/persistence/influx"
 	"github.com/unprofession-al/bpmon/status"
 )
 
@@ -35,13 +37,13 @@ var triggerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		infl, _ := bpmon.NewInflux(c.Influx)
+		p, _ := persistence.New(c.Persistence)
 		stripBy := []status.Status{status.Unknown, status.Ok}
 		var sets []bpmon.ResultSet
 		for _, bp := range b {
 			rs := bp.Status(i, nil, r)
-			if c.Influx.GetLastStatus {
-				rs.AddPreviousStatus(infl, c.Influx.SaveOK)
+			if c.Persistence.GetLastStatus {
+				rs.AddPreviousStatus(p, c.Persistence.SaveOK)
 			}
 			set, stripped := rs.StripByStatus(stripBy)
 			if !stripped {

@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/persistence"
+	_ "github.com/unprofession-al/bpmon/persistence/influx"
 )
 
 var (
@@ -36,11 +38,11 @@ var runCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		infl, _ := bpmon.NewInflux(c.Influx)
+		p, _ := persistence.New(c.Persistence)
 		for _, bp := range b {
-			rs := bp.Status(i, infl, r)
-			if c.Influx.GetLastStatus {
-				rs.AddPreviousStatus(infl, c.Influx.SaveOK)
+			rs := bp.Status(i, p, r)
+			if c.Persistence.GetLastStatus {
+				rs.AddPreviousStatus(p, c.Persistence.SaveOK)
 			}
 			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues, printResponsible))
 		}

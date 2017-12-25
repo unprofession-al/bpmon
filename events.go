@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/status"
 )
 
@@ -24,12 +25,12 @@ type Event struct {
 }
 
 type EventProvider struct {
-	PersistenceProvider
+	persistence.Persistence
 	saveOk        []string
 	getLastStatus bool
 }
 
-func NewEventProvider(pp PersistenceProvider, saveOk []string, getLastStatus bool) EventProvider {
+func NewEventProvider(pp persistence.Persistence, saveOk []string, getLastStatus bool) EventProvider {
 	return EventProvider{pp, saveOk, getLastStatus}
 }
 
@@ -301,7 +302,7 @@ func (ep EventProvider) AnnotateEvent(id string, annotation string) (Event, erro
 		return e, err
 	}
 
-	toPersist := Point{
+	toPersist := persistence.Point{
 		Series: kind,
 		Tags:   make(map[string]string),
 		Fields: make(map[string]interface{}),
@@ -331,7 +332,7 @@ func (ep EventProvider) AnnotateEvent(id string, annotation string) (Event, erro
 	e.Annotation = annotation
 	toPersist.Fields["annotation"] = annotation
 	toPersist.Fields["annotated"] = true
-	err = ep.WritePoints([]Point{toPersist}, true)
+	err = ep.WritePoints([]persistence.Point{toPersist}, true)
 
 	return e, err
 }

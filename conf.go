@@ -8,6 +8,7 @@ import (
 
 	"github.com/unprofession-al/bpmon/configs"
 	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/rules"
 
 	"gopkg.in/yaml.v2"
@@ -15,7 +16,7 @@ import (
 
 type conf struct {
 	Icinga         icinga.IcingaConf     `yaml:"icinga"`
-	Influx         InfluxConf            `yaml:"influx"`
+	Persistence    persistence.Conf      `yaml:"persistence"`
 	Availabilities AvailabilitiesConf    `yaml:"availabilities"`
 	Trigger        Trigger               `yaml:"trigger"`
 	Rules          rules.Rules           `yaml:"rules"`
