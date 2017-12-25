@@ -30,6 +30,9 @@ function loadBPs() {
                 loadKPIs(key);
             }
         }
+    })
+    .fail(function() {
+        $("<div class='notification panel'>Error while listing business processes: API could not be reached...</div>").hide().appendTo("#data").fadeIn("slow");
     });
 }
 
@@ -80,6 +83,9 @@ function loadBPEvents(bpid) {
                 $("#" + bpid + "_availability").text(out);
             }
         }
+    })
+    .fail(function(jqxhr, textStatus, error) {
+        $("<div class='notification panel'>Error while fetching events for business processes " + bpid + ": " + error + "</div>").hide().appendTo("#data").fadeIn("slow");
     });
 }
 
