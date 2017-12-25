@@ -289,9 +289,6 @@ func (ep EventProvider) AnnotateEvent(id string, annotation string) (Event, erro
 		return e, err
 	}
 
-	// get all fields of e, must not be as static
-	fields := []string{"annotation", "annotated", "status"}
-
 	where := []string{}
 	for key, value := range e.Tags {
 		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
@@ -299,17 +296,43 @@ func (ep EventProvider) AnnotateEvent(id string, annotation string) (Event, erro
 	where = append(where, fmt.Sprintf("time = %d", getInfluxTimestamp(e.Start)))
 
 	kind := getKind(e.Tags)
-	point, err := ep.GetOne(fields, kind, where, "")
+	point, err := ep.GetOne([]string{"*"}, kind, where, "")
 	if err != nil {
 		return e, err
 	}
 
-	fmt.Println(point)
+	toPersist := Point{
+		Series: kind,
+		Tags:   make(map[string]string),
+		Fields: make(map[string]interface{}),
+	}
+	for name, value := range point {
+		isTag := false
+		for tagName, _ := range e.Tags {
+			if name == tagName {
+				toPersist.Tags[name] = value.(string)
+				isTag = true
+				continue
+			}
+		}
+		if isTag {
+			continue
+		}
+		if name == "time" {
+			toPersist.Timestamp, err = time.Parse(time.RFC3339, value.(string))
+			if err != nil {
+				return e, err
+			}
+			continue
+		}
+		toPersist.Fields[name] = value
+	}
 
 	e.Annotation = annotation
+	toPersist.Fields["annotation"] = annotation
+	toPersist.Fields["annotated"] = true
+	err = ep.WritePoints([]Point{toPersist}, true)
 
-	// update annotated flag
-	// persist
 	return e, err
 }
 

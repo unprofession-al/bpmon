@@ -18,25 +18,21 @@ type InfluxConf struct {
 		Proto   string        `yaml:"proto"`
 		Timeout time.Duration `yaml:"timeout"`
 	} `yaml:"connection"`
-	SaveOK        []string               `yaml:"save_ok"`
-	Database      string                 `yaml:"database"`
-	GetLastStatus bool                   `yaml:"get_last_status"`
-	DefaultTags   map[string]string      `yaml:"default_tags"`
-	DefaultFields map[string]interface{} `yaml:"default_fields"`
-	PrintQueries  bool                   `yaml:"print_queries"`
+	SaveOK        []string `yaml:"save_ok"`
+	Database      string   `yaml:"database"`
+	GetLastStatus bool     `yaml:"get_last_status"`
+	PrintQueries  bool     `yaml:"print_queries"`
 }
 
 type Influx struct {
-	cli           client.Client
-	saveOK        []string
-	database      string
-	defaultTags   map[string]string
-	defaultFields map[string]interface{}
-	printQueries  bool
+	cli          client.Client
+	saveOK       []string
+	database     string
+	printQueries bool
 }
 
 type Influxable interface {
-	AsInflux([]string, map[string]string, map[string]interface{}) []Point
+	AsInflux([]string) []Point
 }
 
 type Point struct {
@@ -55,12 +51,10 @@ func NewInflux(conf InfluxConf) (Influx, error) {
 		Timeout:  conf.Connection.Timeout,
 	})
 	cli := Influx{
-		cli:           c,
-		saveOK:        conf.SaveOK,
-		defaultTags:   conf.DefaultTags,
-		defaultFields: conf.DefaultFields,
-		database:      conf.Database,
-		printQueries:  conf.PrintQueries,
+		cli:          c,
+		saveOK:       conf.SaveOK,
+		database:     conf.Database,
+		printQueries: conf.PrintQueries,
 	}
 	return cli, err
 }
@@ -74,7 +68,30 @@ func (i Influx) Write(in Influxable, debug bool) error {
 		return err
 	}
 
-	points := in.AsInflux(i.saveOK, i.defaultTags, i.defaultFields)
+	points := in.AsInflux(i.saveOK)
+
+	for _, p := range points {
+		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
+		bp.AddPoint(pt)
+	}
+	if debug {
+		for _, p := range bp.Points() {
+			fmt.Println(p)
+		}
+	} else {
+		err = i.cli.Write(bp)
+	}
+
+	return err
+}
+func (i Influx) WritePoints(points []Point, debug bool) error {
+	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
+		Database:  i.database,
+		Precision: "s",
+	})
+	if err != nil {
+		return err
+	}
 
 	for _, p := range points {
 		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
@@ -111,6 +128,12 @@ func (i Influx) GetOne(fields []string, from string, where []string, additional 
 	}
 	if response.Error() != nil {
 		return out, response.Error()
+	}
+
+	if len(fields) == 1 && fields[0] == "*" {
+		if len(response.Results) >= 1 && len(response.Results[0].Series) >= 1 {
+			fields = response.Results[0].Series[0].Columns
+		}
 	}
 
 	if len(response.Results) >= 1 &&
@@ -151,6 +174,12 @@ func (i Influx) GetAll(fields []string, from string, where []string, additional 
 		return out, response.Error()
 	}
 
+	if len(fields) == 1 && fields[0] == "*" {
+		if len(response.Results) >= 1 && len(response.Results[0].Series) >= 1 {
+			fields = response.Results[0].Series[0].Columns
+		}
+	}
+
 	if len(response.Results) >= 1 &&
 		len(response.Results[0].Series) >= 1 &&
 		len(response.Results[0].Series[0].Values) >= 1 {
@@ -170,6 +199,9 @@ func (i Influx) GetAll(fields []string, from string, where []string, additional 
 
 func prependTimeIfMissing(fields []string) []string {
 	for i, field := range fields {
+		if field == "*" {
+			return []string{"*"}
+		}
 		if field == "time" {
 			if i != 0 {
 				tmp := fields[0]

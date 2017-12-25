@@ -22,6 +22,7 @@ type ResultSet struct {
 	Status        status.Status
 	Was           status.Status
 	WasChecked    bool
+	Annotated     bool
 	StatusChanged bool
 	Err           error
 	Output        string
@@ -96,11 +97,12 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	return setOut, !keep
 }
 
-func (rs ResultSet) AsInflux(saveOK []string, defaultTags map[string]string, defaultFields map[string]interface{}) []Point {
-	return rs.toPoints(defaultTags, defaultFields, saveOK)
+func (rs ResultSet) AsInflux(saveOK []string) []Point {
+	parentTags := make(map[string]string)
+	return rs.toPoints(parentTags, saveOK)
 }
 
-func (rs ResultSet) toPoints(parentTags map[string]string, defaultFields map[string]interface{}, saveOK []string) []Point {
+func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []Point {
 	var out []Point
 
 	tags := make(map[string]string)
@@ -111,10 +113,8 @@ func (rs ResultSet) toPoints(parentTags map[string]string, defaultFields map[str
 
 	if rs.Status != status.Ok || stringInSlice(rs.Kind, saveOK) {
 		fields := map[string]interface{}{
-			"status": rs.Status.Int(),
-		}
-		for key, value := range defaultFields {
-			fields[key] = value
+			"status":    rs.Status.Int(),
+			"annotated": rs.Annotated,
 		}
 		for key, value := range rs.Vals {
 			fields[key] = value
@@ -139,7 +139,7 @@ func (rs ResultSet) toPoints(parentTags map[string]string, defaultFields map[str
 	}
 
 	for _, childRs := range rs.Children {
-		out = append(out, childRs.toPoints(tags, defaultFields, saveOK)...)
+		out = append(out, childRs.toPoints(tags, saveOK)...)
 	}
 	return out
 }

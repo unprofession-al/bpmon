@@ -138,7 +138,17 @@ func AnnotateEventHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	event, err := ep.AnnotateEvent(id, "testannotation")
+	annotation := ""
+	annotations := req.URL.Query()["annotation"]
+
+	if len(annotations) > 0 {
+		annotation = annotations[0]
+	} else {
+		wh.Respond(res, req, http.StatusBadRequest, "no annotation provided")
+		return
+	}
+
+	event, err := ep.AnnotateEvent(id, annotation)
 	if err != nil {
 		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
