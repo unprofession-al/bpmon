@@ -40,17 +40,17 @@ type BP struct {
 	Responsible      string       `yaml:"responsible"`
 }
 
-func (bp BP) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) ResultSet {
-	rs := ResultSet{
+func (bp BP) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+	rs := persistence.ResultSet{
 		Kind:        IdentifierBusinessProcess,
 		Responsible: bp.Responsible,
 		Name:        bp.Name,
 		Id:          bp.Id,
-		Children:    []*ResultSet{},
+		Children:    []*persistence.ResultSet{},
 		Vals:        make(map[string]bool),
 	}
 
-	ch := make(chan *ResultSet)
+	ch := make(chan *persistence.ResultSet)
 	var calcValues []bool
 	for _, k := range bp.Kpis {
 		if k.Responsible == "" {
@@ -93,17 +93,17 @@ type KPI struct {
 	Responsible string
 }
 
-func (k KPI) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) ResultSet {
-	rs := ResultSet{
+func (k KPI) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+	rs := persistence.ResultSet{
 		Kind:        IdentifierKeyPerformanceIndicator,
 		Responsible: k.Responsible,
 		Name:        k.Name,
 		Id:          k.Id,
-		Children:    []*ResultSet{},
+		Children:    []*persistence.ResultSet{},
 		Vals:        make(map[string]bool),
 	}
 
-	ch := make(chan *ResultSet)
+	ch := make(chan *persistence.ResultSet)
 	var calcValues []bool
 	for _, s := range k.Services {
 		if s.Responsible == "" {
@@ -153,9 +153,9 @@ type Service struct {
 	Responsible string
 }
 
-func (s Service) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) ResultSet {
+func (s Service) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
-	rs := ResultSet{
+	rs := persistence.ResultSet{
 		Name:        name,
 		Responsible: s.Responsible,
 		Id:          name,

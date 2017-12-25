@@ -1,6 +1,10 @@
-package persistence
+package bpmon
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/unprofession-al/bpmon/persistence"
+)
 
 type PPMock struct{}
 
@@ -40,4 +44,7 @@ func (pp PPMock) GetAll(fields []string, from string, where []string, additional
 		out = append(out, set)
 	}
 	return out, nil
+}
+func (pp PPMock) Write(p []persistence.Point) error {
+	return nil
 }

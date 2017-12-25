@@ -39,7 +39,7 @@ var triggerCmd = &cobra.Command{
 
 		p, _ := persistence.New(c.Persistence)
 		stripBy := []status.Status{status.Unknown, status.Ok}
-		var sets []bpmon.ResultSet
+		var sets []persistence.ResultSet
 		for _, bp := range b {
 			rs := bp.Status(i, nil, r)
 			if c.Persistence.GetLastStatus {

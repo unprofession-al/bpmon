@@ -30,6 +30,11 @@ type EventProvider struct {
 	getLastStatus bool
 }
 
+//TODO: Rename or delete
+func getInfluxTimestamp(t time.Time) int64 {
+	return t.UnixNano()
+}
+
 func NewEventProvider(pp persistence.Persistence, saveOk []string, getLastStatus bool) EventProvider {
 	return EventProvider{pp, saveOk, getLastStatus}
 }

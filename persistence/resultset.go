@@ -1,4 +1,4 @@
-package bpmon
+package persistence
 
 import (
 	"encoding/json"
@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/mgutz/ansi"
-	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/status"
 )
 
@@ -98,13 +97,13 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	return setOut, !keep
 }
 
-func (rs ResultSet) GetPoints(saveOK []string) []persistence.Point {
+func (rs ResultSet) GetPoints(saveOK []string) []Point {
 	parentTags := make(map[string]string)
 	return rs.toPoints(parentTags, saveOK)
 }
 
-func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []persistence.Point {
-	var out []persistence.Point
+func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []Point {
+	var out []Point
 
 	tags := make(map[string]string)
 	for k, v := range parentTags {
@@ -130,7 +129,7 @@ func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []pe
 			fields["was"] = rs.Was.Int()
 			fields["changed"] = rs.StatusChanged
 		}
-		pt := persistence.Point{
+		pt := Point{
 			Timestamp: rs.At,
 			Series:    rs.Kind,
 			Tags:      tags,
@@ -145,12 +144,12 @@ func (rs ResultSet) toPoints(parentTags map[string]string, saveOK []string) []pe
 	return out
 }
 
-func (rs *ResultSet) AddPreviousStatus(pp persistence.Persistence, saveOK []string) {
+func (rs *ResultSet) AddPreviousStatus(pp Persistence, saveOK []string) {
 	tags := make(map[string]string)
 	rs.previousStatus(tags, pp, saveOK)
 }
 
-func (rs *ResultSet) previousStatus(parentTags map[string]string, pp persistence.Persistence, saveOK []string) {
+func (rs *ResultSet) previousStatus(parentTags map[string]string, pp Persistence, saveOK []string) {
 	tags := make(map[string]string)
 	for k, v := range parentTags {
 		tags[k] = v
@@ -182,7 +181,7 @@ func stringInSlice(a string, list []string) bool {
 	return false
 }
 
-func getLastStatus(pp persistence.Persistence, kind string, tags map[string]string) (status.Status, error) {
+func getLastStatus(pp Persistence, kind string, tags map[string]string) (status.Status, error) {
 	var where []string
 	for key, value := range tags {
 		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
@@ -213,8 +212,4 @@ func getLastStatus(pp persistence.Persistence, kind string, tags map[string]stri
 	}
 
 	return status.FromInt64(statusCode)
-}
-
-func getInfluxTimestamp(t time.Time) int64 {
-	return t.UnixNano()
 }
