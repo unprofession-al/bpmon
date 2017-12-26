@@ -87,11 +87,11 @@ func (bp BP) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rul
 }
 
 type KPI struct {
-	Name        string
-	Id          string
-	Operation   string
-	Services    []Service
-	Responsible string
+	Name        string    `yaml:"name"`
+	Id          string    `yaml:"id"`
+	Operation   string    `yaml:"operation"`
+	Services    []Service `yaml:"services"`
+	Responsible string    `yaml:"responsible"`
 }
 
 func (k KPI) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
@@ -142,16 +142,10 @@ func (k KPI) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rul
 	return rs
 }
 
-type SvcResult struct {
-	At   time.Time
-	Msg  string
-	Vals map[string]bool
-}
-
 type Service struct {
-	Host        string
-	Service     string
-	Responsible string
+	Host        string `yaml:"host"`
+	Service     string `yaml:"service"`
+	Responsible string `yaml:"responsible"`
 }
 
 func (s Service) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
@@ -162,17 +156,14 @@ func (s Service) Status(chk checker.Checker, pp persistence.Persistence, r rules
 		Id:          name,
 		Kind:        IdentifierService,
 	}
-	at, msg, vals, err := chk.Status(s.Host, s.Service)
-	rs.Err = err
-	rs.At = at
-	rs.Output = msg
-	rs.Vals = vals
-	st, err := r.Analyze(vals)
+	result := chk.Status(s.Host, s.Service)
+	rs.Err = result.Error
+	rs.At = result.Timestamp
+	rs.Output = result.Message
+	rs.Vals = result.Values
+	st, _ := r.Analyze(result.Values)
 	rs.Status = st
 	rs.Was = status.Unknown
 	rs.StatusChanged = false
-	if rs.Err != nil {
-		return rs
-	}
 	return rs
 }

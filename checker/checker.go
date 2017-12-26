@@ -13,6 +13,17 @@ var (
 	c   = make(map[string]func(Conf) (Checker, error))
 )
 
+type Conf struct {
+	Kind       string `yaml:"kind"`
+	Connection string `yaml:"connection"`
+}
+
+type Checker interface {
+	Status(string, string) Result
+	Values() []string
+	DefaultRules() rules.Rules
+}
+
 func Register(name string, setupFunc func(Conf) (Checker, error)) {
 	cMu.Lock()
 	defer cMu.Unlock()
@@ -30,13 +41,9 @@ func New(conf Conf) (Checker, error) {
 	return setupFunc(conf)
 }
 
-type Conf struct {
-	Kind       string `yaml:"kind"`
-	Connection string `yaml:"connection"`
-}
-
-type Checker interface {
-	Status(string, string) (time.Time, string, map[string]bool, error)
-	Values() []string
-	DefaultRules() rules.Rules
+type Result struct {
+	Timestamp time.Time
+	Message   string
+	Values    map[string]bool
+	Error     error
 }

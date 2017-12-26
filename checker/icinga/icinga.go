@@ -115,15 +115,20 @@ func (i Icinga) Values() []string {
 	return out
 }
 
-func (i Icinga) Status(host string, service string) (at time.Time, msg string, vals map[string]bool, err error) {
-	at = time.Now()
-	msg = ""
-	vals = icingaDefaultFlags()
+func (i Icinga) Status(host string, service string) checker.Result {
+	r := checker.Result{
+		Timestamp: time.Now(),
+		Values:    icingaDefaultFlags(),
+	}
 
 	response, err := i.fecher.Fetch(host, service)
+	if err != nil {
+		r.Error = err
+		return r
+	}
 
-	at, msg, vals, err = response.status()
-	return
+	r.Timestamp, r.Message, r.Values, r.Error = response.status()
+	return r
 }
 
 // IcingaStatusResult describes the results returned by the icinga
