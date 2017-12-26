@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/unprofession-al/bpmon/checker"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
 )
@@ -12,7 +13,7 @@ type CheckerMock struct{}
 
 func (chk CheckerMock) Status(host, service string) checker.Result {
 	out := checker.Result{
-		Timestamp: time.Now()
+		Timestamp: time.Now(),
 	}
 
 	out.Values = map[string]bool{
