@@ -88,7 +88,7 @@ var SvcTestSets = []svcTestSet{
 
 func TestServices(t *testing.T) {
 	pp := PPMock{}
-	chk := CheckMock{}
+	chk := CheckerMock{}
 	for _, s := range SvcTestSets {
 		rs := s.svc.Status(chk, pp, chk.DefaultRules())
 		if s.errExpected && rs.Err == nil {
