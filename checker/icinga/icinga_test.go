@@ -98,14 +98,14 @@ func (i IcingaMock) Fetch(host, service string) (IcingaStatusResponse, error) {
 func TestStatusInterpreter(t *testing.T) {
 	i := Icinga{fecher: IcingaMock{endpoints: TestSets}}
 	for _, test := range TestSets {
-		_, output, vals, err := i.Status(test.host, test.service)
-		if err != nil {
+		result := i.Status(test.host, test.service)
+		if result.Error != nil {
 			t.Errorf("Error returned: %s", err.Error())
 		}
-		if output != test.output {
+		if result.Message != test.output {
 			t.Errorf("Failed")
 		}
-		eq := reflect.DeepEqual(vals, test.result)
+		eq := reflect.DeepEqual(result.Values, test.result)
 		if !eq {
 			t.Errorf("Results do not match: '%v' vs. '%v'", vals, test.result)
 		}
