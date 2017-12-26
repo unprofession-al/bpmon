@@ -1,9 +1,11 @@
 package bpmon
 
 import (
+	"errors"
 	"testing"
 	"time"
 
+	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/status"
 )
 
@@ -44,10 +46,10 @@ var BpTestSets = []bpTestSet{
 }
 
 func TestBusinessProcess(t *testing.T) {
-	ssp := SSPMock{}
+	chk := CheckerMock{}
 	pp := PPMock{}
 	for _, bp := range BpTestSets {
-		rs := bp.bp.Status(ssp, pp, ssp.DefaultRules())
+		rs := bp.bp.Status(chk, pp, chk.DefaultRules())
 		if rs.Status != bp.status {
 			t.Errorf("Expected status to be '%s', got '%s'", bp.status, rs.Status)
 		}
@@ -86,9 +88,9 @@ var SvcTestSets = []svcTestSet{
 
 func TestServices(t *testing.T) {
 	pp := PPMock{}
-	ssp := SSPMock{}
+	chk := CheckMock{}
 	for _, s := range SvcTestSets {
-		rs := s.svc.Status(ssp, pp, ssp.DefaultRules())
+		rs := s.svc.Status(chk, pp, chk.DefaultRules())
 		if s.errExpected && rs.Err == nil {
 			t.Errorf("Error expected but got nil")
 		} else if !s.errExpected && rs.Err != nil {
@@ -98,4 +100,47 @@ func TestServices(t *testing.T) {
 			t.Errorf("Expected status to be '%s', got '%s'", s.status, rs.Status)
 		}
 	}
+}
+
+type PPMock struct{}
+
+func (pp PPMock) GetOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+	status := 0
+
+	if len(fields) < 1 || len(where) < 1 {
+		return out, errors.New("Error occured")
+	}
+	switch where[0] {
+	case "ok":
+		status = 0
+	case "critical":
+		status = 1
+	case "error":
+		return out, errors.New("Error occured")
+	default:
+		status = 2
+	}
+
+	for _, field := range fields {
+		out[field] = status
+	}
+	return out, nil
+}
+
+func (pp PPMock) GetAll(fields []string, from string, where []string, additional string) ([]map[string]interface{}, error) {
+	var out []map[string]interface{}
+
+	testset := []string{"foo", "bar", "bla"}
+	for _, test := range testset {
+		set := make(map[string]interface{})
+		for _, field := range fields {
+			set[field] = test
+		}
+		out = append(out, set)
+	}
+	return out, nil
+}
+func (pp PPMock) Write(p []persistence.Point) error {
+	return nil
 }

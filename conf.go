@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/unprofession-al/bpmon/checker"
 	"github.com/unprofession-al/bpmon/configs"
-	"github.com/unprofession-al/bpmon/icinga"
 	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/rules"
 
@@ -15,7 +15,7 @@ import (
 )
 
 type conf struct {
-	Icinga         icinga.IcingaConf     `yaml:"icinga"`
+	Checker        checker.Conf          `yaml:"checker"`
 	Persistence    persistence.Conf      `yaml:"persistence"`
 	Availabilities AvailabilitiesConf    `yaml:"availabilities"`
 	Trigger        Trigger               `yaml:"trigger"`

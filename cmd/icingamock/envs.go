@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/checker/icinga"
 	yaml "gopkg.in/yaml.v2"
 )
 

@@ -11,9 +11,36 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/unprofession-al/bpmon/checker"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
 )
+
+func init() {
+	checker.Register("icinga", Setup)
+}
+
+func Setup(conf checker.Conf) (checker.Checker, error) {
+	u, err := url.Parse(conf.Connection)
+	if err != nil {
+		panic(err)
+	}
+	username := u.User.Username()
+	password, _ := u.User.Password()
+
+	baseUrl := fmt.Sprintf("%s://%s%s/v1", u.Scheme, u.Host, u.Path)
+	fetcher := IcingaAPI{
+		baseUrl: baseUrl,
+		pass:    password,
+		user:    username,
+	}
+
+	i := Icinga{
+		fecher: fetcher,
+	}
+
+	return i, nil
+}
 
 const (
 	IcingaFlagOK                = "ok"
@@ -40,26 +67,6 @@ type Icinga struct {
 
 type IcingaFetcher interface {
 	Fetch(string, string) (IcingaStatusResponse, error)
-}
-
-func NewIcinga(conf IcingaConf, additionalRules rules.Rules) (Icinga, error) {
-	var baseUrl string
-	if conf.Path != "" {
-		baseUrl = fmt.Sprintf("%s://%s:%d/%s/v1", conf.Proto, conf.Server, conf.Port, conf.Path)
-	} else {
-		baseUrl = fmt.Sprintf("%s://%s:%d/v1", conf.Proto, conf.Server, conf.Port)
-	}
-	fetcher := IcingaAPI{
-		baseUrl: baseUrl,
-		pass:    conf.Pass,
-		user:    conf.User,
-	}
-
-	i := Icinga{
-		fecher: fetcher,
-	}
-
-	return i, nil
 }
 
 func (i Icinga) DefaultRules() rules.Rules {

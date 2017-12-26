@@ -8,9 +8,9 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
-type SSPMock struct{}
+type CheckerMock struct{}
 
-func (ssp SSPMock) Status(host, service string) (time.Time, string, map[string]bool, error) {
+func (chk CheckerMock) Status(host, service string) (time.Time, string, map[string]bool, error) {
 	vals := map[string]bool{
 		"good":    false,
 		"bad":     false,
@@ -36,11 +36,11 @@ func (ssp SSPMock) Status(host, service string) (time.Time, string, map[string]b
 	}
 }
 
-func (ssp SSPMock) Values() []string {
+func (chk CheckerMock) Values() []string {
 	return []string{"good", "bad", "unknown", "error"}
 }
 
-func (ssp SSPMock) DefaultRules() rules.Rules {
+func (chk CheckerMock) DefaultRules() rules.Rules {
 	rules := rules.Rules{
 		10: rules.Rule{
 			Must:    []string{"bad"},

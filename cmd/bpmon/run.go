@@ -6,7 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/checker"
+	_ "github.com/unprofession-al/bpmon/checker/icinga"
 	"github.com/unprofession-al/bpmon/persistence"
 	_ "github.com/unprofession-al/bpmon/persistence/influx"
 )
@@ -27,7 +28,7 @@ var runCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		i, err := icinga.NewIcinga(c.Icinga, c.Rules)
+		i, err := checker.New(c.Checker)
 		if err != nil {
 			log.Fatal(err)
 		}

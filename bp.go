@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/unprofession-al/bpmon/checker"
 	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
@@ -40,7 +41,7 @@ type BP struct {
 	Responsible      string       `yaml:"responsible"`
 }
 
-func (bp BP) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+func (bp BP) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
 	rs := persistence.ResultSet{
 		Kind:        IdentifierBusinessProcess,
 		Responsible: bp.Responsible,
@@ -56,10 +57,10 @@ func (bp BP) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rul
 		if k.Responsible == "" {
 			k.Responsible = bp.Responsible
 		}
-		go func(k KPI, ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) {
-			childRs := k.Status(ssp, pp, r)
+		go func(k KPI, chk checker.Checker, pp persistence.Persistence, r rules.Rules) {
+			childRs := k.Status(chk, pp, r)
 			ch <- &childRs
-		}(k, ssp, pp, r)
+		}(k, chk, pp, r)
 	}
 
 	for {
@@ -93,7 +94,7 @@ type KPI struct {
 	Responsible string
 }
 
-func (k KPI) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+func (k KPI) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
 	rs := persistence.ResultSet{
 		Kind:        IdentifierKeyPerformanceIndicator,
 		Responsible: k.Responsible,
@@ -109,10 +110,10 @@ func (k KPI) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rul
 		if s.Responsible == "" {
 			s.Responsible = k.Responsible
 		}
-		go func(s Service, ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) {
-			childRs := s.Status(ssp, pp, r)
+		go func(s Service, chk checker.Checker, pp persistence.Persistence, r rules.Rules) {
+			childRs := s.Status(chk, pp, r)
 			ch <- &childRs
-		}(s, ssp, pp, r)
+		}(s, chk, pp, r)
 	}
 
 	for {
@@ -153,7 +154,7 @@ type Service struct {
 	Responsible string
 }
 
-func (s Service) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+func (s Service) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 	rs := persistence.ResultSet{
 		Name:        name,
@@ -161,7 +162,7 @@ func (s Service) Status(ssp ServiceStatusProvider, pp persistence.Persistence, r
 		Id:          name,
 		Kind:        IdentifierService,
 	}
-	at, msg, vals, err := ssp.Status(s.Host, s.Service)
+	at, msg, vals, err := chk.Status(s.Host, s.Service)
 	rs.Err = err
 	rs.At = at
 	rs.Output = msg
