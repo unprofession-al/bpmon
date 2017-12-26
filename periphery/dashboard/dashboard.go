@@ -11,12 +11,13 @@ import (
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/configs"
 	"github.com/unprofession-al/bpmon/periphery/webhelpers"
+	"github.com/unprofession-al/bpmon/persistence"
 )
 
 var bps bpmon.BusinessProcesses
-var ep bpmon.EventProvider
+var ep persistence.EventProvider
 
-func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, epin bpmon.EventProvider) (http.Handler, error) {
+func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, epin persistence.EventProvider) (http.Handler, error) {
 	ep = epin
 	bps = bpin
 	r := mux.NewRouter().StrictSlash(true)

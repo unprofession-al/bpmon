@@ -1,4 +1,4 @@
-package bpmon
+package persistence
 
 import (
 	"encoding/base64"
@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/status"
 )
 
@@ -25,17 +24,12 @@ type Event struct {
 }
 
 type EventProvider struct {
-	persistence.Persistence
+	Persistence
 	saveOk        []string
 	getLastStatus bool
 }
 
-//TODO: Rename or delete
-func getInfluxTimestamp(t time.Time) int64 {
-	return t.UnixNano()
-}
-
-func NewEventProvider(pp persistence.Persistence, saveOk []string, getLastStatus bool) EventProvider {
+func NewEventProvider(pp Persistence, saveOk []string, getLastStatus bool) EventProvider {
 	return EventProvider{pp, saveOk, getLastStatus}
 }
 
@@ -307,7 +301,7 @@ func (ep EventProvider) AnnotateEvent(id string, annotation string) (Event, erro
 		return e, err
 	}
 
-	toPersist := persistence.Point{
+	toPersist := Point{
 		Series: kind,
 		Tags:   make(map[string]string),
 		Fields: make(map[string]interface{}),
@@ -337,7 +331,7 @@ func (ep EventProvider) AnnotateEvent(id string, annotation string) (Event, erro
 	e.Annotation = annotation
 	toPersist.Fields["annotation"] = annotation
 	toPersist.Fields["annotated"] = true
-	err = ep.Write([]persistence.Point{toPersist})
+	err = ep.Write([]Point{toPersist})
 
 	return e, err
 }

@@ -23,7 +23,7 @@ var dashboardCmd = &cobra.Command{
 		}
 
 		p, _ := persistence.New(c.Persistence)
-		ep := bpmon.NewEventProvider(p, c.Persistence.SaveOK, c.Persistence.GetLastStatus)
+		ep := persistence.NewEventProvider(p, c.Persistence.SaveOK, c.Persistence.GetLastStatus)
 
 		router, err := dashboard.Setup(c.Dashboard, bp, ep)
 		if err != nil {
