@@ -10,30 +10,30 @@ import (
 
 type CheckerMock struct{}
 
-func (chk CheckerMock) Status(host, service string) (time.Time, string, map[string]bool, error) {
-	vals := map[string]bool{
+func (chk CheckerMock) Status(host, service string) checker.Result {
+	out := checker.Result{
+		Timestamp: time.Now()
+	}
+
+	out.Values = map[string]bool{
 		"good":    false,
 		"bad":     false,
 		"error":   false,
 		"unknown": false,
 	}
 
-	now := time.Now()
-
 	switch service {
 	case "good":
-		vals["good"] = true
-		return now, "good", vals, nil
+		out.Values["good"] = true
 	case "bad":
-		vals["bad"] = true
-		return now, "bad", vals, nil
+		out.Values["bad"] = true
 	case "error":
-		vals["error"] = true
-		return now, "error", vals, errors.New("Error occured")
+		out.Values["error"] = true
+		out.Error = errors.New("Error occured")
 	default:
-		vals["unknown"] = true
-		return now, "unknown", vals, nil
+		out.Values["unknown"] = true
 	}
+	return out
 }
 
 func (chk CheckerMock) Values() []string {

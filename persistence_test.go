@@ -6,9 +6,9 @@ import (
 	"github.com/unprofession-al/bpmon/persistence"
 )
 
-type PPMock struct{}
+type PersistenceMock struct{}
 
-func (pp PPMock) GetOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {
+func (pp PersistenceMock) GetOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
 	status := 0
 
@@ -32,7 +32,7 @@ func (pp PPMock) GetOne(fields []string, from string, where []string, additional
 	return out, nil
 }
 
-func (pp PPMock) GetAll(fields []string, from string, where []string, additional string) ([]map[string]interface{}, error) {
+func (pp PersistenceMock) GetAll(fields []string, from string, where []string, additional string) ([]map[string]interface{}, error) {
 	var out []map[string]interface{}
 
 	testset := []string{"foo", "bar", "bla"}
@@ -45,6 +45,7 @@ func (pp PPMock) GetAll(fields []string, from string, where []string, additional
 	}
 	return out, nil
 }
-func (pp PPMock) Write(p []persistence.Point) error {
+
+func (pp PersistenceMock) Write(p []persistence.Point) error {
 	return nil
 }
