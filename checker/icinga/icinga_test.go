@@ -100,7 +100,7 @@ func TestStatusInterpreter(t *testing.T) {
 	for _, test := range TestSets {
 		result := i.Status(test.host, test.service)
 		if result.Error != nil {
-			t.Errorf("Error returned: %s", err.Error())
+			t.Errorf("Error returned: %s", result.Error.Error())
 		}
 		if result.Message != test.output {
 			t.Errorf("Failed")
