@@ -107,7 +107,7 @@ func TestStatusInterpreter(t *testing.T) {
 		}
 		eq := reflect.DeepEqual(result.Values, test.result)
 		if !eq {
-			t.Errorf("Results do not match: '%v' vs. '%v'", vals, test.result)
+			t.Errorf("Results do not match: '%v' vs. '%v'", result.Values, test.result)
 		}
 	}
 }
