@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/unprofession-al/bpmon/checker"
-	"github.com/unprofession-al/bpmon/persistence"
+	"github.com/unprofession-al/bpmon/store"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
 )
@@ -21,23 +21,23 @@ type BP struct {
 	Responsible      string       `yaml:"responsible"`
 }
 
-func (bp BP) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
-	rs := persistence.ResultSet{
+func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
+	rs := store.ResultSet{
 		Responsible: bp.Responsible,
 		Name:        bp.Name,
 		Id:          bp.Id,
-		Children:    []*persistence.ResultSet{},
+		Children:    []*store.ResultSet{},
 		Vals:        make(map[string]bool),
-		Tags:        map[string]string{persistence.IdentifierBusinessProcess: bp.Id},
+		Tags:        map[string]string{store.IdentifierBusinessProcess: bp.Id},
 	}
 
-	ch := make(chan *persistence.ResultSet)
+	ch := make(chan *store.ResultSet)
 	var calcValues []bool
 	for _, k := range bp.Kpis {
 		if k.Responsible == "" {
 			k.Responsible = bp.Responsible
 		}
-		go func(k KPI, parentTags map[string]string, chk checker.Checker, pp persistence.Persistence, r rules.Rules) {
+		go func(k KPI, parentTags map[string]string, chk checker.Checker, pp store.Store, r rules.Rules) {
 			childRs := k.Status(rs.Tags, chk, pp, r)
 			ch <- &childRs
 		}(k, rs.Tags, chk, pp, r)
@@ -74,29 +74,29 @@ type KPI struct {
 	Responsible string    `yaml:"responsible"`
 }
 
-func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
 	tags := make(map[string]string)
 	for k, v := range parentTags {
 		tags[k] = v
 	}
-	tags[persistence.IdentifierKeyPerformanceIndicator] = k.Id
+	tags[store.IdentifierKeyPerformanceIndicator] = k.Id
 
-	rs := persistence.ResultSet{
+	rs := store.ResultSet{
 		Responsible: k.Responsible,
 		Name:        k.Name,
 		Id:          k.Id,
-		Children:    []*persistence.ResultSet{},
+		Children:    []*store.ResultSet{},
 		Vals:        make(map[string]bool),
 		Tags:        tags,
 	}
 
-	ch := make(chan *persistence.ResultSet)
+	ch := make(chan *store.ResultSet)
 	var calcValues []bool
 	for _, s := range k.Services {
 		if s.Responsible == "" {
 			s.Responsible = k.Responsible
 		}
-		go func(s Service, parentTags map[string]string, chk checker.Checker, pp persistence.Persistence, r rules.Rules) {
+		go func(s Service, parentTags map[string]string, chk checker.Checker, pp store.Store, r rules.Rules) {
 			childRs := s.Status(rs.Tags, chk, pp, r)
 			ch <- &childRs
 		}(s, rs.Tags, chk, pp, r)
@@ -134,16 +134,16 @@ type Service struct {
 	Responsible string `yaml:"responsible"`
 }
 
-func (s Service) Status(parentTags map[string]string, chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+func (s Service) Status(parentTags map[string]string, chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 
 	tags := make(map[string]string)
 	for k, v := range parentTags {
 		tags[k] = v
 	}
-	tags[persistence.IdentifierService] = name
+	tags[store.IdentifierService] = name
 
-	rs := persistence.ResultSet{
+	rs := store.ResultSet{
 		Name:        name,
 		Responsible: s.Responsible,
 		Id:          name,

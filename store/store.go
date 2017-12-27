@@ -1,4 +1,4 @@
-package persistence
+package store
 
 import (
 	"errors"
@@ -17,10 +17,10 @@ type Conf struct {
 
 var (
 	sMu sync.Mutex
-	s   = make(map[string]func(Conf) (Persistence, error))
+	s   = make(map[string]func(Conf) (Store, error))
 )
 
-func Register(name string, setupFunc func(Conf) (Persistence, error)) {
+func Register(name string, setupFunc func(Conf) (Store, error)) {
 	sMu.Lock()
 	defer sMu.Unlock()
 	if _, dup := s[name]; dup {
@@ -29,7 +29,7 @@ func Register(name string, setupFunc func(Conf) (Persistence, error)) {
 	s[name] = setupFunc
 }
 
-func New(conf Conf) (Persistence, error) {
+func New(conf Conf) (Store, error) {
 	setupFunc, ok := s[conf.Kind]
 	if !ok {
 		return nil, errors.New("store: store '" + conf.Kind + "' does not exist")
@@ -37,8 +37,9 @@ func New(conf Conf) (Persistence, error) {
 	return setupFunc(conf)
 }
 
-type Persistence interface {
+type Store interface {
 	GetEvents(ResultSet, time.Time, time.Time, time.Duration) ([]Event, error)
 	GetLatest(ResultSet) (ResultSet, error)
 	Write(*ResultSet) error
+	AnnotateEvent(string, string) (ResultSet, error)
 }

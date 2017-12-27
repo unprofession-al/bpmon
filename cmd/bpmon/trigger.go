@@ -10,8 +10,8 @@ import (
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/checker"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
-	"github.com/unprofession-al/bpmon/persistence"
-	_ "github.com/unprofession-al/bpmon/persistence/influx"
+	"github.com/unprofession-al/bpmon/store"
+	_ "github.com/unprofession-al/bpmon/store/influx"
 	"github.com/unprofession-al/bpmon/status"
 )
 
@@ -38,13 +38,13 @@ var triggerCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		p, _ := persistence.New(c.Persistence)
+		p, _ := store.New(c.Store)
 		stripBy := []status.Status{status.Unknown, status.Ok}
-		var sets []persistence.ResultSet
+		var sets []store.ResultSet
 		for _, bp := range b {
 			rs := bp.Status(i, nil, r)
-			if c.Persistence.GetLastStatus {
-				rs.AddPreviousStatus(p, c.Persistence.SaveOK)
+			if c.Store.GetLastStatus {
+				rs.AddPreviousStatus(p, c.Store.SaveOK)
 			}
 			set, stripped := rs.StripByStatus(stripBy)
 			if !stripped {

@@ -45,7 +45,7 @@ var BpTestSets = []bpTestSet{
 
 func TestBusinessProcess(t *testing.T) {
 	chk := CheckerMock{}
-	pp := PersistenceMock{}
+	pp := StoreMock{}
 	for _, bp := range BpTestSets {
 		rs := bp.bp.Status(chk, pp, chk.DefaultRules())
 		if rs.Status != bp.status {
@@ -84,7 +84,7 @@ var SvcTestSets = []svcTestSet{
 }
 
 func TestServices(t *testing.T) {
-	pp := PersistenceMock{}
+	pp := StoreMock{}
 	chk := CheckerMock{}
 	parentTags := map[string]string{"BP": "BP", "KPI": "KPI"}
 	for _, s := range SvcTestSets {

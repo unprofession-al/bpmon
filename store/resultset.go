@@ -1,4 +1,4 @@
-package persistence
+package store
 
 import (
 	"fmt"
@@ -115,7 +115,7 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	return setOut, !keep
 }
 
-func (rs *ResultSet) AddPreviousStatus(pp Persistence, saveOK []string) {
+func (rs *ResultSet) AddPreviousStatus(pp Store, saveOK []string) {
 	if stringInSlice(rs.Kind(), saveOK) {
 		latest, err := pp.GetLatest(*rs)
 		if err == nil {

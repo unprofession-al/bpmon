@@ -1,4 +1,4 @@
-package persistence
+package store
 
 import (
 	"encoding/base64"

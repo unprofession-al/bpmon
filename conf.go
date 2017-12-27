@@ -8,7 +8,7 @@ import (
 
 	"github.com/unprofession-al/bpmon/checker"
 	"github.com/unprofession-al/bpmon/configs"
-	"github.com/unprofession-al/bpmon/persistence"
+	"github.com/unprofession-al/bpmon/store"
 	"github.com/unprofession-al/bpmon/rules"
 
 	"gopkg.in/yaml.v2"
@@ -16,7 +16,7 @@ import (
 
 type conf struct {
 	Checker        checker.Conf          `yaml:"checker"`
-	Persistence    persistence.Conf      `yaml:"persistence"`
+	Store    store.Conf      `yaml:"store"`
 	Availabilities AvailabilitiesConf    `yaml:"availabilities"`
 	Trigger        Trigger               `yaml:"trigger"`
 	Rules          rules.Rules           `yaml:"rules"`

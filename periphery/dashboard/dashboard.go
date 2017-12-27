@@ -11,18 +11,18 @@ import (
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/configs"
 	"github.com/unprofession-al/bpmon/periphery/webhelpers"
-	"github.com/unprofession-al/bpmon/persistence"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 var bps bpmon.BusinessProcesses
-var pp persistence.Persistence
+var pp store.Store
 
-func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, ppin persistence.Persistence) (http.Handler, error) {
+func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, ppin store.Store) (http.Handler, error) {
 	pp = ppin
 	bps = bpin
 	r := mux.NewRouter().StrictSlash(true)
 
-	//r.HandleFunc("/api/annotate", AnnotateEventHandler).Methods("POST")
+	r.HandleFunc("/api/annotate", AnnotateEventHandler).Methods("POST")
 	r.HandleFunc("/api/bps/", ListBPsHandler).Methods("GET")
 	r.HandleFunc("/api/bps/{bp}", GetBPTimelineHandler).Methods("GET")
 	r.HandleFunc("/api/bps/{bp}/kpis", ListKPIsHandler).Methods("GET")

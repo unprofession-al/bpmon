@@ -8,8 +8,8 @@ import (
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/checker"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
-	"github.com/unprofession-al/bpmon/persistence"
-	_ "github.com/unprofession-al/bpmon/persistence/influx"
+	"github.com/unprofession-al/bpmon/store"
+	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
 var (
@@ -39,11 +39,11 @@ var runCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		p, _ := persistence.New(c.Persistence)
+		p, _ := store.New(c.Store)
 		for _, bp := range b {
 			rs := bp.Status(i, p, r)
-			if c.Persistence.GetLastStatus {
-				rs.AddPreviousStatus(p, c.Persistence.SaveOK)
+			if c.Store.GetLastStatus {
+				rs.AddPreviousStatus(p, c.Store.SaveOK)
 			}
 			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues, printResponsible))
 		}

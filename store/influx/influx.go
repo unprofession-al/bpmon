@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
-	"github.com/unprofession-al/bpmon/persistence"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 type Influx struct {
@@ -20,10 +20,10 @@ type Influx struct {
 }
 
 func init() {
-	persistence.Register("influx", Setup)
+	store.Register("influx", Setup)
 }
 
-func Setup(conf persistence.Conf) (persistence.Persistence, error) {
+func Setup(conf store.Conf) (store.Store, error) {
 	u, err := url.Parse(conf.Connection)
 	if err != nil {
 		panic(err)
@@ -50,7 +50,7 @@ func Setup(conf persistence.Conf) (persistence.Persistence, error) {
 	return cli, err
 }
 
-func (i Influx) Write(rs *persistence.ResultSet) error {
+func (i Influx) Write(rs *store.ResultSet) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  i.database,
 		Precision: "s",
@@ -76,8 +76,8 @@ func (i Influx) Write(rs *persistence.ResultSet) error {
 	return err
 }
 
-func (i Influx) GetLatest(rs persistence.ResultSet) (persistence.ResultSet, error) {
-	out := persistence.ResultSet{}
+func (i Influx) GetLatest(rs store.ResultSet) (store.ResultSet, error) {
+	out := store.ResultSet{}
 	data := make(map[string]interface{})
 
 	var where []string

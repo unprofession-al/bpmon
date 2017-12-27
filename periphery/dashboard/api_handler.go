@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/bpmon"
 	wh "github.com/unprofession-al/bpmon/periphery/webhelpers"
-	"github.com/unprofession-al/bpmon/persistence"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
@@ -41,7 +41,7 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	start, end := getStartEnd(req)
 
-	where := persistence.ResultSet{
+	where := store.ResultSet{
 		Tags: map[string]string{"BP": bpid},
 	}
 	interval, _ := time.ParseDuration("300s")
@@ -113,7 +113,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	start, end := getStartEnd(req)
 
-	where := persistence.ResultSet{
+	where := store.ResultSet{
 		Tags: map[string]string{"BP": bpid, "KPI": kpiid},
 	}
 
@@ -128,7 +128,6 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	wh.Respond(res, req, http.StatusOK, points)
 }
 
-/*
 func AnnotateEventHandler(res http.ResponseWriter, req *http.Request) {
 	id := ""
 	ids := req.URL.Query()["id"]
@@ -158,7 +157,7 @@ func AnnotateEventHandler(res http.ResponseWriter, req *http.Request) {
 
 	wh.Respond(res, req, http.StatusOK, event)
 }
-*/
+
 func getStartEnd(req *http.Request) (start time.Time, end time.Time) {
 	end = time.Now()
 	start = end.AddDate(0, -1, 0)

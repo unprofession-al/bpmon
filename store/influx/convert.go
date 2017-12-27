@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 type point struct {
@@ -19,7 +19,7 @@ type point struct {
 	Fields    map[string]interface{} `json:"fields"`
 }
 
-func (i Influx) asPoints(rs *persistence.ResultSet) []point {
+func (i Influx) asPoints(rs *store.ResultSet) []point {
 	var out []point
 
 	if rs.Status != status.Ok || stringInSlice(rs.Kind(), i.saveOK) {
@@ -40,6 +40,10 @@ func (i Influx) asPoints(rs *persistence.ResultSet) []point {
 			fields["was"] = rs.Was.Int()
 			fields["changed"] = rs.StatusChanged
 		}
+		if rs.Annotation != "" {
+			fields["annotation"] = rs.Annotation
+		}
+
 		pt := point{
 			Timestamp: rs.At,
 			Series:    rs.Kind(),
@@ -55,10 +59,10 @@ func (i Influx) asPoints(rs *persistence.ResultSet) []point {
 	return out
 }
 
-func (i Influx) asResultSet(data map[string]interface{}) (persistence.ResultSet, error) {
+func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error) {
 	var err error
 	var ok bool
-	out := persistence.ResultSet{
+	out := store.ResultSet{
 		Tags: make(map[string]string),
 		Vals: make(map[string]bool),
 	}
@@ -70,12 +74,12 @@ func (i Influx) asResultSet(data map[string]interface{}) (persistence.ResultSet,
 				if err != nil {
 					return out, err
 				}
-			case persistence.IdentifierBusinessProcess:
-				out.Tags[persistence.IdentifierBusinessProcess] = v.(string)
-			case persistence.IdentifierKeyPerformanceIndicator:
-				out.Tags[persistence.IdentifierKeyPerformanceIndicator] = v.(string)
-			case persistence.IdentifierService:
-				out.Tags[persistence.IdentifierService] = v.(string)
+			case store.IdentifierBusinessProcess:
+				out.Tags[store.IdentifierBusinessProcess] = v.(string)
+			case store.IdentifierKeyPerformanceIndicator:
+				out.Tags[store.IdentifierKeyPerformanceIndicator] = v.(string)
+			case store.IdentifierService:
+				out.Tags[store.IdentifierService] = v.(string)
 			case "err":
 				out.Err = errors.New(v.(string))
 			case "output":

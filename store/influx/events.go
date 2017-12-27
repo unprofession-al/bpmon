@@ -1,16 +1,19 @@
 package influx
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
-	"github.com/unprofession-al/bpmon/persistence"
 	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/store"
 )
 
-func (i Influx) GetEvents(rs persistence.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]persistence.Event, error) {
+func (i Influx) GetEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]store.Event, error) {
 	if i.getLastStatus {
 		for _, saveOkKind := range i.saveOK {
 			if saveOkKind == rs.Kind() {
@@ -21,8 +24,8 @@ func (i Influx) GetEvents(rs persistence.ResultSet, start time.Time, end time.Ti
 	return i.assumeEvents(rs, start, end, interval)
 }
 
-func (i Influx) getEvents(rs persistence.ResultSet, start time.Time, end time.Time) ([]persistence.Event, error) {
-	out := []persistence.Event{}
+func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([]store.Event, error) {
+	out := []store.Event{}
 	totalDuration := end.Sub(start).Seconds()
 
 	where := []string{}
@@ -46,7 +49,7 @@ func (i Influx) getEvents(rs persistence.ResultSet, start time.Time, end time.Ti
 
 	earliestEvent := end
 	for i, row := range rows {
-		current := persistence.Event{Tags: make(map[string]string)}
+		current := store.Event{Tags: make(map[string]string)}
 		current.Start, err = time.Parse(time.RFC3339, row["time"].(string))
 		if err != nil {
 			return out, err
@@ -99,7 +102,7 @@ func (i Influx) getEvents(rs persistence.ResultSet, start time.Time, end time.Ti
 	last, err := i.getOne(fields, rs.Kind(), whereLast, additional)
 	if err != nil {
 		// if no state at all is found
-		complete := persistence.Event{
+		complete := store.Event{
 			Status:          status.Unknown,
 			Annotation:      "no such data found",
 			Duration:        totalDuration,
@@ -110,11 +113,11 @@ func (i Influx) getEvents(rs persistence.ResultSet, start time.Time, end time.Ti
 		}
 
 		complete.SetID()
-		out = append([]persistence.Event{complete}, out...)
+		out = append([]store.Event{complete}, out...)
 	} else {
 		duration := earliestEvent.Sub(start).Seconds()
 		durationPercent := 100.0 / float64(totalDuration) * float64(duration)
-		first := persistence.Event{
+		first := store.Event{
 			Start:           start,
 			End:             earliestEvent,
 			Duration:        duration,
@@ -138,16 +141,16 @@ func (i Influx) getEvents(rs persistence.ResultSet, start time.Time, end time.Ti
 		for tag, _ := range rs.Tags {
 			first.Tags[tag] = last[tag].(string)
 		}
-		out = append([]persistence.Event{first}, out...)
+		out = append([]store.Event{first}, out...)
 	}
 
 	return out, nil
 }
 
-func (i Influx) assumeEvents(rs persistence.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]persistence.Event, error) {
+func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]store.Event, error) {
 	duration := end.Sub(start).Seconds()
-	events := []persistence.Event{
-		persistence.Event{
+	events := []store.Event{
+		store.Event{
 			Status:     status.Ok,
 			Annotation: "",
 			Start:      start,
@@ -180,7 +183,7 @@ func (i Influx) assumeEvents(rs persistence.ResultSet, start time.Time, end time
 		last := events[lastIndex]
 		replace := false
 
-		current := persistence.Event{Tags: make(map[string]string)}
+		current := store.Event{Tags: make(map[string]string)}
 		statusNumber, err := row["status"].(json.Number).Int64()
 		if err != nil {
 			return events, err
@@ -214,7 +217,7 @@ func (i Influx) assumeEvents(rs persistence.ResultSet, start time.Time, end time
 				events[lastIndex] = last
 			}
 		} else if current.Start.After(last.End) {
-			filler := persistence.Event{
+			filler := store.Event{
 				Start:      last.End,
 				End:        current.Start,
 				Status:     status.Ok,
@@ -237,7 +240,7 @@ func (i Influx) assumeEvents(rs persistence.ResultSet, start time.Time, end time
 
 	lastEvent := events[len(events)-1]
 	if lastEvent.End != end {
-		filler := persistence.Event{
+		filler := store.Event{
 			Start:      lastEvent.End,
 			End:        end,
 			Status:     status.Ok,
@@ -255,57 +258,34 @@ func (i Influx) assumeEvents(rs persistence.ResultSet, start time.Time, end time
 	return events, nil
 }
 
-/*
-func (i Influx) AnnotateEvent(id string, annotation string) (persistence.Event, error) {
-	e, err := i.EventByID(id)
+func (i Influx) AnnotateEvent(id string, annotation string) (store.ResultSet, error) {
+	rs, err := i.idToResultSet(id)
 	if err != nil {
-		return e, err
+		return rs, err
 	}
 
 	where := []string{}
-	for key, value := range e.Tags {
+	for key, value := range rs.Tags {
 		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
 	}
-	where = append(where, fmt.Sprintf("time = %d", getInfluxTimestamp(e.Start)))
+	where = append(where, fmt.Sprintf("time = %d", getInfluxTimestamp(rs.At)))
 
 	point, err := i.getOne([]string{"*"}, rs.Kind(), where, "")
 	if err != nil {
-		return e, err
+		return rs, err
 	}
 
-	toPersist := point{
-		Series: kind,
-		Tags:   make(map[string]string),
-		Fields: make(map[string]interface{}),
-	}
-	for name, value := range point {
-		isTag := false
-		for tagName, _ := range e.Tags {
-			if name == tagName {
-				toPersist.Tags[name] = value.(string)
-				isTag = true
-				continue
-			}
-		}
-		if isTag {
-			continue
-		}
-		if name == "time" {
-			toPersist.Timestamp, err = time.Parse(time.RFC3339, value.(string))
-			if err != nil {
-				return e, err
-			}
-			continue
-		}
-		toPersist.Fields[name] = value
+	rs, err = i.asResultSet(point)
+	if err != nil {
+		return rs, err
 	}
 
-	e.Annotation = annotation
-	toPersist.Fields["annotation"] = annotation
-	toPersist.Fields["annotated"] = true
-	//err = ep.Write([]Point{toPersist})
+	rs, err = i.asResultSet(point)
+	rs.Annotated = true
+	rs.Annotation = annotation
+	err = i.Write(&rs)
 
-	return e, err
+	return rs, err
 }
 
 const (
@@ -314,36 +294,35 @@ const (
 	timeTagSeparator = " "
 )
 
-func (i Influx) EventByID(id string) (persistence.Event, error) {
-	e := persistence.Event{
+func (i Influx) idToResultSet(id string) (store.ResultSet, error) {
+	rs := store.ResultSet{
 		Tags: make(map[string]string),
 	}
 	data, err := base64.RawURLEncoding.DecodeString(id)
 	if err != nil {
-		return e, err
+		return rs, err
 	}
 
 	elements := strings.SplitN(string(data), timeTagSeparator, 2)
 	if len(elements) != 2 {
-		return e, errors.New("Malformed Event ID")
+		return rs, errors.New("Malformed Event ID")
 	}
 
 	nanos, err := strconv.ParseInt(elements[0], 10, 64)
 	if err != nil {
-		return e, err
+		return rs, err
 	}
 
-	e.Start = time.Unix(0, nanos)
+	rs.At = time.Unix(0, nanos)
 
 	tags := strings.Split(elements[1], tagSeparator)
 	for _, pair := range tags {
 		touple := strings.SplitN(pair, pairSeparator, 2)
 		if len(touple) != 2 {
-			return e, errors.New("Malformed Event ID")
+			return rs, errors.New("Malformed Event ID")
 		}
-		e.Tags[touple[0]] = touple[1]
+		rs.Tags[touple[0]] = touple[1]
 	}
 
-	return e, nil
+	return rs, nil
 }
-*/

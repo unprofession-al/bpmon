@@ -8,8 +8,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/periphery/dashboard"
-	"github.com/unprofession-al/bpmon/persistence"
-	_ "github.com/unprofession-al/bpmon/persistence/influx"
+	"github.com/unprofession-al/bpmon/store"
+	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
 var dashboardCmd = &cobra.Command{
@@ -22,7 +22,7 @@ var dashboardCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		pp, _ := persistence.New(c.Persistence)
+		pp, _ := store.New(c.Store)
 
 		router, err := dashboard.Setup(c.Dashboard, bp, pp)
 		if err != nil {
