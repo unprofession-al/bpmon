@@ -4,6 +4,8 @@ import (
 	"errors"
 	"sync"
 	"time"
+
+	"github.com/unprofession-al/bpmon/status"
 )
 
 type Conf struct {
@@ -38,7 +40,7 @@ func New(conf Conf) (Store, error) {
 }
 
 type Store interface {
-	GetEvents(ResultSet, time.Time, time.Time, time.Duration) ([]Event, error)
+	GetEvents(ResultSet, time.Time, time.Time, time.Duration, []status.Status) ([]Event, error)
 	GetLatest(ResultSet) (ResultSet, error)
 	Write(*ResultSet) error
 	AnnotateEvent(string, string) (ResultSet, error)

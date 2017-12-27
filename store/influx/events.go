@@ -13,22 +13,32 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 )
 
-func (i Influx) GetEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]store.Event, error) {
+func (i Influx) GetEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
 	if i.getLastStatus {
 		for _, saveOkKind := range i.saveOK {
 			if saveOkKind == rs.Kind() {
-				return i.getEvents(rs, start, end)
+				return i.getEvents(rs, start, end, stati)
 			}
 		}
 	}
-	return i.assumeEvents(rs, start, end, interval)
+	return i.assumeEvents(rs, start, end, interval, stati)
 }
 
-func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([]store.Event, error) {
+func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time, stati []status.Status) ([]store.Event, error) {
 	out := []store.Event{}
 	totalDuration := end.Sub(start).Seconds()
 
 	where := []string{}
+
+	statusWhere := []string{}
+	for _, st := range stati {
+		statusWhere = append(statusWhere, fmt.Sprintf("status = %d", st.Int()))
+	}
+	if len(statusWhere) > 0 {
+		token := fmt.Sprintf(" ( %s ) ", strings.Join(statusWhere, " OR "))
+		where = append(where, token)
+	}
+
 	for key, value := range rs.Tags {
 		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
 	}
@@ -113,7 +123,11 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 		}
 
 		complete.SetID()
-		out = append([]store.Event{complete}, out...)
+		for _, st := range stati {
+			if complete.Status == st {
+				out = append([]store.Event{complete}, out...)
+			}
+		}
 	} else {
 		duration := earliestEvent.Sub(start).Seconds()
 		durationPercent := 100.0 / float64(totalDuration) * float64(duration)
@@ -141,13 +155,17 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 		for tag, _ := range rs.Tags {
 			first.Tags[tag] = last[tag].(string)
 		}
-		out = append([]store.Event{first}, out...)
+		for _, st := range stati {
+			if first.Status == st {
+				out = append([]store.Event{first}, out...)
+			}
+		}
 	}
 
 	return out, nil
 }
 
-func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]store.Event, error) {
+func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
 	duration := end.Sub(start).Seconds()
 	events := []store.Event{
 		store.Event{
@@ -160,6 +178,15 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 	}
 
 	where := []string{}
+
+	statusWhere := []string{}
+	for _, st := range stati {
+		statusWhere = append(statusWhere, fmt.Sprintf("status = %d", st.Int()))
+	}
+	if len(statusWhere) > 0 {
+		token := fmt.Sprintf(" ( %s ) ", strings.Join(statusWhere, " OR "))
+		where = append(where, token)
+	}
 	for key, value := range rs.Tags {
 		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
 	}
@@ -223,7 +250,11 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 				Status:     status.Ok,
 				Annotation: "",
 			}
-			events = append(events, filler)
+			for _, st := range stati {
+				if filler.Status == st {
+					events = append(events, filler)
+				}
+			}
 		}
 
 		// igrnore that case for now
@@ -246,7 +277,11 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 			Status:     status.Ok,
 			Annotation: "",
 		}
-		events = append(events, filler)
+		for _, st := range stati {
+			if filler.Status == st {
+				events = append(events, filler)
+			}
+		}
 	}
 
 	for i, e := range events {

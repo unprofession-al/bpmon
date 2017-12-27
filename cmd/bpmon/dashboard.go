@@ -14,7 +14,7 @@ import (
 
 var dashboardCmd = &cobra.Command{
 	Use:   "dashboard",
-	Short: "Run all business process checks and print to stdout",
+	Short: "Run Dashboard Web UI",
 	Run: func(cmd *cobra.Command, args []string) {
 		c, bp, err := bpmon.Configure(cfgFile, cfgSection, bpPath, bpPattern)
 		if err != nil {

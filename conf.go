@@ -8,19 +8,20 @@ import (
 
 	"github.com/unprofession-al/bpmon/checker"
 	"github.com/unprofession-al/bpmon/configs"
-	"github.com/unprofession-al/bpmon/store"
 	"github.com/unprofession-al/bpmon/rules"
+	"github.com/unprofession-al/bpmon/store"
 
 	"gopkg.in/yaml.v2"
 )
 
 type conf struct {
 	Checker        checker.Conf          `yaml:"checker"`
-	Store    store.Conf      `yaml:"store"`
+	Store          store.Conf            `yaml:"store"`
 	Availabilities AvailabilitiesConf    `yaml:"availabilities"`
 	Trigger        Trigger               `yaml:"trigger"`
 	Rules          rules.Rules           `yaml:"rules"`
 	Dashboard      configs.DashboardConf `yaml:"dashboard"`
+	Annotate       configs.AnnotateConf  `yaml:"annotate"`
 }
 
 type Trigger struct {
@@ -89,6 +90,7 @@ func parseConf(cfg []byte, cfgSection string) (conf, error) {
 	}
 
 	conf.Dashboard = configs.GetDashboardConf(conf.Dashboard)
+	conf.Annotate = configs.GetAnnotateConf(conf.Annotate)
 
 	return conf, nil
 }

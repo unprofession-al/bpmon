@@ -10,26 +10,25 @@ import (
 
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/configs"
-	"github.com/unprofession-al/bpmon/periphery/webhelpers"
+	wh "github.com/unprofession-al/bpmon/periphery/webhelpers"
 	"github.com/unprofession-al/bpmon/store"
 )
 
 var bps bpmon.BusinessProcesses
 var pp store.Store
 
+var routes = make(map[string]wh.Leafs)
+
 func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, ppin store.Store) (http.Handler, error) {
 	pp = ppin
 	bps = bpin
-	r := mux.NewRouter().StrictSlash(true)
 
-	r.HandleFunc("/api/annotate", AnnotateEventHandler).Methods("POST")
-	r.HandleFunc("/api/bps/", ListBPsHandler).Methods("GET")
-	r.HandleFunc("/api/bps/{bp}", GetBPTimelineHandler).Methods("GET")
-	r.HandleFunc("/api/bps/{bp}/kpis", ListKPIsHandler).Methods("GET")
-	r.HandleFunc("/api/bps/{bp}/kpis/{kpi}", GetKPITimelineHandler).Methods("GET")
+	r := mux.NewRouter().StrictSlash(true)
+	api := r.PathPrefix("/api/").Subrouter()
+	wh.PopulateRouter(api, routes)
 
 	if conf.Static == "" {
-		assetHandler := webhelpers.GetAssetHandler("/assets/")
+		assetHandler := wh.GetAssetHandler("/assets/")
 		r.PathPrefix("/assets/").Handler(assetHandler)
 
 		r.PathPrefix("/").Handler(http.FileServer(FS(false)))

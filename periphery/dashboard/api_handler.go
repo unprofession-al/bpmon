@@ -3,12 +3,12 @@ package dashboard
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/bpmon"
 	wh "github.com/unprofession-al/bpmon/periphery/webhelpers"
+	"github.com/unprofession-al/bpmon/status"
 	"github.com/unprofession-al/bpmon/store"
 )
 
@@ -39,13 +39,13 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	start, end := getStartEnd(req)
+	start, end := wh.GetStartEnd(req)
 
 	where := store.ResultSet{
 		Tags: map[string]string{"BP": bpid},
 	}
 	interval, _ := time.ParseDuration("300s")
-	points, err := pp.GetEvents(where, start, end, interval)
+	points, err := pp.GetEvents(where, start, end, interval, []status.Status{})
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
@@ -111,14 +111,14 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	start, end := getStartEnd(req)
+	start, end := wh.GetStartEnd(req)
 
 	where := store.ResultSet{
 		Tags: map[string]string{"BP": bpid, "KPI": kpiid},
 	}
 
 	interval, _ := time.ParseDuration("300s")
-	points, err := pp.GetEvents(where, start, end, interval)
+	points, err := pp.GetEvents(where, start, end, interval, []status.Status{})
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
@@ -126,57 +126,4 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	}
 
 	wh.Respond(res, req, http.StatusOK, points)
-}
-
-func AnnotateEventHandler(res http.ResponseWriter, req *http.Request) {
-	id := ""
-	ids := req.URL.Query()["id"]
-
-	if len(ids) > 0 {
-		id = ids[0]
-	} else {
-		wh.Respond(res, req, http.StatusNotFound, "event not found")
-		return
-	}
-
-	annotation := ""
-	annotations := req.URL.Query()["annotation"]
-
-	if len(annotations) > 0 {
-		annotation = annotations[0]
-	} else {
-		wh.Respond(res, req, http.StatusBadRequest, "no annotation provided")
-		return
-	}
-
-	event, err := pp.AnnotateEvent(id, annotation)
-	if err != nil {
-		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	wh.Respond(res, req, http.StatusOK, event)
-}
-
-func getStartEnd(req *http.Request) (start time.Time, end time.Time) {
-	end = time.Now()
-	start = end.AddDate(0, -1, 0)
-
-	startStr := req.URL.Query()["start"]
-	if len(startStr) > 0 {
-		i, err := strconv.ParseInt(startStr[0], 10, 64)
-		if err == nil {
-			start = time.Unix(i, 0)
-		}
-	}
-
-	endStr := req.URL.Query()["end"]
-	if len(endStr) > 0 {
-		i, err := strconv.ParseInt(endStr[0], 10, 64)
-		if err == nil {
-			end = time.Unix(i, 0)
-		}
-	}
-
-	return
 }
