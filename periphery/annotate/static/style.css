@@ -1,0 +1,44 @@
+.details {
+    display: none;
+}
+
+.chart {
+    width: 100%;
+    height: 40px;
+    clear: both;
+    background-color: #eee;
+}
+
+.kpis .availability .chart {
+    height: 10px;
+}
+
+.chart .frame {
+    height: 100%;
+    float: left;
+}
+
+.chart .ok {
+    background-color: var(--ok-color-bright);
+}
+
+.chart .ok:hover {
+    background-color: var(--ok-color-dark);
+}
+
+.chart .nok {
+    background-color: var(--nok-color-bright);
+}
+
+.chart .nok:hover {
+    background-color: var(--nok-color-dark);
+}
+
+.chart .unknown {
+    background-color: var(--unknown-color-bright);
+}
+
+.chart .unknown:hover {
+    background-color: var(--unknown-color-dark);
+}
+
