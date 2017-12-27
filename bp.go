@@ -10,20 +10,6 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
-func getKind(spec map[string]string) string {
-	kind := "UNKNOWN"
-	if _, ok := spec[persistence.IdentifierBusinessProcess]; ok {
-		kind = persistence.IdentifierBusinessProcess
-	}
-	if _, ok := spec[persistence.IdentifierKeyPerformanceIndicator]; ok {
-		kind = persistence.IdentifierKeyPerformanceIndicator
-	}
-	if _, ok := spec[persistence.IdentifierService]; ok {
-		kind = persistence.IdentifierService
-	}
-	return kind
-}
-
 type BusinessProcesses []BP
 
 type BP struct {

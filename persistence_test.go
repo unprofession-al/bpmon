@@ -46,6 +46,10 @@ func (pp PersistenceMock) GetAll(fields []string, from string, where []string, a
 	return out, nil
 }
 
-func (pp PersistenceMock) Write(p []persistence.Point) error {
+func (pp PersistenceMock) Write(p *persistence.ResultSet) error {
 	return nil
+}
+
+func (pp PersistenceMock) GetLatest(rs persistence.ResultSet) (persistence.ResultSet, error) {
+	return persistence.ResultSet{}, nil
 }
