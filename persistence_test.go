@@ -1,50 +1,12 @@
 package bpmon
 
 import (
-	"errors"
+	"time"
 
 	"github.com/unprofession-al/bpmon/persistence"
 )
 
 type PersistenceMock struct{}
-
-func (pp PersistenceMock) GetOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-	status := 0
-
-	if len(fields) < 1 || len(where) < 1 {
-		return out, errors.New("Error occured")
-	}
-	switch where[0] {
-	case "ok":
-		status = 0
-	case "critical":
-		status = 1
-	case "error":
-		return out, errors.New("Error occured")
-	default:
-		status = 2
-	}
-
-	for _, field := range fields {
-		out[field] = status
-	}
-	return out, nil
-}
-
-func (pp PersistenceMock) GetAll(fields []string, from string, where []string, additional string) ([]map[string]interface{}, error) {
-	var out []map[string]interface{}
-
-	testset := []string{"foo", "bar", "bla"}
-	for _, test := range testset {
-		set := make(map[string]interface{})
-		for _, field := range fields {
-			set[field] = test
-		}
-		out = append(out, set)
-	}
-	return out, nil
-}
 
 func (pp PersistenceMock) Write(p *persistence.ResultSet) error {
 	return nil
@@ -52,4 +14,8 @@ func (pp PersistenceMock) Write(p *persistence.ResultSet) error {
 
 func (pp PersistenceMock) GetLatest(rs persistence.ResultSet) (persistence.ResultSet, error) {
 	return persistence.ResultSet{}, nil
+}
+
+func (pp PersistenceMock) GetEvents(rs persistence.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]persistence.Event, error) {
+	return []persistence.Event{}, nil
 }

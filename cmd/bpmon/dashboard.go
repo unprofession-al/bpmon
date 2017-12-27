@@ -22,10 +22,9 @@ var dashboardCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		p, _ := persistence.New(c.Persistence)
-		ep := persistence.NewEventProvider(p, c.Persistence.SaveOK, c.Persistence.GetLastStatus)
+		pp, _ := persistence.New(c.Persistence)
 
-		router, err := dashboard.Setup(c.Dashboard, bp, ep)
+		router, err := dashboard.Setup(c.Dashboard, bp, pp)
 		if err != nil {
 			msg := fmt.Sprintf("Could not build router for server: %s", err.Error())
 			log.Fatal(msg)

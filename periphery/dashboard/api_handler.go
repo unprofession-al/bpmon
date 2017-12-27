@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/bpmon"
 	wh "github.com/unprofession-al/bpmon/periphery/webhelpers"
+	"github.com/unprofession-al/bpmon/persistence"
 )
 
 func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
@@ -40,11 +41,11 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	start, end := getStartEnd(req)
 
-	where := map[string]string{
-		"BP": bpid,
+	where := persistence.ResultSet{
+		Tags: map[string]string{"BP": bpid},
 	}
 	interval, _ := time.ParseDuration("300s")
-	points, err := ep.GetEvents(where, start, end, interval)
+	points, err := pp.GetEvents(where, start, end, interval)
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
@@ -112,12 +113,12 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	start, end := getStartEnd(req)
 
-	where := map[string]string{
-		"BP":  bpid,
-		"KPI": kpiid,
+	where := persistence.ResultSet{
+		Tags: map[string]string{"BP": bpid, "KPI": kpiid},
 	}
+
 	interval, _ := time.ParseDuration("300s")
-	points, err := ep.GetEvents(where, start, end, interval)
+	points, err := pp.GetEvents(where, start, end, interval)
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
@@ -127,6 +128,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	wh.Respond(res, req, http.StatusOK, points)
 }
 
+/*
 func AnnotateEventHandler(res http.ResponseWriter, req *http.Request) {
 	id := ""
 	ids := req.URL.Query()["id"]
@@ -148,7 +150,7 @@ func AnnotateEventHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	event, err := ep.AnnotateEvent(id, annotation)
+	event, err := pp.AnnotateEvent(id, annotation)
 	if err != nil {
 		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
@@ -156,7 +158,7 @@ func AnnotateEventHandler(res http.ResponseWriter, req *http.Request) {
 
 	wh.Respond(res, req, http.StatusOK, event)
 }
-
+*/
 func getStartEnd(req *http.Request) (start time.Time, end time.Time) {
 	end = time.Now()
 	start = end.AddDate(0, -1, 0)

@@ -15,14 +15,14 @@ import (
 )
 
 var bps bpmon.BusinessProcesses
-var ep persistence.EventProvider
+var pp persistence.Persistence
 
-func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, epin persistence.EventProvider) (http.Handler, error) {
-	ep = epin
+func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, ppin persistence.Persistence) (http.Handler, error) {
+	pp = ppin
 	bps = bpin
 	r := mux.NewRouter().StrictSlash(true)
 
-	r.HandleFunc("/api/annotate", AnnotateEventHandler).Methods("POST")
+	//r.HandleFunc("/api/annotate", AnnotateEventHandler).Methods("POST")
 	r.HandleFunc("/api/bps/", ListBPsHandler).Methods("GET")
 	r.HandleFunc("/api/bps/{bp}", GetBPTimelineHandler).Methods("GET")
 	r.HandleFunc("/api/bps/{bp}/kpis", ListKPIsHandler).Methods("GET")

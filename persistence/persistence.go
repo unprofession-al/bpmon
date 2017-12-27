@@ -38,15 +38,7 @@ func New(conf Conf) (Persistence, error) {
 }
 
 type Persistence interface {
-	GetOne([]string, string, []string, string) (map[string]interface{}, error)
-	GetAll([]string, string, []string, string) ([]map[string]interface{}, error)
+	GetEvents(ResultSet, time.Time, time.Time, time.Duration) ([]Event, error)
 	GetLatest(ResultSet) (ResultSet, error)
 	Write(*ResultSet) error
-}
-
-type Point struct {
-	Timestamp time.Time              `json:"timestamp"`
-	Series    string                 `json:"series"`
-	Tags      map[string]string      `json:"tags"`
-	Fields    map[string]interface{} `json:"fields"`
 }

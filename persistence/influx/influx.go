@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
 	"github.com/unprofession-al/bpmon/persistence"
 )
 
 type Influx struct {
-	cli          client.Client
-	saveOK       []string
-	database     string
-	printQueries bool
+	cli           client.Client
+	saveOK        []string
+	database      string
+	printQueries  bool
+	getLastStatus bool
 }
 
 func init() {
@@ -38,10 +40,11 @@ func Setup(conf persistence.Conf) (persistence.Persistence, error) {
 		Timeout:  conf.Timeout,
 	})
 	cli := Influx{
-		cli:          c,
-		saveOK:       conf.SaveOK,
-		database:     database,
-		printQueries: conf.Debug,
+		cli:           c,
+		saveOK:        conf.SaveOK,
+		database:      database,
+		printQueries:  conf.Debug,
+		getLastStatus: conf.GetLastStatus,
 	}
 
 	return cli, err
@@ -122,7 +125,7 @@ func (i Influx) GetLatest(rs persistence.ResultSet) (persistence.ResultSet, erro
 	return out, err
 }
 
-func (i Influx) GetOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {
+func (i Influx) getOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {
 	out := make(map[string]interface{})
 
 	fields = prependTimeIfMissing(fields)
@@ -166,7 +169,7 @@ func (i Influx) GetOne(fields []string, from string, where []string, additional 
 	return out, nil
 }
 
-func (i Influx) GetAll(fields []string, from string, where []string, additional string) ([]map[string]interface{}, error) {
+func (i Influx) getAll(fields []string, from string, where []string, additional string) ([]map[string]interface{}, error) {
 	var out []map[string]interface{}
 
 	fields = prependTimeIfMissing(fields)
@@ -226,4 +229,8 @@ func prependTimeIfMissing(fields []string) []string {
 		}
 	}
 	return append([]string{"time"}, fields...)
+}
+
+func getInfluxTimestamp(t time.Time) int64 {
+	return t.UnixNano()
 }
