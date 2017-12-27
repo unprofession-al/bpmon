@@ -47,7 +47,7 @@ func Setup(conf persistence.Conf) (persistence.Persistence, error) {
 	return cli, err
 }
 
-func (i Influx) Write(points []persistence.Point) error {
+func (i Influx) Write(rs *persistence.ResultSet) error {
 	bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 		Database:  i.database,
 		Precision: "s",
@@ -56,10 +56,12 @@ func (i Influx) Write(points []persistence.Point) error {
 		return err
 	}
 
+	points := i.asPoints(rs)
 	for _, p := range points {
 		pt, _ := client.NewPoint(p.Series, p.Tags, p.Fields, p.Timestamp)
 		bp.AddPoint(pt)
 	}
+
 	if i.printQueries {
 		for _, p := range bp.Points() {
 			fmt.Println(p)
@@ -69,6 +71,55 @@ func (i Influx) Write(points []persistence.Point) error {
 	}
 
 	return err
+}
+
+func (i Influx) GetLatest(rs persistence.ResultSet) (persistence.ResultSet, error) {
+	out := persistence.ResultSet{}
+	data := make(map[string]interface{})
+
+	var where []string
+	for key, value := range rs.Tags {
+		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
+	}
+	query := fmt.Sprintf("SELECT * FROM %s WHERE %s ORDER BY time DESC LIMIT 1;", rs.Kind(), strings.Join(where, " AND "))
+
+	if i.printQueries {
+		fmt.Println(query)
+	}
+
+	q := client.Query{
+		Command:  query,
+		Database: i.database,
+	}
+
+	response, err := i.cli.Query(q)
+	if err != nil {
+		return out, err
+	}
+	if response.Error() != nil {
+		return out, response.Error()
+	}
+
+	var fields []string
+	if len(response.Results) >= 1 && len(response.Results[0].Series) >= 1 {
+		fields = response.Results[0].Series[0].Columns
+	}
+
+	if len(response.Results) >= 1 &&
+		len(response.Results[0].Series) >= 1 &&
+		len(response.Results[0].Series[0].Values) >= 1 &&
+		len(response.Results[0].Series[0].Values[0]) >= 2 {
+		row := response.Results[0].Series[0].Values[0]
+		for i, field := range row {
+			data[fields[i]] = field
+		}
+	} else {
+		err = errors.New("No matching entry found")
+		return out, err
+	}
+
+	out, err = i.asResultSet(data)
+	return out, err
 }
 
 func (i Influx) GetOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {

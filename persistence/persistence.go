@@ -40,7 +40,8 @@ func New(conf Conf) (Persistence, error) {
 type Persistence interface {
 	GetOne([]string, string, []string, string) (map[string]interface{}, error)
 	GetAll([]string, string, []string, string) ([]map[string]interface{}, error)
-	Write([]Point) error
+	GetLatest(ResultSet) (ResultSet, error)
+	Write(*ResultSet) error
 }
 
 type Point struct {

@@ -10,22 +10,16 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
-const (
-	IdentifierBusinessProcess         = "BP"
-	IdentifierKeyPerformanceIndicator = "KPI"
-	IdentifierService                 = "SVC"
-)
-
 func getKind(spec map[string]string) string {
 	kind := "UNKNOWN"
-	if _, ok := spec[IdentifierBusinessProcess]; ok {
-		kind = IdentifierBusinessProcess
+	if _, ok := spec[persistence.IdentifierBusinessProcess]; ok {
+		kind = persistence.IdentifierBusinessProcess
 	}
-	if _, ok := spec[IdentifierKeyPerformanceIndicator]; ok {
-		kind = IdentifierKeyPerformanceIndicator
+	if _, ok := spec[persistence.IdentifierKeyPerformanceIndicator]; ok {
+		kind = persistence.IdentifierKeyPerformanceIndicator
 	}
-	if _, ok := spec[IdentifierService]; ok {
-		kind = IdentifierService
+	if _, ok := spec[persistence.IdentifierService]; ok {
+		kind = persistence.IdentifierService
 	}
 	return kind
 }
@@ -43,12 +37,12 @@ type BP struct {
 
 func (bp BP) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
 	rs := persistence.ResultSet{
-		Kind:        IdentifierBusinessProcess,
 		Responsible: bp.Responsible,
 		Name:        bp.Name,
 		Id:          bp.Id,
 		Children:    []*persistence.ResultSet{},
 		Vals:        make(map[string]bool),
+		Tags:        map[string]string{persistence.IdentifierBusinessProcess: bp.Id},
 	}
 
 	ch := make(chan *persistence.ResultSet)
@@ -57,10 +51,10 @@ func (bp BP) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rul
 		if k.Responsible == "" {
 			k.Responsible = bp.Responsible
 		}
-		go func(k KPI, chk checker.Checker, pp persistence.Persistence, r rules.Rules) {
-			childRs := k.Status(chk, pp, r)
+		go func(k KPI, parentTags map[string]string, chk checker.Checker, pp persistence.Persistence, r rules.Rules) {
+			childRs := k.Status(rs.Tags, chk, pp, r)
 			ch <- &childRs
-		}(k, chk, pp, r)
+		}(k, rs.Tags, chk, pp, r)
 	}
 
 	for {
@@ -94,14 +88,20 @@ type KPI struct {
 	Responsible string    `yaml:"responsible"`
 }
 
-func (k KPI) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+	tags := make(map[string]string)
+	for k, v := range parentTags {
+		tags[k] = v
+	}
+	tags[persistence.IdentifierKeyPerformanceIndicator] = k.Id
+
 	rs := persistence.ResultSet{
-		Kind:        IdentifierKeyPerformanceIndicator,
 		Responsible: k.Responsible,
 		Name:        k.Name,
 		Id:          k.Id,
 		Children:    []*persistence.ResultSet{},
 		Vals:        make(map[string]bool),
+		Tags:        tags,
 	}
 
 	ch := make(chan *persistence.ResultSet)
@@ -110,10 +110,10 @@ func (k KPI) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rul
 		if s.Responsible == "" {
 			s.Responsible = k.Responsible
 		}
-		go func(s Service, chk checker.Checker, pp persistence.Persistence, r rules.Rules) {
-			childRs := s.Status(chk, pp, r)
+		go func(s Service, parentTags map[string]string, chk checker.Checker, pp persistence.Persistence, r rules.Rules) {
+			childRs := s.Status(rs.Tags, chk, pp, r)
 			ch <- &childRs
-		}(s, chk, pp, r)
+		}(s, rs.Tags, chk, pp, r)
 	}
 
 	for {
@@ -148,13 +148,20 @@ type Service struct {
 	Responsible string `yaml:"responsible"`
 }
 
-func (s Service) Status(chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
+func (s Service) Status(parentTags map[string]string, chk checker.Checker, pp persistence.Persistence, r rules.Rules) persistence.ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
+
+	tags := make(map[string]string)
+	for k, v := range parentTags {
+		tags[k] = v
+	}
+	tags[persistence.IdentifierService] = name
+
 	rs := persistence.ResultSet{
 		Name:        name,
 		Responsible: s.Responsible,
 		Id:          name,
-		Kind:        IdentifierService,
+		Tags:        tags,
 	}
 	result := chk.Status(s.Host, s.Service)
 	rs.Err = result.Error
