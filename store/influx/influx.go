@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
 	"github.com/unprofession-al/bpmon/store"
@@ -78,20 +77,40 @@ func (i Influx) Write(rs *store.ResultSet) error {
 
 func (i Influx) GetLatest(rs store.ResultSet) (store.ResultSet, error) {
 	out := store.ResultSet{}
-	data := make(map[string]interface{})
+	query := NewSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
+	data, err := i.First(query)
+	out, err = i.asResultSet(data)
+	return out, err
+}
 
-	var where []string
-	for key, value := range rs.Tags {
-		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
+func (i Influx) First(query Query) (map[string]interface{}, error) {
+	out := make(map[string]interface{})
+
+	all, err := i.Run(query)
+	if err != nil {
+		return out, err
 	}
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s ORDER BY time DESC LIMIT 1;", rs.Kind(), strings.Join(where, " AND "))
+
+	if len(all) == 0 {
+		return out, errors.New("no data returned")
+	}
+
+	for k, v := range all[0] {
+		out[k] = v
+	}
+
+	return out, nil
+}
+
+func (i Influx) Run(query Query) ([]map[string]interface{}, error) {
+	var out []map[string]interface{}
 
 	if i.printQueries {
-		fmt.Println(query)
+		fmt.Println(query.Query())
 	}
 
 	q := client.Query{
-		Command:  query,
+		Command:  query.Query(),
 		Database: i.database,
 	}
 
@@ -110,127 +129,16 @@ func (i Influx) GetLatest(rs store.ResultSet) (store.ResultSet, error) {
 
 	if len(response.Results) >= 1 &&
 		len(response.Results[0].Series) >= 1 &&
-		len(response.Results[0].Series[0].Values) >= 1 &&
-		len(response.Results[0].Series[0].Values[0]) >= 2 {
-		row := response.Results[0].Series[0].Values[0]
-		for i, field := range row {
-			data[fields[i]] = field
-		}
-	} else {
-		err = errors.New("No matching entry found")
-		return out, err
-	}
-
-	out, err = i.asResultSet(data)
-	return out, err
-}
-
-func (i Influx) getOne(fields []string, from string, where []string, additional string) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
-
-	fields = prependTimeIfMissing(fields)
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s %s;", strings.Join(fields, ", "), from, strings.Join(where, " AND "), additional)
-	if i.printQueries {
-		fmt.Println(query)
-	}
-
-	q := client.Query{
-		Command:  query,
-		Database: i.database,
-	}
-
-	response, err := i.cli.Query(q)
-	if err != nil {
-		return out, err
-	}
-	if response.Error() != nil {
-		return out, response.Error()
-	}
-
-	if len(fields) == 1 && fields[0] == "*" {
-		if len(response.Results) >= 1 && len(response.Results[0].Series) >= 1 {
-			fields = response.Results[0].Series[0].Columns
-		}
-	}
-
-	if len(response.Results) >= 1 &&
-		len(response.Results[0].Series) >= 1 &&
-		len(response.Results[0].Series[0].Values) >= 1 &&
-		len(response.Results[0].Series[0].Values[0]) >= 2 {
-		row := response.Results[0].Series[0].Values[0]
-		for i, data := range row {
-			out[fields[i]] = data
-		}
-	} else {
-		err = errors.New("No matching entry found")
-		return out, err
-	}
-
-	return out, nil
-}
-
-func (i Influx) getAll(fields []string, from string, where []string, additional string) ([]map[string]interface{}, error) {
-	var out []map[string]interface{}
-
-	fields = prependTimeIfMissing(fields)
-	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s %s;", strings.Join(fields, ", "), from, strings.Join(where, " AND "), additional)
-	if i.printQueries {
-		fmt.Println(query)
-	}
-
-	q := client.Query{
-		Command:  query,
-		Database: i.database,
-	}
-
-	response, err := i.cli.Query(q)
-	if err != nil {
-		return out, err
-	}
-	if response.Error() != nil {
-		return out, response.Error()
-	}
-
-	if len(fields) == 1 && fields[0] == "*" {
-		if len(response.Results) >= 1 && len(response.Results[0].Series) >= 1 {
-			fields = response.Results[0].Series[0].Columns
-		}
-	}
-
-	if len(response.Results) >= 1 &&
-		len(response.Results[0].Series) >= 1 &&
 		len(response.Results[0].Series[0].Values) >= 1 {
 		rows := response.Results[0].Series[0].Values
 		for _, row := range rows {
-			set := make(map[string]interface{})
-			for i, data := range row {
-				set[fields[i]] = data
+			data := make(map[string]interface{})
+			for i, cell := range row {
+				data[fields[i]] = cell
 			}
-			out = append(out, set)
+			out = append(out, data)
 		}
 
 	}
-
 	return out, nil
-}
-
-func prependTimeIfMissing(fields []string) []string {
-	for i, field := range fields {
-		if field == "*" {
-			return []string{"*"}
-		}
-		if field == "time" {
-			if i != 0 {
-				tmp := fields[0]
-				fields[0] = "time"
-				fields[i] = tmp
-			}
-			return fields
-		}
-	}
-	return append([]string{"time"}, fields...)
-}
-
-func getInfluxTimestamp(t time.Time) int64 {
-	return t.UnixNano()
 }

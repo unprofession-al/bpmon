@@ -42,36 +42,17 @@ func filterByStatus(in []store.Event, stati []status.Status) []store.Event {
 	return out
 }
 
-func buildTimeFilter(s time.Time, e time.Time) []string {
-	var clause []string
-	clause = append(clause, fmt.Sprintf("time < %d", getInfluxTimestamp(e)))
-	clause = append(clause, fmt.Sprintf("time > %d", getInfluxTimestamp(s)))
-	return clause
-}
-
-func buildTagFilter(tags map[string]string) []string {
-	var clause []string
-	for key, value := range tags {
-		clause = append(clause, fmt.Sprintf("%s = '%s'", key, value))
-	}
-	return clause
-}
-
 func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([]store.Event, error) {
 	out := []store.Event{}
 	totalDuration := end.Sub(start).Seconds()
-
-	where := []string{}
-	where = append(buildTimeFilter(start, end), where...)
-	where = append(buildTagFilter(rs.Tags), where...)
-	where = append(where, "changed = true")
 
 	fields := []string{"time", "status", "annotation"}
 	for tag, _ := range rs.Tags {
 		fields = append(fields, tag)
 	}
 
-	rows, err := i.getAll(fields, rs.Kind(), where, "")
+	query := NewSelectQuery().Fields(fields...).From(rs.Kind()).Between(start, end).FilterTags(rs.Tags).Filter("changed = true")
+	rows, err := i.Run(query)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
 		return out, errors.New(msg)
@@ -124,11 +105,9 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 	}
 
 	// get last state before the time window specified by 'start' and 'end'
-	whereLast := []string{}
-	whereLast = append(buildTagFilter(rs.Tags), whereLast...)
-	whereLast = append(buildTimeFilter(start, end), whereLast...)
-	additional := "ORDER BY time DESC LIMIT 1"
-	last, err := i.getOne(fields, rs.Kind(), whereLast, additional)
+	query = NewSelectQuery().Fields(fields...).From(rs.Kind()).Between(start, end).FilterTags(rs.Tags).OrderBy("time").Limit(1)
+	last, err := i.First(query)
+
 	if err != nil {
 		// if no state at all is found
 		complete := store.Event{
@@ -190,16 +169,13 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 		},
 	}
 
-	where := []string{}
-	where = append(buildTimeFilter(start, end), where...)
-	where = append(buildTagFilter(rs.Tags), where...)
-
 	fields := []string{"time", "status", "annotation"}
 	for tag, _ := range rs.Tags {
 		fields = append(fields, tag)
 	}
 
-	rows, err := i.getAll(fields, rs.Kind(), where, "")
+	query := NewSelectQuery().Fields(fields...).From(rs.Kind()).Between(start, end).FilterTags(rs.Tags)
+	rows, err := i.Run(query)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
 		return events, errors.New(msg)
@@ -292,13 +268,9 @@ func (i Influx) AnnotateEvent(id string, annotation string) (store.ResultSet, er
 		return rs, err
 	}
 
-	where := []string{}
-	for key, value := range rs.Tags {
-		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
-	}
-	where = append(where, fmt.Sprintf("time = %d", getInfluxTimestamp(rs.Start)))
-
-	point, err := i.getOne([]string{"*"}, rs.Kind(), where, "")
+	filter := fmt.Sprintf("time = %d", rs.Start.UnixNano())
+	query := NewSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).Filter(filter).Limit(1)
+	point, err := i.First(query)
 	if err != nil {
 		return rs, err
 	}
