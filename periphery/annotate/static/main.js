@@ -1,7 +1,7 @@
 function loadCount(days) {
-    $.getJSON("/api/v1/bp/events?count&range=" + days, function(data) {
-        $("#count").html(data);
-    });
+    //$.getJSON("/api/v1/bp/events?count&range=" + days, function(data) {
+    //    $("#count").html(data);
+    //});
 }
 
 function loadEvents(size, days) {
