@@ -34,32 +34,34 @@
 
 <script type="text/html" id="event_tmpl">
     <div class="event panel" id="<%=id%>">
-        <div class="info event-section left">
-            <div class="timestamp">
-                <%=timestamp%>
-            </div>
-        </div>
-        <div class="tags event-section left">
-            <% for (var tag in t) { %>
-            <div class="tag">
-                <%=tag%><span class="tabbed"> <%=t[tag]%></span>
-            </div>
-            <% } %>
-        </div>
-        <div class="event-section buttons right">
-            <span onclick="quickAnnotate(&#39;<%=id%>&#39;)" class="button quick">Quick Annotate</span>
-            <span onclick="showEditor(&#39;<%=id%>&#39;)" class="button">Annotate</span>
-        </div>
-        <div class="annotation-editor" id="<%=id%>_annotation_editor" style="display: none;">
-            <div class="annotation-editor-top">
-                <div contenteditable="true" class="annotation-input regular" id="<%=id%>_annotation" data-placeholder="Provide annotation text here..."></div>
-            </div>
-            <div class="annotation-editor-bottom">
-                <span onclick="hideEditor(&#39;<%=id%>&#39;)" class="button quick">Cancel</span>
-                <span onclick="annotate(&#39;<%=id%>&#39;)" class="button">Send</span>
-            </div>
-        </div>
-    </div>
+		<div class="panel-content">
+        	<div class="info event-section left">
+            	<div class="timestamp">
+                	<%=timestamp%>
+            	</div>
+        	</div>
+        	<div class="tags event-section left">
+            	<% for (var tag in t) { %>
+	            <div class="tag">
+    	            <%=tag%><b> <%=t[tag]%></b>
+        	    </div>
+            	<% } %>
+	        </div>
+    	    <div class="event-section buttons right">
+        	    <span onclick="quickAnnotate(&#39;<%=id%>&#39;)" class="button quick">Quick Annotate</span>
+            	<span onclick="showEditor(&#39;<%=id%>&#39;)" class="button">Annotate</span>
+	        </div>
+    	    <div class="annotation-editor" id="<%=id%>_annotation_editor" style="display: none;">
+        	    <div class="annotation-editor-top">
+            	    <div contenteditable="true" class="annotation-input regular" id="<%=id%>_annotation" data-placeholder="Provide annotation text here..."></div>
+            	</div>
+            	<div class="annotation-editor-bottom">
+                	<span onclick="hideEditor(&#39;<%=id%>&#39;)" class="button quick">Cancel</span>
+                	<span onclick="annotate(&#39;<%=id%>&#39;)" class="button">Send</span>
+            	</div>
+        	</div>
+    	</div>
+	</div>
 </script>
 
 <script src="assets/jquery-3.2.1.min.js"></script>

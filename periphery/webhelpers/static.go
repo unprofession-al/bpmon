@@ -467,12 +467,12 @@ V/CP1m8KvruE5ezx+RYu1tXsUVGweNCwaAql3wEAAP//0oorZNEEAAA=
 
 	"/components/typo.css": {
 		local:   "static/components/typo.css",
-		size:    225,
-		modtime: 1514380703,
+		size:    250,
+		modtime: 1514458931,
 		compressed: `
-H4sIAAAAAAAC/4zNTcrCMBDG8X1O8WxeukmhH6+b9BbeIKFJJ9BkSjOgVby7oBW7dPsffvM4HjfcFQAE
-zlIHm+K8GVRndixcaRSbS138GsOgHkpRq0GdBvUa9K9Bp50nu04x18KLQdss1+FYHYtw+hxeb46rFx8n
-EgPH8zh8c4k3b9D2zd/bdL+bZjfqGQAA//8oZwvW4QAAAA==
+H4sIAAAAAAAC/4zNQQrCMBCF4X1O8TbSTQppqwjpLbxBg00nYDKlGdAqvbugFbsR3P7DN8/xecZDAYDn
+JKXvYrjMFsWJHQsXGrlLucz9FHyrFqWo0qBagxoN2mvQYeWxm4aQSuHRojLjrd1WxyIcP4fXm+3qtQ8D
+icXRmPZbc7j3FlVjdm9S/03MStxPsahnAAAA//90CF5b+gAAAA==
 `,
 	},
 

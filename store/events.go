@@ -12,6 +12,7 @@ import (
 type Event struct {
 	ID              string            `json:"id"`
 	Status          status.Status     `json:"status"`
+	Pseudo          bool              `json:"pseudo"`
 	Annotation      string            `json:"annotation"`
 	Start           time.Time         `json:"start"`
 	End             time.Time         `json:"end"`

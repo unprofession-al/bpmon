@@ -1,44 +1,67 @@
-.details {
-    display: none;
+.info, .tags {
+    overflow: hidden;
+    width: 240px;
+    padding-right: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
 }
 
-.chart {
-    width: 100%;
-    height: 40px;
+.button.quick {
+    background-color: #dba578;
+}
+
+.annotation-editor {
     clear: both;
-    background-color: #eee;
-}
-
-.kpis .availability .chart {
-    height: 10px;
-}
-
-.chart .frame {
-    height: 100%;
     float: left;
+    padding-top: 20px;
+    width: 100%;
+    text-align: center;
+    /*border: 1px solid blue;*/
 }
 
-.chart .ok {
-    background-color: var(--ok-color-bright);
+.annotation-editor-top {
+    width: 100%;
+    clear: both;
 }
 
-.chart .ok:hover {
-    background-color: var(--ok-color-dark);
+.annotation-editor-bottom {
+    width: 100%;
+    clear: both;
+    float: right;
+    text-align: right;
+    padding-top: 20px;
 }
 
-.chart .nok {
-    background-color: var(--nok-color-bright);
+.annotation-input {
+    height: 20px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
-.chart .nok:hover {
-    background-color: var(--nok-color-dark);
+.annotation-input br {
+    display:none;
 }
 
-.chart .unknown {
-    background-color: var(--unknown-color-bright);
+.annotation-input * {
+    display:inline;
+    white-space:nowrap;
 }
 
-.chart .unknown:hover {
-    background-color: var(--unknown-color-dark);
+.annotation-input.regular {
+    background-color: #afd1ca;
+}
+
+.annotation-input.quick {
+    width: 300px;
+    background-color: #ffffff;
+}
+
+.annotation-input:empty:before {
+    color: #999;
+    font-size: 80%;
+    content: attr(data-placeholder);
 }
 

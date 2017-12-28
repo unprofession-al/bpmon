@@ -45,7 +45,7 @@ func (i Influx) asPoints(rs *store.ResultSet) []point {
 		}
 
 		pt := point{
-			Timestamp: rs.At,
+			Timestamp: rs.Start,
 			Series:    rs.Kind(),
 			Tags:      rs.Tags,
 			Fields:    fields,
@@ -70,7 +70,7 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 		if v != nil {
 			switch k {
 			case "time":
-				out.At, err = time.Parse(time.RFC3339, v.(string))
+				out.Start, err = time.Parse(time.RFC3339, v.(string))
 				if err != nil {
 					return out, err
 				}
@@ -115,6 +115,7 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 				if err != nil {
 					return out, err
 				}
+			case "end":
 			case "name":
 			case "responsible":
 			case "children":

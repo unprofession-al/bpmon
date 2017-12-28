@@ -14,36 +14,56 @@ import (
 )
 
 func (i Influx) GetEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
+	var out []store.Event
+	var err error
 	if i.getLastStatus {
 		for _, saveOkKind := range i.saveOK {
 			if saveOkKind == rs.Kind() {
-				return i.getEvents(rs, start, end, stati)
+				out, err = i.getEvents(rs, start, end)
 			}
 		}
 	}
-	return i.assumeEvents(rs, start, end, interval, stati)
+	out, err = i.assumeEvents(rs, start, end, interval)
+	return filterByStatus(out, stati), err
 }
 
-func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time, stati []status.Status) ([]store.Event, error) {
+func filterByStatus(in []store.Event, stati []status.Status) []store.Event {
+	if len(stati) == 0 {
+		return in
+	}
+	var out []store.Event
+	for _, event := range in {
+		for _, st := range stati {
+			if event.Status == st {
+				out = append(out, event)
+			}
+		}
+	}
+	return out
+}
+
+func buildTimeFilter(s time.Time, e time.Time) []string {
+	var clause []string
+	clause = append(clause, fmt.Sprintf("time < %d", getInfluxTimestamp(e)))
+	clause = append(clause, fmt.Sprintf("time > %d", getInfluxTimestamp(s)))
+	return clause
+}
+
+func buildTagFilter(tags map[string]string) []string {
+	var clause []string
+	for key, value := range tags {
+		clause = append(clause, fmt.Sprintf("%s = '%s'", key, value))
+	}
+	return clause
+}
+
+func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([]store.Event, error) {
 	out := []store.Event{}
 	totalDuration := end.Sub(start).Seconds()
 
 	where := []string{}
-
-	statusWhere := []string{}
-	for _, st := range stati {
-		statusWhere = append(statusWhere, fmt.Sprintf("status = %d", st.Int()))
-	}
-	if len(statusWhere) > 0 {
-		token := fmt.Sprintf(" ( %s ) ", strings.Join(statusWhere, " OR "))
-		where = append(where, token)
-	}
-
-	for key, value := range rs.Tags {
-		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
-	}
-	where = append(where, fmt.Sprintf("time < %d", getInfluxTimestamp(end)))
-	where = append(where, fmt.Sprintf("time > %d", getInfluxTimestamp(start)))
+	where = append(buildTimeFilter(start, end), where...)
+	where = append(buildTagFilter(rs.Tags), where...)
 	where = append(where, "changed = true")
 
 	fields := []string{"time", "status", "annotation"}
@@ -59,7 +79,10 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time, st
 
 	earliestEvent := end
 	for i, row := range rows {
-		current := store.Event{Tags: make(map[string]string)}
+		current := store.Event{
+			Tags:   make(map[string]string),
+			Pseudo: false,
+		}
 		current.Start, err = time.Parse(time.RFC3339, row["time"].(string))
 		if err != nil {
 			return out, err
@@ -97,23 +120,20 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time, st
 		}
 
 		current.SetID()
-
 		out = append(out, current)
 	}
 
 	// get last state before the time window specified by 'start' and 'end'
 	whereLast := []string{}
-	for key, value := range rs.Tags {
-		whereLast = append(whereLast, fmt.Sprintf("%s = '%s'", key, value))
-	}
-	whereLast = append(whereLast, fmt.Sprintf("time < %d", getInfluxTimestamp(end)))
-	whereLast = append(whereLast, fmt.Sprintf("time > %d", getInfluxTimestamp(start)))
+	whereLast = append(buildTagFilter(rs.Tags), whereLast...)
+	whereLast = append(buildTimeFilter(start, end), whereLast...)
 	additional := "ORDER BY time DESC LIMIT 1"
 	last, err := i.getOne(fields, rs.Kind(), whereLast, additional)
 	if err != nil {
 		// if no state at all is found
 		complete := store.Event{
 			Status:          status.Unknown,
+			Pseudo:          true,
 			Annotation:      "no such data found",
 			Duration:        totalDuration,
 			DurationPercent: 100.0,
@@ -123,17 +143,14 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time, st
 		}
 
 		complete.SetID()
-		for _, st := range stati {
-			if complete.Status == st {
-				out = append([]store.Event{complete}, out...)
-			}
-		}
+		out = append([]store.Event{complete}, out...)
 	} else {
 		duration := earliestEvent.Sub(start).Seconds()
 		durationPercent := 100.0 / float64(totalDuration) * float64(duration)
 		first := store.Event{
 			Start:           start,
 			End:             earliestEvent,
+			Pseudo:          true,
 			Duration:        duration,
 			DurationPercent: durationPercent,
 			Tags:            make(map[string]string),
@@ -155,17 +172,13 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time, st
 		for tag, _ := range rs.Tags {
 			first.Tags[tag] = last[tag].(string)
 		}
-		for _, st := range stati {
-			if first.Status == st {
-				out = append([]store.Event{first}, out...)
-			}
-		}
+		out = append([]store.Event{first}, out...)
 	}
 
 	return out, nil
 }
 
-func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
+func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]store.Event, error) {
 	duration := end.Sub(start).Seconds()
 	events := []store.Event{
 		store.Event{
@@ -178,20 +191,8 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 	}
 
 	where := []string{}
-
-	statusWhere := []string{}
-	for _, st := range stati {
-		statusWhere = append(statusWhere, fmt.Sprintf("status = %d", st.Int()))
-	}
-	if len(statusWhere) > 0 {
-		token := fmt.Sprintf(" ( %s ) ", strings.Join(statusWhere, " OR "))
-		where = append(where, token)
-	}
-	for key, value := range rs.Tags {
-		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
-	}
-	where = append(where, fmt.Sprintf("time < %d", getInfluxTimestamp(end)))
-	where = append(where, fmt.Sprintf("time > %d", getInfluxTimestamp(start)))
+	where = append(buildTimeFilter(start, end), where...)
+	where = append(buildTagFilter(rs.Tags), where...)
 
 	fields := []string{"time", "status", "annotation"}
 	for tag, _ := range rs.Tags {
@@ -250,11 +251,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 				Status:     status.Ok,
 				Annotation: "",
 			}
-			for _, st := range stati {
-				if filler.Status == st {
-					events = append(events, filler)
-				}
-			}
+			events = append(events, filler)
 		}
 
 		// igrnore that case for now
@@ -277,11 +274,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 			Status:     status.Ok,
 			Annotation: "",
 		}
-		for _, st := range stati {
-			if filler.Status == st {
-				events = append(events, filler)
-			}
-		}
+		events = append(events, filler)
 	}
 
 	for i, e := range events {
@@ -303,7 +296,7 @@ func (i Influx) AnnotateEvent(id string, annotation string) (store.ResultSet, er
 	for key, value := range rs.Tags {
 		where = append(where, fmt.Sprintf("%s = '%s'", key, value))
 	}
-	where = append(where, fmt.Sprintf("time = %d", getInfluxTimestamp(rs.At)))
+	where = append(where, fmt.Sprintf("time = %d", getInfluxTimestamp(rs.Start)))
 
 	point, err := i.getOne([]string{"*"}, rs.Kind(), where, "")
 	if err != nil {
@@ -348,7 +341,7 @@ func (i Influx) idToResultSet(id string) (store.ResultSet, error) {
 		return rs, err
 	}
 
-	rs.At = time.Unix(0, nanos)
+	rs.Start = time.Unix(0, nanos)
 
 	tags := strings.Split(elements[1], tagSeparator)
 	for _, pair := range tags {

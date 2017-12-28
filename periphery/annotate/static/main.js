@@ -18,10 +18,11 @@ function loadEvents(size, days) {
                     day: "numeric", year: "numeric", month: "short",
                     day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"
                 };
-                var date = new Date(data[key].timestamp);
-                var dateString =  date.toLocaleTimeString("de-ch", options)
+                var date = new Date(data[key].start);
+                var dateString =  date.toLocaleTimeString("de-ch", options);
+                var duration = data[key].duration.toFixed(0);
 
-                var event = {id: key, timestamp: dateString, t: data[key].tags}
+                var event = {id: key, timestamp: dateString, t: data[key].tags, dur: duration};
                 var pannel = tmpl("event_tmpl", event);
                 $(pannel).hide().appendTo("#data").fadeIn(fadein);
             }
@@ -69,13 +70,13 @@ function annotate(id) {
 
 function showEditor(event) {
     var id = "#"+event+"_annotation_editor";
-    $(id).parent().find(".buttons").fadeOut(200);
+    $(id).parent().find(".buttons").fadeOut(100);
     $(id).slideDown();
 }
 
 function hideEditor(event) {
     var id = "#"+event+"_annotation_editor";
-    $(id).parent().find(".buttons").fadeIn(200);
+    $(id).parent().find(".buttons").fadeIn(100);
     $(id).slideUp();
 }
 

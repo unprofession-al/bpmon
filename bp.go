@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/unprofession-al/bpmon/checker"
-	"github.com/unprofession-al/bpmon/store"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 type BusinessProcesses []BP
@@ -61,8 +61,8 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 	rs.Status = status.FromBool(ok)
 	rs.Was = status.Unknown
 	rs.StatusChanged = false
-	rs.At = time.Now()
-	rs.Vals["in_availability"] = bp.Availability.Contains(rs.At)
+	rs.Start = time.Now()
+	rs.Vals["in_availability"] = bp.Availability.Contains(rs.Start)
 	return rs
 }
 
@@ -120,7 +120,7 @@ func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp store.
 	rs.Status = status.FromBool(ok)
 	rs.Was = status.Unknown
 	rs.StatusChanged = false
-	rs.At = time.Now()
+	rs.Start = time.Now()
 	if err != nil {
 		rs.Err = err
 		rs.Status = status.Unknown
@@ -151,7 +151,7 @@ func (s Service) Status(parentTags map[string]string, chk checker.Checker, pp st
 	}
 	result := chk.Status(s.Host, s.Service)
 	rs.Err = result.Error
-	rs.At = result.Timestamp
+	rs.Start = result.Timestamp
 	rs.Output = result.Message
 	rs.Vals = result.Values
 	st, _ := r.Analyze(result.Values)

@@ -14,7 +14,8 @@ type ResultSet struct {
 	Name          string
 	Id            string
 	Tags          map[string]string
-	At            time.Time
+	Start         time.Time
+	End           time.Time
 	Vals          map[string]bool
 	Status        status.Status
 	Was           status.Status
@@ -57,7 +58,7 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool, resp bool) string
 
 	ident = strings.Repeat("   ", level+1)
 	if ts {
-		timestamp := rs.At.Format("2006-01-02 15:04:05")
+		timestamp := rs.Start.Format("2006-01-02 15:04:05")
 		out += fmt.Sprintf(" (%s)", timestamp)
 	}
 	if resp && rs.Responsible != "" {
