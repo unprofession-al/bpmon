@@ -1,4 +1,4 @@
-var apiBaseURL = "/api/v1/"
+var apiBaseURL = "/api/v1/";
 
 function init() {
     hideSpinner();
@@ -16,7 +16,7 @@ function init() {
 }
 
 function loadBPs() {
-    $.getJSON(apiBaseURL+"bps/", function(data) {
+    $.getJSON(apiBaseURL+"bps" + window.location.search, function(data) {
         if (data == 0 || data == null || data == undefined) {
             $("<div class='notification panel'>Error while listing business processes...</div>").hide().appendTo("#data").fadeIn("slow");
         } else {
@@ -33,13 +33,13 @@ function loadBPs() {
             }
         }
     })
-    .fail(function() {
-        $("<div class='notification panel'>Error while listing business processes: API could not be reached...</div>").hide().appendTo("#data").fadeIn("slow");
+    .fail(function(data) {
+        $("<div class='notification panel'>Error while listing business processes, API could not be reached. Error is: " + data.responseText + " (HTTP Error " + data.status + ")</div>").hide().appendTo("#data").fadeIn("slow");
     });
 }
 
 function loadBPEvents(bpid) {
-    $.getJSON(apiBaseURL+"bps/" + bpid, function(data) {
+    $.getJSON(apiBaseURL+"bps/" + bpid + window.location.search, function(data) {
         if (data == 0 || data == null || data == undefined) {
             $("<div class='notification panel'>Could not fetch events for business process '" + bpid + "'...</div>").hide().appendTo("#data").fadeIn("slow");
         } else {
@@ -92,7 +92,7 @@ function loadBPEvents(bpid) {
 }
 
 function loadKPIs(bpid) {
-    $.getJSON(apiBaseURL+"bps/" + bpid + "/kpis", function(data) {
+    $.getJSON(apiBaseURL+"bps/" + bpid + "/kpis" + window.location.search, function(data) {
         if (data == 0 || data == null || data == undefined) {
             $("<div class='notification panel'>Error while listing KPIs for business processes " + bpid + "...</div>").hide().appendTo("#data").fadeIn("slow");
         } else {
@@ -107,7 +107,7 @@ function loadKPIs(bpid) {
 }
 
 function loadKPIEvents(bpid, kpiid) {
-    $.getJSON(apiBaseURL+"bps/" + bpid + "/kpis/" + kpiid, function(data) {
+    $.getJSON(apiBaseURL+"bps/" + bpid + "/kpis/" + kpiid + window.location.search, function(data) {
         if (data == 0 || data == null || data == undefined) {
             $("<div class='notification panel'>Could not fetch events for KPI "+ kpiid + " of business process " + bpid + "'...</div>").hide().appendTo("#data").fadeIn("slow");
         } else {

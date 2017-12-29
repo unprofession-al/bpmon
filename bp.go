@@ -1,6 +1,7 @@
 package bpmon
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"time"
 
@@ -12,6 +13,36 @@ import (
 
 type BusinessProcesses []BP
 
+func (bps BusinessProcesses) GenerateHashes(pepper string) map[string]string {
+	recipientList := make(map[string]struct{})
+	for _, bp := range bps {
+		for _, recipient := range bp.Recipients {
+			recipientList[recipient] = struct{}{}
+		}
+	}
+
+	recipients := make(map[string]string)
+	for recipient, _ := range recipientList {
+		toHash := []byte(recipient + ":::" + pepper)
+		sum := fmt.Sprintf("%x", sha256.Sum256(toHash))
+		recipients[sum] = recipient
+	}
+
+	return recipients
+}
+
+func (bps BusinessProcesses) GetByRecipient(recipient string) BusinessProcesses {
+	var out BusinessProcesses
+	for _, bp := range bps {
+		for _, r := range bp.Recipients {
+			if recipient == r {
+				out = append(out, bp)
+			}
+		}
+	}
+	return out
+}
+
 type BP struct {
 	Name             string       `yaml:"name"`
 	Id               string       `yaml:"id"`
@@ -19,6 +50,7 @@ type BP struct {
 	AvailabilityName string       `yaml:"availability"`
 	Availability     Availability `yaml:"-"`
 	Responsible      string       `yaml:"responsible"`
+	Recipients       []string     `yaml:"recipients"`
 }
 
 func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {

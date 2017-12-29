@@ -19,13 +19,21 @@ var pp store.Store
 
 var routes = make(map[string]wh.Leafs)
 
-func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, ppin store.Store) (http.Handler, error) {
-	pp = ppin
-	bps = bpin
+func Setup(conf configs.DashboardConf, bpsIn bpmon.BusinessProcesses, ppIn store.Store, auth bool, recipientHashes map[string]string) (http.Handler, error) {
+	pp = ppIn
+	bps = bpsIn
 
 	r := mux.NewRouter().StrictSlash(true)
-	api := r.PathPrefix("/api/").Subrouter()
+
+	apiRouter := mux.NewRouter()
+	api := apiRouter.PathPrefix("/api/").Subrouter()
 	wh.PopulateRouter(api, routes)
+	if auth {
+		ta := wh.TokenAuth{recipientHashes}
+		r.Handle("/api/{_:.*}", ta.Create(apiRouter))
+	} else {
+		r.Handle("/api/{_:.*}", apiRouter)
+	}
 
 	if conf.Static == "" {
 		assetHandler := wh.GetAssetHandler("/assets/")

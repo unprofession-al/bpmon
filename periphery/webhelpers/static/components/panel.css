@@ -28,4 +28,5 @@
 
 .notification {
     background-color: var(--notify-color);
+    padding: 20px 30px;
 }
