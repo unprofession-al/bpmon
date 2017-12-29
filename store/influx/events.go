@@ -20,6 +20,7 @@ func (i Influx) GetEvents(rs store.ResultSet, start time.Time, end time.Time, in
 		for _, saveOkKind := range i.saveOK {
 			if saveOkKind == rs.Kind() {
 				out, err = i.getEvents(rs, start, end)
+				return filterByStatus(out, stati), err
 			}
 		}
 	}
@@ -106,7 +107,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 
 	// get last state before the time window specified by 'start' and 'end'
 	gap, _ := time.ParseDuration("30m")
-	query = NewSelectQuery().Fields(fields...).From(rs.Kind()).Between(end, end.Add(gap*-1)).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
+	query = NewSelectQuery().Fields(fields...).From(rs.Kind()).Between(end.Add(gap*-1), end).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
 	last, err := i.First(query)
 
 	if err != nil {
