@@ -76,15 +76,12 @@ func (i Influx) Write(rs *store.ResultSet) error {
 }
 
 func (i Influx) GetLatest(rs store.ResultSet) (store.ResultSet, error) {
-	out := store.ResultSet{}
 	query := NewSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
-	data, err := i.First(query)
-	out, err = i.asResultSet(data)
-	return out, err
+	return i.First(query)
 }
 
-func (i Influx) First(query Query) (map[string]interface{}, error) {
-	out := make(map[string]interface{})
+func (i Influx) First(query Query) (store.ResultSet, error) {
+	var out store.ResultSet
 
 	all, err := i.Run(query)
 	if err != nil {
@@ -95,15 +92,12 @@ func (i Influx) First(query Query) (map[string]interface{}, error) {
 		return out, errors.New("no data returned")
 	}
 
-	for k, v := range all[0] {
-		out[k] = v
-	}
-
+	out = all[0]
 	return out, nil
 }
 
-func (i Influx) Run(query Query) ([]map[string]interface{}, error) {
-	var out []map[string]interface{}
+func (i Influx) Run(query Query) ([]store.ResultSet, error) {
+	var out []store.ResultSet
 
 	if i.printQueries {
 		fmt.Println(query.Query())
@@ -136,7 +130,11 @@ func (i Influx) Run(query Query) ([]map[string]interface{}, error) {
 			for i, cell := range row {
 				data[fields[i]] = cell
 			}
-			out = append(out, data)
+			rs, err := i.asResultSet(data)
+			if err != nil {
+				return out, err
+			}
+			out = append(out, rs)
 		}
 
 	}

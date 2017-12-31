@@ -2,7 +2,6 @@ package influx
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -47,67 +46,38 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 	out := []store.Event{}
 	totalDuration := end.Sub(start).Seconds()
 
-	fields := []string{"time", "status", "annotation"}
-	for tag, _ := range rs.Tags {
-		fields = append(fields, tag)
-	}
-
-	query := NewSelectQuery().Fields(fields...).From(rs.Kind()).Between(start, end).FilterTags(rs.Tags).Filter("changed = true")
-	rows, err := i.Run(query)
+	query := NewSelectQuery().From(rs.Kind()).Between(start, end).FilterTags(rs.Tags).Filter("changed = true")
+	resultsets, err := i.Run(query)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
 		return out, errors.New(msg)
 	}
 
 	earliestEvent := end
-	for i, row := range rows {
+	for i, resultset := range resultsets {
 		current := store.Event{
-			Tags:   make(map[string]string),
-			Pseudo: false,
+			Tags:       resultset.Tags,
+			Pseudo:     false,
+			Status:     resultset.Status,
+			Annotation: resultset.Annotation,
 		}
-		current.Start, err = time.Parse(time.RFC3339, row["time"].(string))
-		if err != nil {
-			return out, err
-		}
+		current.Start = resultset.Start
 		if current.Start.Before(earliestEvent) {
 			earliestEvent = current.Start
 		}
 		current.End = end
-		next := i + 1
-		if next < len(rows) {
-			current.End, err = time.Parse(time.RFC3339, rows[i+1]["time"].(string))
-			if err != nil {
-				return out, err
-			}
+		if next := i + 1; next < len(resultsets) {
+			current.End = resultsets[i+1].Start
 		}
-
 		current.Duration = current.End.Sub(current.Start).Seconds()
 		current.DurationPercent = 100.0 / float64(totalDuration) * float64(current.Duration)
-		statusNumber, err := row["status"].(json.Number).Int64()
-		if err != nil {
-			return out, err
-		}
-		current.Status, err = status.FromInt64(statusNumber)
-		if err != nil {
-			return out, err
-		}
-		if row["annotation"] != nil {
-			current.Annotation = row["annotation"].(string)
-		} else {
-			current.Annotation = ""
-		}
-
-		for tag, _ := range rs.Tags {
-			current.Tags[tag] = row[tag].(string)
-		}
-
 		current.SetID()
 		out = append(out, current)
 	}
 
 	// get last state before the time window specified by 'start' and 'end'
 	gap, _ := time.ParseDuration("30m")
-	query = NewSelectQuery().Fields(fields...).From(rs.Kind()).Between(end.Add(gap*-1), end).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
+	query = NewSelectQuery().From(rs.Kind()).Between(end.Add(gap*-1), end).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
 	last, err := i.First(query)
 
 	if err != nil {
@@ -122,7 +92,6 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 			End:             end,
 			Tags:            rs.Tags,
 		}
-
 		complete.SetID()
 		out = append([]store.Event{complete}, out...)
 	} else {
@@ -134,25 +103,11 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 			Pseudo:          true,
 			Duration:        duration,
 			DurationPercent: durationPercent,
-			Tags:            make(map[string]string),
+			Tags:            last.Tags,
+			Status:          last.Status,
+			Annotation:      last.Annotation,
 		}
 		first.SetID()
-		statusNumber, err := last["status"].(json.Number).Int64()
-		if err != nil {
-			return out, err
-		}
-		first.Status, err = status.FromInt64(statusNumber)
-		if err != nil {
-			return out, err
-		}
-		if last["annotation"] != nil {
-			first.Annotation = last["annotation"].(string)
-		} else {
-			first.Annotation = ""
-		}
-		for tag, _ := range rs.Tags {
-			first.Tags[tag] = last[tag].(string)
-		}
 		out = append([]store.Event{first}, out...)
 	}
 
@@ -171,12 +126,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 		},
 	}
 
-	fields := []string{"time", "status", "annotation"}
-	for tag, _ := range rs.Tags {
-		fields = append(fields, tag)
-	}
-
-	query := NewSelectQuery().Fields(fields...).From(rs.Kind()).Between(start, end).FilterTags(rs.Tags)
+	query := NewSelectQuery().From(rs.Kind()).Between(start, end).FilterTags(rs.Tags)
 	rows, err := i.Run(query)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
@@ -189,30 +139,13 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 		last := events[lastIndex]
 		replace := false
 
-		current := store.Event{Tags: make(map[string]string)}
-		statusNumber, err := row["status"].(json.Number).Int64()
-		if err != nil {
-			return events, err
-		}
-		current.Status, err = status.FromInt64(statusNumber)
-		if err != nil {
-			return events, err
-		}
-		current.Start, err = time.Parse(time.RFC3339, row["time"].(string))
-		if err != nil {
-			return events, err
+		current := store.Event{
+			Tags:       row.Tags,
+			Status:     row.Status,
+			Start:      row.Start,
+			Annotation: row.Annotation,
 		}
 		current.End = current.Start.Add(interval)
-		if row["annotation"] != nil {
-			current.Annotation = row["annotation"].(string)
-		} else {
-			current.Annotation = ""
-		}
-
-		for tag, _ := range rs.Tags {
-			current.Tags[tag] = row[tag].(string)
-		}
-
 		if current.Start.Before(last.End) {
 			if last.Status == current.Status {
 				current.Start = last.Start
@@ -272,17 +205,11 @@ func (i Influx) AnnotateEvent(id string, annotation string) (store.ResultSet, er
 
 	filter := fmt.Sprintf("time = %d", rs.Start.UnixNano())
 	query := NewSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).Filter(filter).Limit(1)
-	point, err := i.First(query)
+	rs, err = i.First(query)
 	if err != nil {
 		return rs, err
 	}
 
-	rs, err = i.asResultSet(point)
-	if err != nil {
-		return rs, err
-	}
-
-	rs, err = i.asResultSet(point)
 	rs.Annotated = true
 	rs.Annotation = annotation
 	err = i.Write(&rs)
