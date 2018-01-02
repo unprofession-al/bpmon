@@ -13,8 +13,8 @@ import (
 
 type Environments map[string]*Hosts
 
-func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.IcingaStatusResponse, error) {
-	response := icinga.IcingaStatusResponse{}
+func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.StatusResponse, error) {
+	response := icinga.StatusResponse{}
 
 	env, ok := e[envN]
 	if !ok {
@@ -40,8 +40,8 @@ func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.IcingaSt
 	return response, nil
 }
 
-func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Timestamp) (icinga.IcingaStatusResponse, error) {
-	response := icinga.IcingaStatusResponse{}
+func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Timestamp) (icinga.StatusResponse, error) {
+	response := icinga.StatusResponse{}
 
 	env, ok := e[envN]
 	if !ok {
@@ -82,7 +82,7 @@ func (e Environments) Get(name string) (*Hosts, error) {
 
 func (e Environments) List() []string {
 	var out []string
-	for n, _ := range e {
+	for n := range e {
 		out = append(out, n)
 	}
 	return out

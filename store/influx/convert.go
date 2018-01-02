@@ -69,7 +69,7 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 	for k, v := range data {
 		if v != nil {
 			switch k {
-			case "time":
+			case timefield:
 				out.Start, err = time.Parse(time.RFC3339, v.(string))
 				if err != nil {
 					return out, err

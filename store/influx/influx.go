@@ -10,6 +10,8 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 )
 
+const timefield = "time"
+
 type Influx struct {
 	cli           client.Client
 	saveOK        []string

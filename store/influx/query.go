@@ -34,8 +34,8 @@ func (sq *SelectQuery) From(from string) *SelectQuery {
 }
 
 func (sq *SelectQuery) Between(s time.Time, e time.Time) *SelectQuery {
-	sq.where = append(sq.where, fmt.Sprintf("time < %d", e.UnixNano()))
-	sq.where = append(sq.where, fmt.Sprintf("time > %d", s.UnixNano()))
+	sq.where = append(sq.where, fmt.Sprintf("%s < %d", timefield, e.UnixNano()))
+	sq.where = append(sq.where, fmt.Sprintf("%s > %d", timefield, s.UnixNano()))
 	return sq
 }
 

@@ -28,9 +28,9 @@ func Setup(conf checker.Conf) (checker.Checker, error) {
 	username := u.User.Username()
 	password, _ := u.User.Password()
 
-	baseUrl := fmt.Sprintf("%s://%s%s/v1", u.Scheme, u.Host, u.Path)
+	baseURL := fmt.Sprintf("%s://%s%s/v1", u.Scheme, u.Host, u.Path)
 	fetcher := IcingaAPI{
-		baseUrl: baseUrl,
+		baseURL: baseURL,
 		pass:    password,
 		user:    username,
 	}
@@ -52,7 +52,7 @@ const (
 	IcingaFlagFailed            = "failed"
 )
 
-type IcingaConf struct {
+type Conf struct {
 	Server string `yaml:"server"`
 	Path   string `yaml:"path"`
 	Port   int    `yaml:"port"`
@@ -62,11 +62,11 @@ type IcingaConf struct {
 }
 
 type Icinga struct {
-	fecher IcingaFetcher
+	fecher Fetcher
 }
 
-type IcingaFetcher interface {
-	Fetch(string, string) (IcingaStatusResponse, error)
+type Fetcher interface {
+	Fetch(string, string) (StatusResponse, error)
 }
 
 func (i Icinga) DefaultRules() rules.Rules {
@@ -109,7 +109,7 @@ func icingaDefaultFlags() map[string]bool {
 
 func (i Icinga) Values() []string {
 	var out []string
-	for key, _ := range icingaDefaultFlags() {
+	for key := range icingaDefaultFlags() {
 		out = append(out, key)
 	}
 	return out
@@ -133,7 +133,7 @@ func (i Icinga) Status(host string, service string) checker.Result {
 
 // IcingaStatusResult describes the results returned by the icinga
 // api when a service status is requested.
-type IcingaStatusResponse struct {
+type StatusResponse struct {
 	Results []IcingaStatusResult `json:"results"`
 }
 
@@ -183,7 +183,7 @@ const (
 	IcingaStatusUnknown
 )
 
-func (r IcingaStatusResponse) status() (at time.Time, msg string, vals map[string]bool, err error) {
+func (r StatusResponse) status() (at time.Time, msg string, vals map[string]bool, err error) {
 	at = time.Now()
 	msg = ""
 	vals = icingaDefaultFlags()
@@ -220,23 +220,23 @@ func (r IcingaStatusResponse) status() (at time.Time, msg string, vals map[strin
 }
 
 type IcingaAPI struct {
-	baseUrl string
+	baseURL string
 	user    string
 	pass    string
 }
 
-func (i IcingaAPI) Fetch(host, service string) (IcingaStatusResponse, error) {
-	var response IcingaStatusResponse
+func (i IcingaAPI) Fetch(host, service string) (StatusResponse, error) {
+	var response StatusResponse
 	var body []byte
 
 	// proper encoding for the host string
-	hostUrl := &url.URL{Path: host}
-	host = hostUrl.String()
+	hostURL := &url.URL{Path: host}
+	host = hostURL.String()
 	// proper encoding for the service string
-	serviceUrl := &url.URL{Path: service}
-	service = serviceUrl.String()
+	serviceURL := &url.URL{Path: service}
+	service = serviceURL.String()
 	// build url
-	url := fmt.Sprintf("%s/objects/services?service=%s!%s", i.baseUrl, host, service)
+	url := fmt.Sprintf("%s/objects/services?service=%s!%s", i.baseURL, host, service)
 	// query api
 	// TODO: read rootca from file
 	tr := &http.Transport{
