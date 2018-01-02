@@ -43,5 +43,5 @@ type Store interface {
 	GetEvents(ResultSet, time.Time, time.Time, time.Duration, []status.Status) ([]Event, error)
 	GetLatest(ResultSet) (ResultSet, error)
 	Write(*ResultSet) error
-	AnnotateEvent(string, string) (ResultSet, error)
+	AnnotateEvent(EventID, string) (ResultSet, error)
 }

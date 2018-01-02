@@ -1,11 +1,8 @@
 package influx
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/unprofession-al/bpmon/status"
@@ -71,7 +68,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 		}
 		current.Duration = current.End.Sub(current.Start).Seconds()
 		current.DurationPercent = 100.0 / float64(totalDuration) * float64(current.Duration)
-		current.SetID()
+		current.SetEventID()
 		out = append(out, current)
 	}
 
@@ -92,7 +89,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 			End:             end,
 			Tags:            rs.Tags,
 		}
-		complete.SetID()
+		complete.SetEventID()
 		out = append([]store.Event{complete}, out...)
 	} else {
 		duration := earliestEvent.Sub(start).Seconds()
@@ -107,7 +104,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 			Status:          last.Status,
 			Annotation:      last.Annotation,
 		}
-		first.SetID()
+		first.SetEventID()
 		out = append([]store.Event{first}, out...)
 	}
 
@@ -191,14 +188,14 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 	for i, e := range events {
 		e.Duration = e.End.Sub(e.Start).Seconds()
 		e.DurationPercent = 100.0 / float64(duration) * e.Duration
-		e.SetID()
+		e.SetEventID()
 		events[i] = e
 	}
 	return events, nil
 }
 
-func (i Influx) AnnotateEvent(id string, annotation string) (store.ResultSet, error) {
-	rs, err := i.idToResultSet(id)
+func (i Influx) AnnotateEvent(eid store.EventID, annotation string) (store.ResultSet, error) {
+	rs, err := eid.GetResultSet()
 	if err != nil {
 		return rs, err
 	}
@@ -215,43 +212,4 @@ func (i Influx) AnnotateEvent(id string, annotation string) (store.ResultSet, er
 	err = i.Write(&rs)
 
 	return rs, err
-}
-
-const (
-	pairSeparator    = "="
-	tagSeparator     = ";"
-	timeTagSeparator = " "
-)
-
-func (i Influx) idToResultSet(id string) (store.ResultSet, error) {
-	rs := store.ResultSet{
-		Tags: make(map[string]string),
-	}
-	data, err := base64.RawURLEncoding.DecodeString(id)
-	if err != nil {
-		return rs, err
-	}
-
-	elements := strings.SplitN(string(data), timeTagSeparator, 2)
-	if len(elements) != 2 {
-		return rs, errors.New("Malformed Event ID")
-	}
-
-	nanos, err := strconv.ParseInt(elements[0], 10, 64)
-	if err != nil {
-		return rs, err
-	}
-
-	rs.Start = time.Unix(0, nanos)
-
-	tags := strings.Split(elements[1], tagSeparator)
-	for _, pair := range tags {
-		touple := strings.SplitN(pair, pairSeparator, 2)
-		if len(touple) != 2 {
-			return rs, errors.New("Malformed Event ID")
-		}
-		rs.Tags[touple[0]] = touple[1]
-	}
-
-	return rs, nil
 }
