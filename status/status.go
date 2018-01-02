@@ -83,7 +83,7 @@ func FromBool(ok bool) Status {
 	return NOK
 }
 
-// Int returns on boolean representation of the status. Status 'Unknown' is
+// Bool returns on boolean representation of the status. Status 'Unknown' is
 // considered true.
 func (s Status) Bool() bool {
 	if s == NOK {
