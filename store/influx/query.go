@@ -24,9 +24,7 @@ func NewSelectQuery() *SelectQuery {
 }
 
 func (sq *SelectQuery) Fields(fields ...string) *SelectQuery {
-	for _, s := range fields {
-		sq.fields = append(sq.fields, s)
-	}
+	sq.fields = append(sq.fields, fields...)
 	return sq
 }
 

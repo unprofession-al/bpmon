@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -169,7 +168,7 @@ func parseBP(bpconf []byte, env *Hosts) (*Hosts, error) {
 	bp := bpmon.BP{}
 	err := yaml.Unmarshal(bpconf, &bp)
 	if err != nil {
-		return env, errors.New(fmt.Sprintf("Error while parsing: %s", err.Error()))
+		return env, fmt.Errorf("Error while parsing: %s", err.Error())
 	}
 
 	for _, kpi := range bp.Kpis {

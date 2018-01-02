@@ -20,7 +20,6 @@ var (
 	bpDir      string
 	staticDir  string
 	hub        *Hub
-	restClient *Client
 	cfg        Configuration
 	envs       *Environments
 )

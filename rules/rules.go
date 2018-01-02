@@ -47,7 +47,7 @@ func (rules Rules) Analyze(values map[string]bool) (status.Status, error) {
 					break
 				}
 			} else {
-				return status.Unknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
+				return status.Unknown, fmt.Errorf("Key '%s' from rule with order %d does not exist", keyname, index)
 			}
 		}
 
@@ -58,7 +58,7 @@ func (rules Rules) Analyze(values map[string]bool) (status.Status, error) {
 					break
 				}
 			} else {
-				return status.Unknown, errors.New(fmt.Sprintf("Key '%s' from rule with order %d does not exist", keyname, index))
+				return status.Unknown, fmt.Errorf("Key '%s' from rule with order %d does not exist", keyname, index)
 			}
 		}
 

@@ -36,11 +36,10 @@ func Respond(res http.ResponseWriter, req *http.Request, code int, data interfac
 
 	if err != nil {
 		out = errMesg
-		res.WriteHeader(http.StatusInternalServerError)
-	} else {
-		res.WriteHeader(code)
-		res.Write(out)
+		code = http.StatusInternalServerError
 	}
+	res.WriteHeader(code)
+	res.Write(out)
 	return
 }
 

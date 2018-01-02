@@ -53,12 +53,12 @@ const (
 )
 
 type IcingaConf struct {
-	Server string `yaml: "server"`
-	Path   string `yaml: "path"`
-	Port   int    `yaml: "port"`
-	Pass   string `yaml: "pass"`
-	User   string `yaml: "user"`
-	Proto  string `yaml: "proto"`
+	Server string `yaml:"server"`
+	Path   string `yaml:"path"`
+	Port   int    `yaml:"port"`
+	Pass   string `yaml:"pass"`
+	User   string `yaml:"user"`
+	Proto  string `yaml:"proto"`
 }
 
 type Icinga struct {
