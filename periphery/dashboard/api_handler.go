@@ -17,11 +17,11 @@ func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
 
 	if recipient := req.Context().Value("recipient"); recipient != nil {
 		for _, bp := range bps.GetByRecipient(recipient.(string)) {
-			list[bp.Id] = bp.Name
+			list[bp.ID] = bp.Name
 		}
 	} else {
 		for _, bp := range bps {
-			list[bp.Id] = bp.Name
+			list[bp.ID] = bp.Name
 		}
 	}
 
@@ -35,7 +35,7 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 	// name := ""
 	found := false
 	for _, bp := range bps {
-		if bp.Id == bpid {
+		if bp.ID == bpid {
 			found = true
 			//name = bp.Name
 		}
@@ -70,10 +70,10 @@ func ListKPIsHandler(res http.ResponseWriter, req *http.Request) {
 	list := make(map[string]string)
 	found := false
 	for _, bp := range bps {
-		if bp.Id == bpid {
+		if bp.ID == bpid {
 			found = true
 			for _, kpi := range bp.Kpis {
-				list[kpi.Id] = kpi.Name
+				list[kpi.ID] = kpi.Name
 			}
 		}
 	}
@@ -94,7 +94,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	bp := bpmon.BP{}
 	found := false
 	for _, currentBP := range bps {
-		if currentBP.Id == bpid {
+		if currentBP.ID == bpid {
 			found = true
 			bp = currentBP
 		}
@@ -108,7 +108,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	found = false
 	for _, currentKPI := range bp.Kpis {
-		if currentKPI.Id == kpiid {
+		if currentKPI.ID == kpiid {
 			found = true
 		}
 	}

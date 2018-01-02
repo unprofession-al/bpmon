@@ -62,7 +62,7 @@ func toWeekday(str string) (time.Weekday, error) {
 	case time.Saturday.String():
 		return time.Saturday, nil
 	default:
-		return time.Monday, errors.New(fmt.Sprintf("'%s' does not look like the name of a weekday", str))
+		return time.Monday, fmt.Errorf("'%s' does not look like the name of a weekday", str)
 	}
 }
 
@@ -119,7 +119,7 @@ func toAvailabilityTime(trStrings []string) (AvailabilityTime, error) {
 			break
 		}
 		if len(tStrings) != 2 {
-			return out, errors.New(fmt.Sprintf("'%s' does not look like a time range definition, time slots must be formated as in '%s-%s'", trString, HourMinuteSecond, HourMinuteSecond))
+			return out, fmt.Errorf("'%s' does not look like a time range definition, time slots must be formated as in '%s-%s'", trString, HourMinuteSecond, HourMinuteSecond)
 		}
 		start, err := toTime(tStrings[0])
 		if err != nil {
@@ -142,7 +142,7 @@ func toTime(tString string) (time.Time, error) {
 	tString = strings.TrimSpace(tString)
 	t, err := time.Parse(HourMinuteSecond, tString)
 	if err != nil {
-		return t, errors.New(fmt.Sprintf("'%s' does not look like a time, times must be formated as in '%s'", tString, HourMinuteSecond))
+		return t, fmt.Errorf("'%s' does not look like a time, times must be formated as in '%s'", tString, HourMinuteSecond)
 	}
 	return t, err
 

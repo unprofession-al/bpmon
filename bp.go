@@ -22,7 +22,7 @@ func (bps BusinessProcesses) GenerateHashes(pepper string) map[string]string {
 	}
 
 	recipients := make(map[string]string)
-	for recipient, _ := range recipientList {
+	for recipient := range recipientList {
 		toHash := []byte(recipient + ":::" + pepper)
 		sum := fmt.Sprintf("%x", sha256.Sum256(toHash))
 		recipients[sum] = recipient
@@ -45,7 +45,7 @@ func (bps BusinessProcesses) GetByRecipient(recipient string) BusinessProcesses 
 
 type BP struct {
 	Name             string       `yaml:"name"`
-	Id               string       `yaml:"id"`
+	ID               string       `yaml:"id"`
 	Kpis             []KPI        `yaml:"kpis"`
 	AvailabilityName string       `yaml:"availability"`
 	Availability     Availability `yaml:"-"`
@@ -57,10 +57,10 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 	rs := store.ResultSet{
 		Responsible: bp.Responsible,
 		Name:        bp.Name,
-		Id:          bp.Id,
+		Id:          bp.ID,
 		Children:    []*store.ResultSet{},
 		Vals:        make(map[string]bool),
-		Tags:        map[string]string{store.IdentifierBusinessProcess: bp.Id},
+		Tags:        map[string]string{store.IdentifierBusinessProcess: bp.ID},
 	}
 
 	ch := make(chan *store.ResultSet)
@@ -76,13 +76,11 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 	}
 
 	for {
-		select {
-		case childRs := <-ch:
-			calcValues = append(calcValues, childRs.Status.Bool())
-			rs.Children = append(rs.Children, childRs)
-			if len(calcValues) == len(bp.Kpis) {
-				ch = nil
-			}
+		childRs := <-ch
+		calcValues = append(calcValues, childRs.Status.Bool())
+		rs.Children = append(rs.Children, childRs)
+		if len(calcValues) == len(bp.Kpis) {
+			ch = nil
 		}
 		if ch == nil {
 			break
@@ -100,7 +98,7 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 
 type KPI struct {
 	Name        string    `yaml:"name"`
-	Id          string    `yaml:"id"`
+	ID          string    `yaml:"id"`
 	Operation   string    `yaml:"operation"`
 	Services    []Service `yaml:"services"`
 	Responsible string    `yaml:"responsible"`
@@ -111,12 +109,12 @@ func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp store.
 	for k, v := range parentTags {
 		tags[k] = v
 	}
-	tags[store.IdentifierKeyPerformanceIndicator] = k.Id
+	tags[store.IdentifierKeyPerformanceIndicator] = k.ID
 
 	rs := store.ResultSet{
 		Responsible: k.Responsible,
 		Name:        k.Name,
-		Id:          k.Id,
+		Id:          k.ID,
 		Children:    []*store.ResultSet{},
 		Vals:        make(map[string]bool),
 		Tags:        tags,
@@ -135,13 +133,11 @@ func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp store.
 	}
 
 	for {
-		select {
-		case childRs := <-ch:
-			calcValues = append(calcValues, childRs.Status.Bool())
-			rs.Children = append(rs.Children, childRs)
-			if len(calcValues) == len(k.Services) {
-				ch = nil
-			}
+		childRs := <-ch
+		calcValues = append(calcValues, childRs.Status.Bool())
+		rs.Children = append(rs.Children, childRs)
+		if len(calcValues) == len(k.Services) {
+			ch = nil
 		}
 		if ch == nil {
 			break

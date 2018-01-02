@@ -27,7 +27,7 @@ func ListEvents(res http.ResponseWriter, req *http.Request) {
 	var out []store.Event
 	for _, bp := range bps {
 		rs := store.ResultSet{
-			Tags: map[string]string{store.IdentifierBusinessProcess: bp.Id},
+			Tags: map[string]string{store.IdentifierBusinessProcess: bp.ID},
 		}
 		if strings.ToUpper(kind) == store.IdentifierBusinessProcess {
 			events, err := pp.GetEvents(rs, start, end, interval, stati)

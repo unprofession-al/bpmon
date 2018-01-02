@@ -25,11 +25,11 @@ func TestStringToWeekday(t *testing.T) {
 
 	for _, test := range tests {
 		day, err := toWeekday(test.str)
-		if err == nil && test.errExpected == true {
+		if err == nil && test.errExpected {
 			t.Errorf("Error expected for '%s' but test succeeded", test.str)
-		} else if err != nil && test.errExpected == false {
+		} else if err != nil && !test.errExpected {
 			t.Errorf("No error expected for '%s' but test failed: %s", test.str, err.Error())
-		} else if err == nil && test.errExpected == false {
+		} else if err == nil && !test.errExpected {
 			if day != test.day {
 				t.Errorf("Result not as expected for '%s': Should be '%v', is '%v'", test.str, test.day, day)
 			}
@@ -89,11 +89,11 @@ func TestStringsToAvailabilityTime(t *testing.T) {
 
 	for _, test := range tests {
 		at, err := toAvailabilityTime(test.str)
-		if err == nil && test.errExpected == true {
+		if err == nil && test.errExpected {
 			t.Errorf("Error expected for '%s' but test succeeded", test.str)
-		} else if err != nil && test.errExpected == false {
+		} else if err != nil && !test.errExpected {
 			t.Errorf("No error expected for '%s' but test failed: %s", test.str, err.Error())
-		} else if err == nil && test.errExpected == false {
+		} else if err == nil && !test.errExpected {
 			eq := reflect.DeepEqual(at, test.at)
 			if !eq {
 				t.Errorf("Results do not match for %v: '%v' vs. '%v'", test.str, at, test.at)

@@ -26,12 +26,12 @@ var BpTestSets = []bpTestSet{
 	{
 		bp: BP{
 			Name:         "TestBP",
-			Id:           "test_bp",
+			ID:           "test_bp",
 			Availability: allDayLong,
 			Kpis: []KPI{
 				KPI{
 					Name:      "TestKPI",
-					Id:        "test_kpi",
+					ID:        "test_kpi",
 					Operation: "OR",
 					Services: []Service{
 						Service{Host: "Host", Service: "good"},
