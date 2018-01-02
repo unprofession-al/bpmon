@@ -115,7 +115,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 	duration := end.Sub(start).Seconds()
 	events := []store.Event{
 		store.Event{
-			Status:     status.Ok,
+			Status:     status.OK,
 			Annotation: "",
 			Start:      start,
 			End:        end,
@@ -156,7 +156,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 			filler := store.Event{
 				Start:      last.End,
 				End:        current.Start,
-				Status:     status.Ok,
+				Status:     status.OK,
 				Annotation: "",
 			}
 			events = append(events, filler)
@@ -179,7 +179,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 		filler := store.Event{
 			Start:      lastEvent.End,
 			End:        end,
-			Status:     status.Ok,
+			Status:     status.OK,
 			Annotation: "",
 		}
 		events = append(events, filler)

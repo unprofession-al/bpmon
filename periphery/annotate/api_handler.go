@@ -22,7 +22,7 @@ func ListEvents(res http.ResponseWriter, req *http.Request) {
 
 	start, end := wh.GetStartEnd(req)
 	interval, _ := time.ParseDuration("300s")
-	stati := []status.Status{status.Nok}
+	stati := []status.Status{status.NOK}
 
 	var out []store.Event
 	for _, bp := range bps {

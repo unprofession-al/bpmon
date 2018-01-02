@@ -67,7 +67,7 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool, resp bool) string
 	if rs.Err != nil {
 		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.Err.Error())
 	}
-	if rs.Status == status.Nok && rs.Output != "" {
+	if rs.Status == status.NOK && rs.Output != "" {
 		out += fmt.Sprintf("\n%sMessage from Monitoring: %s", ident, rs.Output)
 	}
 	if vals && len(rs.Vals) > 0 {

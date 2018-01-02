@@ -10,9 +10,9 @@ import (
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/checker"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
+	"github.com/unprofession-al/bpmon/status"
 	"github.com/unprofession-al/bpmon/store"
 	_ "github.com/unprofession-al/bpmon/store/influx"
-	"github.com/unprofession-al/bpmon/status"
 )
 
 var triggerCmd = &cobra.Command{
@@ -39,7 +39,7 @@ var triggerCmd = &cobra.Command{
 		}
 
 		p, _ := store.New(c.Store)
-		stripBy := []status.Status{status.Unknown, status.Ok}
+		stripBy := []status.Status{status.Unknown, status.OK}
 		var sets []store.ResultSet
 		for _, bp := range b {
 			rs := bp.Status(i, nil, r)

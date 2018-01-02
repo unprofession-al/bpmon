@@ -84,12 +84,12 @@ func (i Icinga) DefaultRules() rules.Rules {
 		30: rules.Rule{
 			Must:    []string{IcingaFlagCritical},
 			MustNot: []string{IcingaFlagScheduledDowntime},
-			Then:    status.Nok,
+			Then:    status.NOK,
 		},
 		9999: rules.Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.Ok,
+			Then:    status.OK,
 		},
 	}
 	return rules

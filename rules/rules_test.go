@@ -12,7 +12,7 @@ var testRules = map[string]Rules{
 		10: Rule{
 			Must:    []string{"bad"},
 			MustNot: []string{},
-			Then:    status.Nok,
+			Then:    status.NOK,
 		},
 		11: Rule{
 			Must:    []string{},
@@ -22,7 +22,7 @@ var testRules = map[string]Rules{
 		20: Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.Ok,
+			Then:    status.OK,
 		},
 	},
 	"additional": Rules{
@@ -36,7 +36,7 @@ var testRules = map[string]Rules{
 		10: Rule{
 			Must:    []string{"bad"},
 			MustNot: []string{},
-			Then:    status.Nok,
+			Then:    status.NOK,
 		},
 		11: Rule{
 			Must:    []string{},
@@ -51,7 +51,7 @@ var testRules = map[string]Rules{
 		20: Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.Ok,
+			Then:    status.OK,
 		},
 	},
 	"overwrite": Rules{
@@ -75,7 +75,7 @@ var testRules = map[string]Rules{
 		20: Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.Ok,
+			Then:    status.OK,
 		},
 	},
 }
@@ -117,7 +117,7 @@ func TestRuleAnalyze(t *testing.T) {
 				"bad":   false,
 				"known": true,
 			},
-			status:      status.Ok,
+			status:      status.OK,
 			errExpected: false,
 		},
 		"must fail because key 'bad' and 'known' do not exist": {
