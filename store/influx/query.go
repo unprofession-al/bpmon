@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-type Query interface {
+type query interface {
 	Query() string
 }
 
-type SelectQuery struct {
+type selectquery struct {
 	fields  []string
 	from    string
 	where   []string
@@ -19,59 +19,59 @@ type SelectQuery struct {
 	limit   int
 }
 
-func NewSelectQuery() *SelectQuery {
-	return &SelectQuery{}
+func newSelectQuery() *selectquery {
+	return &selectquery{}
 }
 
-func (sq *SelectQuery) Fields(fields ...string) *SelectQuery {
+func (sq *selectquery) Fields(fields ...string) *selectquery {
 	sq.fields = append(sq.fields, fields...)
 	return sq
 }
 
-func (sq *SelectQuery) From(from string) *SelectQuery {
+func (sq *selectquery) From(from string) *selectquery {
 	sq.from = from
 	return sq
 }
 
-func (sq *SelectQuery) Between(s time.Time, e time.Time) *SelectQuery {
+func (sq *selectquery) Between(s time.Time, e time.Time) *selectquery {
 	sq.where = append(sq.where, fmt.Sprintf("%s < %d", timefield, e.UnixNano()))
 	sq.where = append(sq.where, fmt.Sprintf("%s > %d", timefield, s.UnixNano()))
 	return sq
 }
 
-func (sq *SelectQuery) FilterTags(tags map[string]string) *SelectQuery {
+func (sq *selectquery) FilterTags(tags map[string]string) *selectquery {
 	for key, value := range tags {
 		sq.where = append(sq.where, fmt.Sprintf("%s = '%s'", key, value))
 	}
 	return sq
 }
 
-func (sq *SelectQuery) Filter(filter string) *SelectQuery {
+func (sq *selectquery) Filter(filter string) *selectquery {
 	sq.where = append(sq.where, filter)
 	return sq
 }
 
-func (sq *SelectQuery) OrderBy(orderBy string) *SelectQuery {
+func (sq *selectquery) OrderBy(orderBy string) *selectquery {
 	sq.orderBy = orderBy
 	return sq
 }
 
-func (sq *SelectQuery) Asc() *SelectQuery {
+func (sq *selectquery) Asc() *selectquery {
 	sq.desc = false
 	return sq
 }
 
-func (sq *SelectQuery) Desc() *SelectQuery {
+func (sq *selectquery) Desc() *selectquery {
 	sq.desc = true
 	return sq
 }
 
-func (sq *SelectQuery) Limit(limit int) *SelectQuery {
+func (sq *selectquery) Limit(limit int) *selectquery {
 	sq.limit = limit
 	return sq
 }
 
-func (sq *SelectQuery) Query() string {
+func (sq *selectquery) Query() string {
 	fields := sq.fieldsQuery()
 	where := strings.Join(sq.where, " AND ")
 	order := ""
@@ -91,7 +91,7 @@ func (sq *SelectQuery) Query() string {
 	return fmt.Sprintf("SELECT %s FROM %s WHERE %s %s %s", fields, sq.from, where, order, limit)
 }
 
-func (sq *SelectQuery) fieldsQuery() string {
+func (sq *selectquery) fieldsQuery() string {
 	// if no fields are specified, query all
 	if len(sq.fields) == 0 {
 		return "*"

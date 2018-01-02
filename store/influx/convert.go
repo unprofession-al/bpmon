@@ -127,7 +127,7 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 			}
 		}
 	}
-	out.Id = out.Tags[out.Kind()]
+	out.ID = out.Tags[out.Kind()]
 	return out, nil
 }
 

@@ -34,7 +34,7 @@ var runCmd = &cobra.Command{
 		}
 
 		r := i.DefaultRules()
-		r.Merge(c.Rules)
+		err = r.Merge(c.Rules)
 		if err != nil {
 			log.Fatal(err)
 		}

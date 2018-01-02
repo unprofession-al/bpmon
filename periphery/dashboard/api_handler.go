@@ -15,7 +15,7 @@ import (
 func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
 	list := make(map[string]string)
 
-	if recipient := req.Context().Value("recipient"); recipient != nil {
+	if recipient := req.Context().Value(wh.KeyRecipient); recipient != nil {
 		for _, bp := range bps.GetByRecipient(recipient.(string)) {
 			list[bp.ID] = bp.Name
 		}

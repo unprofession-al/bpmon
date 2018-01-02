@@ -40,7 +40,6 @@ func Respond(res http.ResponseWriter, req *http.Request, code int, data interfac
 	}
 	res.WriteHeader(code)
 	res.Write(out)
-	return
 }
 
 func GetAssetHandler(prefix string) http.Handler {

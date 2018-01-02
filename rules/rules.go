@@ -28,9 +28,9 @@ func (r Rules) Merge(additional Rules) error {
 	return nil
 }
 
-func (rules Rules) Analyze(values map[string]bool) (status.Status, error) {
+func (r Rules) Analyze(values map[string]bool) (status.Status, error) {
 	var order []int
-	for index := range rules {
+	for index := range r {
 		order = append(order, index)
 	}
 	sort.Ints(order)
@@ -38,7 +38,7 @@ func (rules Rules) Analyze(values map[string]bool) (status.Status, error) {
 	for _, index := range order {
 		matchMustCond := true
 		matchMustNotCond := true
-		rule := rules[index]
+		rule := r[index]
 
 		for _, keyname := range rule.Must {
 			if val, ok := values[keyname]; ok {

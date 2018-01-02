@@ -86,10 +86,7 @@ func FromBool(ok bool) Status {
 // Bool returns on boolean representation of the status. Status 'Unknown' is
 // considered true.
 func (s Status) Bool() bool {
-	if s == NOK {
-		return false
-	}
-	return true
+	return s != NOK
 }
 
 // UnmarshalYAML implements the Unmarshaler interface of package yaml.

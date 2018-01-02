@@ -106,7 +106,6 @@ func TestRuleMergingOverwrite(t *testing.T) {
 
 func TestRuleAnalyze(t *testing.T) {
 	testsets := map[string]struct {
-		desc        string
 		test        map[string]bool
 		status      status.Status
 		errExpected bool

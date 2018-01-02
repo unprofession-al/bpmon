@@ -12,8 +12,6 @@ import (
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
-var debug bool
-
 var writeCmd = &cobra.Command{
 	Use:   "write",
 	Short: "Insert data into InfluxDB",
@@ -30,7 +28,7 @@ var writeCmd = &cobra.Command{
 		}
 
 		r := i.DefaultRules()
-		r.Merge(c.Rules)
+		err = r.Merge(c.Rules)
 		if err != nil {
 			log.Fatal(err)
 		}

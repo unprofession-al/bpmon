@@ -22,12 +22,12 @@ func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.StatusRe
 	}
 	for hostname, services := range *env {
 		for servicename, service := range *services {
-			result := icinga.IcingaStatusResult{
-				Attrs: icinga.IcingaStatusAttrs{
+			result := icinga.StatusResult{
+				Attrs: icinga.StatusAttrs{
 					Acknowledgement: Btof(service.Acknowledgement),
 					DowntimeDepth:   Btof(service.Downtime),
 					LastCheck:       t,
-					LastCheckResult: icinga.IcingaStatusLastCheckResult{
+					LastCheckResult: icinga.LastCheckResult{
 						State:  float64(service.CheckState),
 						Output: service.CheckOutput,
 					},
@@ -51,12 +51,12 @@ func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Time
 		if hostname == hostN {
 			for servicename, service := range *services {
 				if servicename == serviceN {
-					result := icinga.IcingaStatusResult{
-						Attrs: icinga.IcingaStatusAttrs{
+					result := icinga.StatusResult{
+						Attrs: icinga.StatusAttrs{
 							Acknowledgement: Btof(service.Acknowledgement),
 							DowntimeDepth:   Btof(service.Downtime),
 							LastCheck:       t,
-							LastCheckResult: icinga.IcingaStatusLastCheckResult{
+							LastCheckResult: icinga.LastCheckResult{
 								State:  float64(service.CheckState),
 								Output: service.CheckOutput,
 							},

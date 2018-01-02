@@ -9,6 +9,12 @@ type TokenAuth struct {
 	Tokens map[string]string
 }
 
+type key int
+
+const (
+	KeyRecipient key = iota
+)
+
 func (ta TokenAuth) Create(next http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		var authToken string
@@ -21,7 +27,7 @@ func (ta TokenAuth) Create(next http.Handler) http.Handler {
 			http.Error(w, "authorization failed", http.StatusUnauthorized)
 			return
 		}
-		ctx := context.WithValue(r.Context(), "recipient", recipient)
+		ctx := context.WithValue(r.Context(), KeyRecipient, recipient)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 

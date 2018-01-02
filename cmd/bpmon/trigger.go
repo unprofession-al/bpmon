@@ -33,7 +33,7 @@ var triggerCmd = &cobra.Command{
 		}
 
 		r := i.DefaultRules()
-		r.Merge(c.Rules)
+		err = r.Merge(c.Rules)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -52,7 +52,11 @@ var triggerCmd = &cobra.Command{
 			}
 		}
 		var command bytes.Buffer
-		t.Execute(&command, sets)
+		err = t.Execute(&command, sets)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if len(sets) > 0 {
 			fmt.Println(command.String())
 		}

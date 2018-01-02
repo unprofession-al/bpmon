@@ -29,7 +29,7 @@ func Setup(conf checker.Conf) (checker.Checker, error) {
 	password, _ := u.User.Password()
 
 	baseURL := fmt.Sprintf("%s://%s%s/v1", u.Scheme, u.Host, u.Path)
-	fetcher := IcingaAPI{
+	fetcher := API{
 		baseURL: baseURL,
 		pass:    password,
 		user:    username,
@@ -134,22 +134,22 @@ func (i Icinga) Status(host string, service string) checker.Result {
 // IcingaStatusResult describes the results returned by the icinga
 // api when a service status is requested.
 type StatusResponse struct {
-	Results []IcingaStatusResult `json:"results"`
+	Results []StatusResult `json:"results"`
 }
 
-type IcingaStatusResult struct {
-	Attrs IcingaStatusAttrs `json:"attrs"`
-	Name  string            `json:"name"`
+type StatusResult struct {
+	Attrs StatusAttrs `json:"attrs"`
+	Name  string      `json:"name"`
 }
 
-type IcingaStatusAttrs struct {
-	Acknowledgement float64                     `json:"acknowledgement"`
-	LastCheckResult IcingaStatusLastCheckResult `json:"last_check_result"`
-	LastCheck       Timestamp                   `json:"last_check"`
-	DowntimeDepth   float64                     `json:"downtime_depth"`
+type StatusAttrs struct {
+	Acknowledgement float64         `json:"acknowledgement"`
+	LastCheckResult LastCheckResult `json:"last_check_result"`
+	LastCheck       Timestamp       `json:"last_check"`
+	DowntimeDepth   float64         `json:"downtime_depth"`
 }
 
-type IcingaStatusLastCheckResult struct {
+type LastCheckResult struct {
 	State  float64 `json:"state"`
 	Output string  `json:"output"`
 }
@@ -219,13 +219,13 @@ func (r StatusResponse) status() (at time.Time, msg string, vals map[string]bool
 	return
 }
 
-type IcingaAPI struct {
+type API struct {
 	baseURL string
 	user    string
 	pass    string
 }
 
-func (i IcingaAPI) Fetch(host, service string) (StatusResponse, error) {
+func (i API) Fetch(host, service string) (StatusResponse, error) {
 	var response StatusResponse
 	var body []byte
 
@@ -259,6 +259,9 @@ func (i IcingaAPI) Fetch(host, service string) (StatusResponse, error) {
 	}
 	// parse response body
 	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return response, err
+	}
 
 	err = json.Unmarshal(body, &response)
 	return response, err

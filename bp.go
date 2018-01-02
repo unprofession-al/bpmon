@@ -57,7 +57,7 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 	rs := store.ResultSet{
 		Responsible: bp.Responsible,
 		Name:        bp.Name,
-		Id:          bp.ID,
+		ID:          bp.ID,
 		Children:    []*store.ResultSet{},
 		Vals:        make(map[string]bool),
 		Tags:        map[string]string{store.IdentifierBusinessProcess: bp.ID},
@@ -114,7 +114,7 @@ func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp store.
 	rs := store.ResultSet{
 		Responsible: k.Responsible,
 		Name:        k.Name,
-		Id:          k.ID,
+		ID:          k.ID,
 		Children:    []*store.ResultSet{},
 		Vals:        make(map[string]bool),
 		Tags:        tags,
@@ -174,7 +174,7 @@ func (s Service) Status(parentTags map[string]string, chk checker.Checker, pp st
 	rs := store.ResultSet{
 		Name:        name,
 		Responsible: s.Responsible,
-		Id:          name,
+		ID:          name,
 		Tags:        tags,
 	}
 	result := chk.Status(s.Host, s.Service)

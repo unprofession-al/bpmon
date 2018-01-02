@@ -12,7 +12,7 @@ import (
 
 type ResultSet struct {
 	Name          string
-	Id            string
+	ID            string
 	Tags          map[string]string
 	Start         time.Time
 	End           time.Time

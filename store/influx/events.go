@@ -43,8 +43,8 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 	out := []store.Event{}
 	totalDuration := end.Sub(start).Seconds()
 
-	query := NewSelectQuery().From(rs.Kind()).Between(start, end).FilterTags(rs.Tags).Filter("changed = true")
-	resultsets, err := i.Run(query)
+	q := newSelectQuery().From(rs.Kind()).Between(start, end).FilterTags(rs.Tags).Filter("changed = true")
+	resultsets, err := i.Run(q)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
 		return out, errors.New(msg)
@@ -67,15 +67,15 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 			current.End = resultsets[i+1].Start
 		}
 		current.Duration = current.End.Sub(current.Start).Seconds()
-		current.DurationPercent = 100.0 / float64(totalDuration) * float64(current.Duration)
+		current.DurationPercent = 100.0 / totalDuration * current.Duration
 		current.SetEventID()
 		out = append(out, current)
 	}
 
 	// get last state before the time window specified by 'start' and 'end'
 	gap, _ := time.ParseDuration("30m")
-	query = NewSelectQuery().From(rs.Kind()).Between(end.Add(gap*-1), end).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
-	last, err := i.First(query)
+	q = newSelectQuery().From(rs.Kind()).Between(end.Add(gap*-1), end).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
+	last, err := i.First(q)
 
 	if err != nil {
 		// if no state at all is found
@@ -93,7 +93,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 		out = append([]store.Event{complete}, out...)
 	} else {
 		duration := earliestEvent.Sub(start).Seconds()
-		durationPercent := 100.0 / float64(totalDuration) * float64(duration)
+		durationPercent := 100.0 / totalDuration * duration
 		first := store.Event{
 			Start:           start,
 			End:             earliestEvent,
@@ -123,8 +123,8 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 		},
 	}
 
-	query := NewSelectQuery().From(rs.Kind()).Between(start, end).FilterTags(rs.Tags)
-	rows, err := i.Run(query)
+	q := newSelectQuery().From(rs.Kind()).Between(start, end).FilterTags(rs.Tags)
+	rows, err := i.Run(q)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
 		return events, errors.New(msg)
@@ -187,7 +187,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 
 	for i, e := range events {
 		e.Duration = e.End.Sub(e.Start).Seconds()
-		e.DurationPercent = 100.0 / float64(duration) * e.Duration
+		e.DurationPercent = 100.0 / duration * e.Duration
 		e.SetEventID()
 		events[i] = e
 	}
@@ -201,8 +201,8 @@ func (i Influx) AnnotateEvent(eid store.EventID, annotation string) (store.Resul
 	}
 
 	filter := fmt.Sprintf("time = %d", rs.Start.UnixNano())
-	query := NewSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).Filter(filter).Limit(1)
-	rs, err = i.First(query)
+	q := newSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).Filter(filter).Limit(1)
+	rs, err = i.First(q)
 	if err != nil {
 		return rs, err
 	}

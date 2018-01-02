@@ -29,7 +29,7 @@ func Setup(conf configs.DashboardConf, bpsIn bpmon.BusinessProcesses, ppIn store
 	api := apiRouter.PathPrefix("/api/").Subrouter()
 	wh.PopulateRouter(api, routes)
 	if auth {
-		ta := wh.TokenAuth{recipientHashes}
+		ta := wh.TokenAuth{Tokens: recipientHashes}
 		r.Handle("/api/{_:.*}", ta.Create(apiRouter))
 	} else {
 		r.Handle("/api/{_:.*}", apiRouter)

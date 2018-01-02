@@ -78,14 +78,14 @@ func (i Influx) Write(rs *store.ResultSet) error {
 }
 
 func (i Influx) GetLatest(rs store.ResultSet) (store.ResultSet, error) {
-	query := NewSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
-	return i.First(query)
+	q := newSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
+	return i.First(q)
 }
 
-func (i Influx) First(query Query) (store.ResultSet, error) {
+func (i Influx) First(q query) (store.ResultSet, error) {
 	var out store.ResultSet
 
-	all, err := i.Run(query)
+	all, err := i.Run(q)
 	if err != nil {
 		return out, err
 	}
@@ -98,19 +98,19 @@ func (i Influx) First(query Query) (store.ResultSet, error) {
 	return out, nil
 }
 
-func (i Influx) Run(query Query) ([]store.ResultSet, error) {
+func (i Influx) Run(q query) ([]store.ResultSet, error) {
 	var out []store.ResultSet
 
 	if i.printQueries {
-		fmt.Println(query.Query())
+		fmt.Println(q.Query())
 	}
 
-	q := client.Query{
-		Command:  query.Query(),
+	cq := client.Query{
+		Command:  q.Query(),
 		Database: i.database,
 	}
 
-	response, err := i.cli.Query(q)
+	response, err := i.cli.Query(cq)
 	if err != nil {
 		return out, err
 	}
