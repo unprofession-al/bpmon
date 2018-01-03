@@ -1,7 +1,7 @@
 package configs
 
 type AnnotateConf struct {
-	Listener string `yaml:"listerer"`
+	Listener string `yaml:"listener"`
 	Static   string `yaml:"static"`
 }
 

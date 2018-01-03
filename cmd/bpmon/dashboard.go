@@ -46,9 +46,8 @@ var dashboardCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		listen := fmt.Sprintf("%s:%d", c.Dashboard.Address, c.Dashboard.Port)
-		fmt.Printf("Serving Dashboard at http://%s\nPress CTRL-c to stop...\n", listen)
-		log.Fatal(http.ListenAndServe(listen, router))
+		fmt.Printf("Serving Dashboard at http://%s\nPress CTRL-c to stop...\n", c.Dashboard.Listener)
+		log.Fatal(http.ListenAndServe(c.Dashboard.Listener, router))
 	},
 }
 
