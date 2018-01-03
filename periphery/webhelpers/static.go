@@ -312,7 +312,7 @@ HBxUPimQBB86eE/rbQ14cB/8CwAA//+KSg0W2AMAAA==
 	"/components/badge.css": {
 		local:   "static/components/badge.css",
 		size:    210,
-		modtime: 1514380703,
+		modtime: 1514987324,
 		compressed: `
 H4sIAAAAAAAC/0zOwQrCMBAE0Hu/YkA8RtqKUtK7/5F0YwyWbEhSLIr/LjZE3Nu+mcMctCJr8GoAIHBy
 2bGXUDrxvGQzbp45SIiuDWv5o7O3/JVTlaCInLcS57BiqKo5kokiKnJLkuh/da2mu428eBITzxwldurY

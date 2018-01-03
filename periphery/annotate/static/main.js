@@ -1,14 +1,9 @@
-function loadCount(days) {
-    //$.getJSON("/api/v1/bp/events?count&range=" + days, function(data) {
-    //    $("#count").html(data);
-    //});
-}
-
-function loadEvents(size, days) {
-    $.getJSON("/api/v1/bp/events?size=" + size + "&range=" + days, function(data) {
+function loadEvents() {
+    $.getJSON("/api/v1/bp/events" + window.location.search, function(data) {
         hideSpinner();
-        if (data == 0 || data == null || data == undefined) {
-            $("<div class='notification pannel'>No unannotated events found...</div>").hide().appendTo("#events").fadeIn(fadein);
+        if (data == 0 || data === null || data === undefined) {
+            $("<div class='notification panel'>No unannotated events found...</div>").hide().appendTo("#data").fadeIn(fadein);
+            $("#count").html("0");
         } else {
             var count = 0;
             for (var key in data) {
@@ -26,6 +21,7 @@ function loadEvents(size, days) {
 
                 $(panel).hide().appendTo("#data").fadeIn(fadein);
             }
+            $("#count").html(count);
         }
     });
 }
@@ -89,7 +85,6 @@ function reloadData() {
     var url = new URL(window.location.href);
     var days = url.searchParams.get("days");
     var size = url.searchParams.get("size");
-    loadCount(days);
     loadEvents(size, days);
 }
 
