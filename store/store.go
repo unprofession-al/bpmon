@@ -8,6 +8,10 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
+// Conf keeps the counfiguration for a store implementation. This struct
+// is passed to the store implementatinon itself via the registerd setup
+// function. The field 'Kind' is used to determine which provider is
+// requested.
 type Conf struct {
 	Kind          string        `yaml:"kind"`
 	Connection    string        `yaml:"connection"`
@@ -22,6 +26,9 @@ var (
 	s   = make(map[string]func(Conf) (Store, error))
 )
 
+// Register must be called in the init function of each store implementation.
+// The Register function will panic if two store impelmentations with the same
+// name try to register themselfs.
 func Register(name string, setupFunc func(Conf) (Store, error)) {
 	sMu.Lock()
 	defer sMu.Unlock()
@@ -31,6 +38,9 @@ func Register(name string, setupFunc func(Conf) (Store, error)) {
 	s[name] = setupFunc
 }
 
+// New well return a configured instance of a store implementation. The
+// implementation requested is determined by the 'Kind' field of the
+// configuration struct.
 func New(conf Conf) (Store, error) {
 	setupFunc, ok := s[conf.Kind]
 	if !ok {
@@ -39,10 +49,48 @@ func New(conf Conf) (Store, error) {
 	return setupFunc(conf)
 }
 
+// Store is the interface that describes all operations exposed by a store.
 type Store interface {
-	Write(*ResultSet) error
-	GetSpans(ResultSet, time.Time, time.Time, time.Duration, []status.Status) ([]Span, error)
-	GetEvents(time.Time, time.Time, time.Duration, []status.Status) ([]Event, error)
-	GetLatest(ResultSet) (ResultSet, error)
-	AnnotateEvent(ID, string) (ResultSet, error)
+	// Write takes a (nested) ResultSet and persists all values (including all
+	// child values) to the store.
+	Write(input *ResultSet) error
+
+	// GetSpans fetches all time spans (periods where the status of on entity
+	// remains the same) between 'start' and 'end'.
+	//
+	// To determine which spans should be queried, the 'Tags' of the 'ResultSet'
+	// provided are considered.
+	//
+	// If a span cannot be determinded because of a 'StatusChanged' flag, a
+	// potential interval is required to _assume_ if a gap between to
+	// measurements represents a status change or should be considered a status
+	// change to 'status.OK'. This interval should be sightly larger than the
+	// interval of your execution interval of 'bpmon write' in order to bp as
+	// accurate as possible.
+	//
+	// Also the results can be filtered by their status. If no status list is
+	// provided all spans will be returned.
+	GetSpans(input ResultSet, start time.Time, end time.Time, interval time.Duration, statusRequested []status.Status) ([]Span, error)
+
+	// GetEvents fetches all Events (check results that do have the same status
+	// as before) between 'start' and 'end'.
+	//
+	// If an event cannot be determinded because of a 'StatusChanged' flag, a
+	// potential interval is required to _assume_ if a gap between to
+	// measurements represents a status change or should be considered a status
+	// change to 'status.OK'. This interval should be sightly larger than the
+	// interval of your execution interval of 'bpmon write' in order to bp as
+	// accurate as possible.
+	//
+	// Also the results can be filtered by their status. If no status list is
+	// provided all events will be returned.
+	GetEvents(start time.Time, end time.Time, interval time.Duration, statusRequested []status.Status) ([]Event, error)
+
+	// GetLatest returns a representation of the latest persisted ResultSet
+	// matching the 'Tags' of the 'ResultSet' provided as input.
+	GetLatest(input ResultSet) (ResultSet, error)
+
+	// AnnotateEvent persists an annotation string on the event described via
+	// its 'ID'. It also updates its field 'Annotated' to 'true'.
+	AnnotateEvent(id ID, annotation string) (ResultSet, error)
 }
