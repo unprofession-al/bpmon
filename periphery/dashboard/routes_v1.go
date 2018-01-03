@@ -11,7 +11,7 @@ func init() {
 			L: wh.Leafs{
 				"{bp}": wh.Leaf{
 					E: wh.Endpoints{
-						"GET": wh.Endpoint{N: "GetBPEvents", H: GetBPTimelineHandler},
+						"GET": wh.Endpoint{N: "GetBPSpans", H: GetBPTimelineHandler},
 					},
 					L: wh.Leafs{
 						"kpis": wh.Leaf{
@@ -21,7 +21,7 @@ func init() {
 							L: wh.Leafs{
 								"{kpi}": wh.Leaf{
 									E: wh.Endpoints{
-										"GET": wh.Endpoint{N: "GetKPIEvents", H: GetKPITimelineHandler},
+										"GET": wh.Endpoint{N: "GetKPISpans", H: GetKPITimelineHandler},
 									},
 								},
 							},

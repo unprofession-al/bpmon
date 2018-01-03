@@ -17,9 +17,9 @@ func (pp StoreMock) GetLatest(rs store.ResultSet) (store.ResultSet, error) {
 	return store.ResultSet{}, nil
 }
 
-func (pp StoreMock) GetEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
-	return []store.Event{}, nil
+func (pp StoreMock) GetEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Span, error) {
+	return []store.Span{}, nil
 }
-func (pp StoreMock) AnnotateEvent(id store.EventID, annotation string) (store.ResultSet, error) {
+func (pp StoreMock) AnnotateEvent(id store.ID, annotation string) (store.ResultSet, error) {
 	return store.ResultSet{}, nil
 }

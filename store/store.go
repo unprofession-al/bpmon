@@ -40,8 +40,9 @@ func New(conf Conf) (Store, error) {
 }
 
 type Store interface {
-	GetEvents(ResultSet, time.Time, time.Time, time.Duration, []status.Status) ([]Event, error)
-	GetLatest(ResultSet) (ResultSet, error)
 	Write(*ResultSet) error
-	AnnotateEvent(EventID, string) (ResultSet, error)
+	GetSpans(ResultSet, time.Time, time.Time, time.Duration, []status.Status) ([]Span, error)
+	GetEvents(time.Time, time.Time, time.Duration, []status.Status) ([]Event, error)
+	GetLatest(ResultSet) (ResultSet, error)
+	AnnotateEvent(ID, string) (ResultSet, error)
 }

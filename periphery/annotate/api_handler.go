@@ -1,9 +1,9 @@
 package annotate
 
 import (
-	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -13,33 +13,39 @@ import (
 )
 
 func ListEvents(res http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	kind, ok := vars["kind"]
-	if !ok {
-		wh.Respond(res, req, http.StatusNotFound, errors.New("type not found"))
-		return
-	}
-
 	start, end := wh.GetStartEnd(req)
+
+	// TODO: This two values should not be hard coded...
 	interval, _ := time.ParseDuration("300s")
 	stati := []status.Status{status.NOK}
 
-	var out []store.Event
-	for _, bp := range bps {
-		rs := store.ResultSet{
-			Tags: map[string]string{store.IdentifierBusinessProcess: bp.ID},
-		}
-		if strings.ToUpper(kind) == store.IdentifierBusinessProcess {
-			events, err := pp.GetEvents(rs, start, end, interval, stati)
-			if err != nil {
-				wh.Respond(res, req, http.StatusInternalServerError, err.Error())
-				return
-			}
-			out = append(out, events...)
-		}
+	out, err := pp.GetEvents(start, end, interval, stati)
+	if err != nil {
+		msg := fmt.Sprintf("An error occured: %s", err.Error())
+		wh.Respond(res, req, http.StatusInternalServerError, msg)
+		return
 	}
 
 	wh.Respond(res, req, http.StatusOK, out)
 }
 
-func AnnotateEvent(res http.ResponseWriter, req *http.Request) {}
+func AnnotateEvent(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	id := store.ID(vars["event"])
+
+	b, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+	message := string(b)
+
+	out, err := pp.AnnotateEvent(id, message)
+	if err != nil {
+		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	wh.Respond(res, req, http.StatusCreated, out)
+}

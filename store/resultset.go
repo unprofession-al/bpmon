@@ -13,16 +13,15 @@ import (
 type ResultSet struct {
 	Name          string
 	ID            string
-	Tags          map[string]string
 	Start         time.Time
-	End           time.Time
+	Tags          map[string]string
 	Vals          map[string]bool
 	Status        status.Status
 	Was           status.Status
 	WasChecked    bool
+	StatusChanged bool
 	Annotated     bool
 	Annotation    string
-	StatusChanged bool
 	Err           error
 	Output        string
 	Responsible   string

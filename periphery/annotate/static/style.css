@@ -1,9 +1,16 @@
 .info, .tags {
     overflow: hidden;
-    width: 240px;
     padding-right: 10px;
     padding-top: 12px;
     padding-bottom: 12px;
+}
+
+.info {
+    width: 170px;
+}
+
+.buttons {
+    width: 250px;
 }
 
 .button.quick {

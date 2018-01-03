@@ -13,6 +13,8 @@
 
 .panel-content {
     padding: 20px 30px;
+    height: auto;
+    overflow: auto;
 }
 
 .panel-collapser {

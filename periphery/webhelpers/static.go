@@ -393,15 +393,15 @@ ufb/LwAA//+WzwgbfQQAAA==
 
 	"/components/panel.css": {
 		local:   "static/components/panel.css",
-		size:    678,
-		modtime: 1514554869,
+		size:    716,
+		modtime: 1514984961,
 		compressed: `
-H4sIAAAAAAAC/3xS0WrDMAx871cIxqCFuaTd+uJ+jRw7iYhjGUdp0439+0icwKDL8IPhdDpLdz5GDM7D
-1w4AwPCoevqkUGswnKxLyvB4nWt3stJoOBXFawY6TDUFZViEOw3vRVyYs0qDlu8aCjjHES5xnO9UG9wX
-b/M5ni+HhY9lWyceglUle04aXqqqyrXKM4oG7yrJQMTaKZMctopCT9ZpwBuTXaS2Cpb66PGhQdB4lzF1
-d6YlmR4duvC36Pdulx1SJQdxQRanIlo723Qu4rjs/pvrPcbepYX95N3zyjdMe6U6pJARZRLVjbi0mpTj
-EI4aevZktzoOcFqDyAlNIeAgnDFxoyj0VAcNpQviUsYbNzVrOH2s3VuDWUztMlQ5pH7iRKasNFkQWKii
-EoU4rP9qY92Z+sjY4fqPsT8BAAD//7m9kVKmAgAA
+H4sIAAAAAAAC/3SS0W6dMAyG73kKS9OkHmmpOGfrTfo0DjFgEeIomHPopr77BAGtU4u4QPrt/Pn9Oc8J
+IwX4UwEAOFnMxL85dhacZE/ZOFlet9qDvfYWrnX9vQgj5o6jcaIqo4Wfddo7N5cevTws1HBLC7ykZfvn
+zuFT/WP7nm8vl70fm6HLMkdvGgmSLXxr27bU2iCoFgK1WoSEHRmXCQfDcWJPFvAu7Hers4LnKQV8s6Do
+AhXNPMgNrOul8xi/Nn2vqkLINBKVou6kEnq/YbrVafkwe0/c9WoBZ5WiyJ1yG1YWRfvoGAKmifLu+Ynw
+ZzB3zE/GjMixKMbl9T7KB8qyNJVkYZLA/uzEBa5H5LLHdVX/QistajBwFy00FJXy/+Ndfx2nz4J5zMMe
+qpnztPYk4eK0Ioii3HKDyhKP13cy7tb6VrTL6yn+9+pvAAAA//9+zHOnzAIAAA==
 `,
 	},
 

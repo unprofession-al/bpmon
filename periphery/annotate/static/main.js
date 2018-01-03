@@ -18,13 +18,13 @@ function loadEvents(size, days) {
                     day: "numeric", year: "numeric", month: "short",
                     day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit"
                 };
-                var date = new Date(data[key].start);
+                var date = new Date(data[key].time);
                 var dateString =  date.toLocaleTimeString("de-ch", options);
-                var duration = data[key].duration.toFixed(0);
 
-                var event = {id: key, timestamp: dateString, t: data[key].tags, dur: duration};
-                var pannel = tmpl("event_tmpl", event);
-                $(pannel).hide().appendTo("#data").fadeIn(fadein);
+                var event = {id: data[key].id, timestamp: dateString, t: data[key].tags};
+                var panel = tmpl("event_tmpl", event);
+
+                $(panel).hide().appendTo("#data").fadeIn(fadein);
             }
         }
     });
@@ -43,7 +43,7 @@ function quickAnnotate(id) {
                 var url = new URL(window.location.href);
                 var days = url.searchParams.get("days");
                 loadCount(days);
-                $('#'+id).fadeOut("slow");
+                $('#'+id).fadeOut(100);
             }
         });
     }
@@ -62,7 +62,7 @@ function annotate(id) {
                 var url = new URL(window.location.href);
                 var days = url.searchParams.get("days");
                 loadCount(days);
-                $('#'+id).fadeOut("slow");
+                $('#'+id).fadeOut(100);
             }
         });
     }
