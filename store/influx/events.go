@@ -48,7 +48,7 @@ func (i Influx) AnnotateEvent(id store.ID, annotation string) (store.ResultSet, 
 	}
 
 	filter := fmt.Sprintf("time = %d", rs.Start.UnixNano())
-	q := newSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).Filter(filter).Limit(1)
+	q := newSelectQuery().From(rs.Kind().String()).FilterTags(rs.Tags).Filter(filter).Limit(1)
 	rs, err = i.First(q)
 	if err != nil {
 		return rs, err

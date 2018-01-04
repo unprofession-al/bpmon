@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+// ID is a unique id per 'Event'/'Span'. In order to bp translatable to a
+// ResultSet, the ID is composed of its timestamp as well its tags.
+// The composed string is then BASE64 encoded (no security reasons here for
+// a solid encryption, therefore BASE64 is fine).
 type ID string
 
 const (
@@ -17,18 +21,21 @@ const (
 	timeTagSeparator = " "
 )
 
-func NewID(timestamp time.Time, tags map[string]string) ID {
+// NewID generats an ID based on the timestamp as well as the tags.
+func NewID(timestamp time.Time, tags map[Kind]string) ID {
 	var pairs []string
 	for key, value := range tags {
-		pairs = append(pairs, key+pairSeparator+value)
+		pairs = append(pairs, key.String()+pairSeparator+value)
 	}
 	s := fmt.Sprintf("%v%s%s", timestamp.UnixNano(), timeTagSeparator, strings.Join(pairs, tagSeparator))
 	return ID(base64.RawURLEncoding.EncodeToString([]byte(s)))
 }
 
+// GetResultSet returns a ResultSet based on the Infos contained in the
+// ID string. If the encoding in gibberish, an error is returned.
 func (eid ID) GetResultSet() (ResultSet, error) {
 	rs := ResultSet{
-		Tags: make(map[string]string),
+		Tags: make(map[Kind]string),
 	}
 	data, err := base64.RawURLEncoding.DecodeString(string(eid))
 	if err != nil {
@@ -53,7 +60,7 @@ func (eid ID) GetResultSet() (ResultSet, error) {
 		if len(touple) != 2 {
 			return rs, errors.New("Malformed Event ID")
 		}
-		rs.Tags[touple[0]] = touple[1]
+		rs.Tags[Kind(touple[0])] = touple[1]
 	}
 
 	return rs, nil

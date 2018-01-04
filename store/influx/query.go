@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/unprofession-al/bpmon/store"
 )
 
 type query interface {
@@ -39,7 +41,7 @@ func (sq *selectquery) Between(s time.Time, e time.Time) *selectquery {
 	return sq
 }
 
-func (sq *selectquery) FilterTags(tags map[string]string) *selectquery {
+func (sq *selectquery) FilterTags(tags map[store.Kind]string) *selectquery {
 	for key, value := range tags {
 		sq.where = append(sq.where, fmt.Sprintf("%s = '%s'", key, value))
 	}

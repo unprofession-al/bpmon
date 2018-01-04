@@ -8,11 +8,11 @@ import (
 
 // Event represents a status change.
 type Event struct {
-	ID         ID                `json:"id"`
-	Status     status.Status     `json:"status"`
-	Annotation string            `json:"annotation"`
-	Time       time.Time         `json:"time"`
-	Tags       map[string]string `json:"tags"`
+	ID         ID              `json:"id"`
+	Status     status.Status   `json:"status"`
+	Annotation string          `json:"annotation"`
+	Time       time.Time       `json:"time"`
+	Tags       map[Kind]string `json:"tags"`
 }
 
 // SetID adds an ID to a `Span` based on its Time and Tags which sould be unique.

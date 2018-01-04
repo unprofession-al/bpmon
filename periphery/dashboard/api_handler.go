@@ -50,7 +50,7 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 	start, end := wh.GetStartEnd(req)
 
 	where := store.ResultSet{
-		Tags: map[string]string{"BP": bpid},
+		Tags: map[store.Kind]string{store.KindBusinessProcess: bpid},
 	}
 	interval, _ := time.ParseDuration("300s")
 	points, err := pp.GetSpans(where, start, end, interval, []status.Status{})
@@ -122,7 +122,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	start, end := wh.GetStartEnd(req)
 
 	where := store.ResultSet{
-		Tags: map[string]string{"BP": bpid, "KPI": kpiid},
+		Tags: map[store.Kind]string{store.KindBusinessProcess: bpid, store.KindKeyPerformanceIndicator: kpiid},
 	}
 
 	interval, _ := time.ParseDuration("300s")

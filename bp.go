@@ -60,7 +60,7 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 		ID:          bp.ID,
 		Children:    []*store.ResultSet{},
 		Vals:        make(map[string]bool),
-		Tags:        map[string]string{store.IdentifierBusinessProcess: bp.ID},
+		Tags:        map[store.Kind]string{store.KindBusinessProcess: bp.ID},
 	}
 
 	ch := make(chan *store.ResultSet)
@@ -69,7 +69,7 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 		if k.Responsible == "" {
 			k.Responsible = bp.Responsible
 		}
-		go func(k KPI, parentTags map[string]string, chk checker.Checker, pp store.Store, r rules.Rules) {
+		go func(k KPI, parentTags map[store.Kind]string, chk checker.Checker, pp store.Store, r rules.Rules) {
 			childRs := k.Status(rs.Tags, chk, pp, r)
 			ch <- &childRs
 		}(k, rs.Tags, chk, pp, r)
@@ -104,12 +104,12 @@ type KPI struct {
 	Responsible string    `yaml:"responsible"`
 }
 
-func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
-	tags := make(map[string]string)
+func (k KPI) Status(parentTags map[store.Kind]string, chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
+	tags := make(map[store.Kind]string)
 	for k, v := range parentTags {
 		tags[k] = v
 	}
-	tags[store.IdentifierKeyPerformanceIndicator] = k.ID
+	tags[store.KindKeyPerformanceIndicator] = k.ID
 
 	rs := store.ResultSet{
 		Responsible: k.Responsible,
@@ -126,7 +126,7 @@ func (k KPI) Status(parentTags map[string]string, chk checker.Checker, pp store.
 		if s.Responsible == "" {
 			s.Responsible = k.Responsible
 		}
-		go func(s Service, parentTags map[string]string, chk checker.Checker, pp store.Store, r rules.Rules) {
+		go func(s Service, parentTags map[store.Kind]string, chk checker.Checker, pp store.Store, r rules.Rules) {
 			childRs := s.Status(rs.Tags, chk, pp, r)
 			ch <- &childRs
 		}(s, rs.Tags, chk, pp, r)
@@ -162,14 +162,14 @@ type Service struct {
 	Responsible string `yaml:"responsible"`
 }
 
-func (s Service) Status(parentTags map[string]string, chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
+func (s Service) Status(parentTags map[store.Kind]string, chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 
-	tags := make(map[string]string)
+	tags := make(map[store.Kind]string)
 	for k, v := range parentTags {
 		tags[k] = v
 	}
-	tags[store.IdentifierService] = name
+	tags[store.KindService] = name
 
 	rs := store.ResultSet{
 		Name:        name,

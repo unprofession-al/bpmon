@@ -22,7 +22,7 @@ type point struct {
 func (i Influx) asPoints(rs *store.ResultSet) []point {
 	var out []point
 
-	if rs.Status != status.OK || stringInSlice(rs.Kind(), i.saveOK) {
+	if rs.Status != status.OK || stringInSlice(rs.Kind().String(), i.saveOK) {
 		fields := map[string]interface{}{
 			"status":    rs.Status.Int(),
 			"annotated": rs.Annotated,
@@ -44,10 +44,15 @@ func (i Influx) asPoints(rs *store.ResultSet) []point {
 			fields["annotation"] = rs.Annotation
 		}
 
+		tags := make(map[string]string)
+		for k, v := range rs.Tags {
+			tags[k.String()] = v
+		}
+
 		pt := point{
 			Timestamp: rs.Start,
-			Series:    rs.Kind(),
-			Tags:      rs.Tags,
+			Series:    rs.Kind().String(),
+			Tags:      tags,
 			Fields:    fields,
 		}
 		out = append(out, pt)
@@ -63,23 +68,23 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 	var err error
 	var ok bool
 	out := store.ResultSet{
-		Tags: make(map[string]string),
+		Tags: make(map[store.Kind]string),
 		Vals: make(map[string]bool),
 	}
 	for k, v := range data {
 		if v != nil {
-			switch k {
+			switch store.Kind(k) {
 			case timefield:
 				out.Start, err = time.Parse(time.RFC3339, v.(string))
 				if err != nil {
 					return out, err
 				}
-			case store.IdentifierBusinessProcess:
-				out.Tags[store.IdentifierBusinessProcess] = v.(string)
-			case store.IdentifierKeyPerformanceIndicator:
-				out.Tags[store.IdentifierKeyPerformanceIndicator] = v.(string)
-			case store.IdentifierService:
-				out.Tags[store.IdentifierService] = v.(string)
+			case store.KindBusinessProcess:
+				out.Tags[store.KindBusinessProcess] = v.(string)
+			case store.KindKeyPerformanceIndicator:
+				out.Tags[store.KindKeyPerformanceIndicator] = v.(string)
+			case store.KindService:
+				out.Tags[store.KindService] = v.(string)
 			case "err":
 				out.Err = errors.New(v.(string))
 			case "output":

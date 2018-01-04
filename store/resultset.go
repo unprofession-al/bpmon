@@ -10,11 +10,13 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
+// ResultSet holds all results of a check. It is also returned by store
+// implementations when queries are executed.
 type ResultSet struct {
 	Name          string
 	ID            string
 	Start         time.Time
-	Tags          map[string]string
+	Tags          map[Kind]string
 	Vals          map[string]bool
 	Status        status.Status
 	Was           status.Status
@@ -28,22 +30,29 @@ type ResultSet struct {
 	Children      []*ResultSet
 }
 
+type Kind string
+
 const (
-	IdentifierBusinessProcess         = "BP"
-	IdentifierKeyPerformanceIndicator = "KPI"
-	IdentifierService                 = "SVC"
+	KindBusinessProcess         Kind = "BP"
+	KindKeyPerformanceIndicator Kind = "KPI"
+	KindService                 Kind = "SVC"
+	KindUnknown                 Kind = "UNKNOWN"
 )
 
-func (rs ResultSet) Kind() string {
-	kind := "UNKNOWN"
-	if _, ok := rs.Tags[IdentifierBusinessProcess]; ok {
-		kind = IdentifierBusinessProcess
+func (k Kind) String() string {
+	return string(k)
+}
+
+func (rs ResultSet) Kind() Kind {
+	kind := KindUnknown
+	if _, ok := rs.Tags[KindBusinessProcess]; ok {
+		kind = KindBusinessProcess
 	}
-	if _, ok := rs.Tags[IdentifierKeyPerformanceIndicator]; ok {
-		kind = IdentifierKeyPerformanceIndicator
+	if _, ok := rs.Tags[KindKeyPerformanceIndicator]; ok {
+		kind = KindKeyPerformanceIndicator
 	}
-	if _, ok := rs.Tags[IdentifierService]; ok {
-		kind = IdentifierService
+	if _, ok := rs.Tags[KindService]; ok {
+		kind = KindService
 	}
 	return kind
 }
@@ -116,7 +125,7 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 }
 
 func (rs *ResultSet) AddPreviousStatus(pp Store, saveOK []string) {
-	if stringInSlice(rs.Kind(), saveOK) {
+	if stringInSlice(string(rs.Kind()), saveOK) {
 		latest, err := pp.GetLatest(*rs)
 		if err == nil {
 			rs.Was = latest.Was

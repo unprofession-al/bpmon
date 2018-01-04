@@ -31,7 +31,7 @@ func (i Influx) GetSpans(rs store.ResultSet, start time.Time, end time.Time, int
 	var err error
 	if i.getLastStatus {
 		for _, saveOkKind := range i.saveOK {
-			if saveOkKind == rs.Kind() {
+			if saveOkKind == rs.Kind().String() {
 				out, err = i.getEvents(rs, start, end)
 				return out.FilterByStatus(stati), err
 			}
@@ -45,7 +45,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 	out := []store.Span{}
 	totalDuration := end.Sub(start).Seconds()
 
-	q := newSelectQuery().From(rs.Kind()).Between(start, end).FilterTags(rs.Tags).Filter("changed = true")
+	q := newSelectQuery().From(rs.Kind().String()).Between(start, end).FilterTags(rs.Tags).Filter("changed = true")
 	resultsets, err := i.Run(q)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())
@@ -76,7 +76,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 
 	// get last state before the time window specified by 'start' and 'end'
 	gap, _ := time.ParseDuration("30m")
-	q = newSelectQuery().From(rs.Kind()).Between(end.Add(gap*-1), end).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
+	q = newSelectQuery().From(rs.Kind().String()).Between(end.Add(gap*-1), end).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
 	last, err := i.First(q)
 
 	if err != nil {
@@ -125,7 +125,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 		},
 	}
 
-	q := newSelectQuery().From(rs.Kind()).Between(start, end).FilterTags(rs.Tags)
+	q := newSelectQuery().From(rs.Kind().String()).Between(start, end).FilterTags(rs.Tags)
 	rows, err := i.Run(q)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())

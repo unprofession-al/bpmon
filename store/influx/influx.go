@@ -78,7 +78,7 @@ func (i Influx) Write(rs *store.ResultSet) error {
 }
 
 func (i Influx) GetLatest(rs store.ResultSet) (store.ResultSet, error) {
-	q := newSelectQuery().From(rs.Kind()).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
+	q := newSelectQuery().From(rs.Kind().String()).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
 	return i.First(q)
 }
 
