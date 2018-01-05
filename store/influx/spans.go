@@ -32,16 +32,16 @@ func (i Influx) GetSpans(rs store.ResultSet, start time.Time, end time.Time, int
 	if i.getLastStatus {
 		for _, saveOkKind := range i.saveOK {
 			if saveOkKind == rs.Kind().String() {
-				out, err = i.getEvents(rs, start, end)
+				out, err = i.getSpans(rs, start, end)
 				return out.FilterByStatus(stati), err
 			}
 		}
 	}
-	out, err = i.assumeEvents(rs, start, end, interval)
+	out, err = i.assumeSpans(rs, start, end, interval)
 	return out.FilterByStatus(stati), err
 }
 
-func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([]store.Span, error) {
+func (i Influx) getSpans(rs store.ResultSet, start time.Time, end time.Time) ([]store.Span, error) {
 	out := []store.Span{}
 	totalDuration := end.Sub(start).Seconds()
 
@@ -113,7 +113,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 	return out, nil
 }
 
-func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]store.Span, error) {
+func (i Influx) assumeSpans(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]store.Span, error) {
 	duration := end.Sub(start).Seconds()
 	s := []store.Span{
 		store.Span{
