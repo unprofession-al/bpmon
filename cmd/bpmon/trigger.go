@@ -39,14 +39,14 @@ var triggerCmd = &cobra.Command{
 		}
 
 		p, _ := store.New(c.Store)
-		stripBy := []status.Status{status.Unknown, status.OK}
+		filterBy := []status.Status{status.NOK}
 		var sets []store.ResultSet
 		for _, bp := range b {
 			rs := bp.Status(i, nil, r)
 			if c.Store.GetLastStatus {
 				rs.AddPreviousStatus(p, c.Store.SaveOK)
 			}
-			set, stripped := rs.StripByStatus(stripBy)
+			set, stripped := rs.FilterByStatus(filterBy)
 			if !stripped {
 				sets = append(sets, set)
 			}

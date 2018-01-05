@@ -106,7 +106,7 @@ func (sq *selectquery) fieldsQuery() string {
 		}
 	}
 
-	// make sure time is in the filst position
+	// make sure time is in the first position
 	timeFound := false
 	for i, field := range sq.fields {
 		if field == "time" {

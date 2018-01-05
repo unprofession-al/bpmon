@@ -1,3 +1,6 @@
+// Package store provides an interface that allows to implement various
+// backends to be loaded in compile time. This makes the persistence layer
+// of BPMON interchangeable.
 package store
 
 import (

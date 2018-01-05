@@ -30,19 +30,7 @@ type ResultSet struct {
 	Children      []*ResultSet
 }
 
-type Kind string
-
-const (
-	KindBusinessProcess         Kind = "BP"
-	KindKeyPerformanceIndicator Kind = "KPI"
-	KindService                 Kind = "SVC"
-	KindUnknown                 Kind = "UNKNOWN"
-)
-
-func (k Kind) String() string {
-	return string(k)
-}
-
+// Kind returns the Kind of the Result set based on its tags.
 func (rs ResultSet) Kind() Kind {
 	kind := KindUnknown
 	if _, ok := rs.Tags[KindBusinessProcess]; ok {
@@ -57,6 +45,8 @@ func (rs ResultSet) Kind() Kind {
 	return kind
 }
 
+// PrettyPrint returns a string representation of its 'ResultSet', proper formated
+// to be printed to STDOUT in a human readable form.
 func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool, resp bool) string {
 	ident := strings.Repeat("   ", level)
 	out := rs.Status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.Kind(), rs.Name, rs.Status))
@@ -102,19 +92,21 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool, resp bool) string
 	return out
 }
 
-func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
+// FilterByStatus returns a ResultSet that only contains element with one of the
+// status passed as argument.
+func (rs ResultSet) FilterByStatus(s []status.Status) (ResultSet, bool) {
 	setOut := rs
-	keep := true
+	keep := false
 	for _, status := range s {
 		if rs.Status == status {
-			keep = false
+			keep = true
 			break
 		}
 	}
 	if keep {
 		var children []*ResultSet
 		for _, child := range rs.Children {
-			set, stripped := child.StripByStatus(s)
+			set, stripped := child.FilterByStatus(s)
 			if !stripped {
 				children = append(children, &set)
 			}
@@ -124,6 +116,15 @@ func (rs ResultSet) StripByStatus(s []status.Status) (ResultSet, bool) {
 	return setOut, !keep
 }
 
+// AddPreviousStatus looks up the last status of a 'ResultSet' which was
+// persisted to the store and adds 3 additional to the current ResultSet:
+//
+//		* 'Was' represent the latest status
+//		* 'WasChecked' is set to 'true'
+//		* 'StatusChanged' is set to 'true' if the last Status and the current status differ
+//
+// This is only executed if status.OK is peristed for the 'Kind' of the
+// 'ResultSet', otherwise the information would not make any sense.
 func (rs *ResultSet) AddPreviousStatus(pp Store, saveOK []string) {
 	if stringInSlice(string(rs.Kind()), saveOK) {
 		latest, err := pp.GetLatest(*rs)
@@ -148,4 +149,19 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+// Kind describes the type of entity a ResultSet/Event/Store can represent.
+type Kind string
+
+const (
+	KindBusinessProcess         Kind = "BP"
+	KindKeyPerformanceIndicator Kind = "KPI"
+	KindService                 Kind = "SVC"
+	KindUnknown                 Kind = "UNKNOWN"
+)
+
+// String implements the Stringer interface.
+func (k Kind) String() string {
+	return string(k)
 }
