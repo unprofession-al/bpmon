@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 type bpTestSet struct {
@@ -86,7 +87,7 @@ var SvcTestSets = []svcTestSet{
 func TestServices(t *testing.T) {
 	pp := StoreMock{}
 	chk := CheckerMock{}
-	parentTags := map[string]string{"BP": "BP", "KPI": "KPI"}
+	parentTags := map[store.Kind]string{store.KindBusinessProcess: "BP", store.KindKeyPerformanceIndicator: "KPI"}
 	for _, s := range SvcTestSets {
 		rs := s.svc.Status(parentTags, chk, pp, chk.DefaultRules())
 		if s.errExpected && rs.Err == nil {
