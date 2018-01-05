@@ -28,6 +28,9 @@ type Rule struct {
 	Then status.Status `yaml:"then"`
 }
 
+// Merge adds a new set of Rules to the Rules that call the method. If a Rule
+// index (int key of the map) is present in both Rule sets, the 'additional'
+// Rule will win.
 func (r Rules) Merge(additional Rules) error {
 	for order, a := range additional {
 		rule := Rule{
@@ -40,6 +43,19 @@ func (r Rules) Merge(additional Rules) error {
 	return nil
 }
 
+// Analyze takes values (as in store.ResultSet) and validates those values
+// against the Rules. It does so by:
+//
+//		* Starting at the first rule (rule with the smallest index).
+//		* Checking if all fields listed in 'Must' are true.
+//		* Checking if all fields listed in 'MustNot' are false.
+//		* Returning the status defined in 'Then' if the conditions
+//		  above apply.
+//
+// If a 'Must' of 'MustNot' key does not exist in the values, an error
+// is returned.
+//
+// If no Rules apply, status 'Unknown' is returned.
 func (r Rules) Analyze(values map[string]bool) (status.Status, error) {
 	var order []int
 	for index := range r {
