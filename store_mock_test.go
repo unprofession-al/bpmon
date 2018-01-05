@@ -25,6 +25,6 @@ func (pp StoreMock) AnnotateEvent(id store.ID, annotation string) (store.ResultS
 	return store.ResultSet{}, nil
 }
 
-func (pp StoreMock) GetEvents(start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
+func (pp StoreMock) GetEvents(kind store.Kind, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
 	return []store.Event{}, nil
 }

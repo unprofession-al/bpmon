@@ -76,7 +76,7 @@ type Accessor interface {
 	GetSpans(input ResultSet, start time.Time, end time.Time, interval time.Duration, statusRequested []status.Status) ([]Span, error)
 
 	// GetEvents fetches all Events (check results that do have the same status
-	// as before) between 'start' and 'end'.
+	// as before) of a certain kind between 'start' and 'end'.
 	//
 	// If an event cannot be determinded because of a 'StatusChanged' flag, a
 	// potential interval is required to _assume_ if a gap between to
@@ -87,7 +87,7 @@ type Accessor interface {
 	//
 	// Also the results can be filtered by their status. If no status list is
 	// provided all events will be returned.
-	GetEvents(start time.Time, end time.Time, interval time.Duration, statusRequested []status.Status) ([]Event, error)
+	GetEvents(kind Kind, start time.Time, end time.Time, interval time.Duration, statusRequested []status.Status) ([]Event, error)
 
 	// GetLatest returns a representation of the latest persisted ResultSet
 	// matching the 'Tags' of the 'ResultSet' provided as input.

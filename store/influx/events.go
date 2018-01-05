@@ -10,7 +10,7 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 )
 
-func (i Influx) GetEvents(start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
+func (i Influx) GetEvents(kind store.Kind, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
 	var out []store.Event
 
 	var statusQuerySegment []string
@@ -19,7 +19,7 @@ func (i Influx) GetEvents(start time.Time, end time.Time, interval time.Duration
 	}
 	sqs := strings.Join(statusQuerySegment, " OR ")
 
-	q := newSelectQuery().From("BP").Between(start, end).Filter("changed = true").Filter(sqs).Filter("annotated = false")
+	q := newSelectQuery().From(kind.String()).Between(start, end).Filter("changed = true").Filter(sqs).Filter("annotated = false")
 	resultsets, err := i.Run(q)
 	if err != nil {
 		msg := fmt.Sprintf("Cannot run query, error is: %s", err.Error())

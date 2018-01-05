@@ -19,7 +19,7 @@ func ListEvents(res http.ResponseWriter, req *http.Request) {
 	interval, _ := time.ParseDuration("300s")
 	stati := []status.Status{status.StatusNOK}
 
-	out, err := pp.GetEvents(start, end, interval, stati)
+	out, err := pp.GetEvents(store.KindBusinessProcess, start, end, interval, stati)
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
