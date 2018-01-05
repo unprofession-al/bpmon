@@ -24,7 +24,7 @@ func init() {
 	store.Register("influx", Setup)
 }
 
-func Setup(conf store.Conf) (store.Store, error) {
+func Setup(conf store.Conf) (store.Accessor, error) {
 	u, err := url.Parse(conf.Connection)
 	if err != nil {
 		panic(err)

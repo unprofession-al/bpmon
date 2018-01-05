@@ -22,7 +22,7 @@ type point struct {
 func (i Influx) asPoints(rs *store.ResultSet) []point {
 	var out []point
 
-	if rs.Status != status.OK || stringInSlice(rs.Kind().String(), i.saveOK) {
+	if rs.Status != status.StatusOK || stringInSlice(rs.Kind().String(), i.saveOK) {
 		fields := map[string]interface{}{
 			"status":    rs.Status.Int(),
 			"annotated": rs.Annotated,

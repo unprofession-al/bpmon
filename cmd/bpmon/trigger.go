@@ -39,7 +39,7 @@ var triggerCmd = &cobra.Command{
 		}
 
 		p, _ := store.New(c.Store)
-		filterBy := []status.Status{status.NOK}
+		filterBy := []status.Status{status.StatusNOK}
 		var sets []store.ResultSet
 		for _, bp := range b {
 			rs := bp.Status(i, nil, r)

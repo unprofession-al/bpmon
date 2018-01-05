@@ -15,11 +15,11 @@ import (
 )
 
 var bps bpmon.BusinessProcesses
-var pp store.Store
+var pp store.Accessor
 
 var routes = make(map[string]wh.Leafs)
 
-func Setup(conf configs.DashboardConf, bpsIn bpmon.BusinessProcesses, ppIn store.Store, auth bool, recipientHashes map[string]string) (http.Handler, error) {
+func Setup(conf configs.DashboardConf, bpsIn bpmon.BusinessProcesses, ppIn store.Accessor, auth bool, recipientHashes map[string]string) (http.Handler, error) {
 	pp = ppIn
 	bps = bpsIn
 

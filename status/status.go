@@ -13,20 +13,20 @@ type Status int
 
 // The status code list.
 const (
-	OK = iota
-	NOK
-	Unknown
+	StatusOK Status = Status(iota)
+	StatusNOK
+	StatusUnknown
 )
 
-var statusText = map[int]string{
-	OK:      "ok",
-	NOK:     "not ok",
-	Unknown: "unknown",
+var statusText = map[Status]string{
+	StatusOK:      "ok",
+	StatusNOK:     "not ok",
+	StatusUnknown: "unknown",
 }
 
 // String implements the stringer interface.
 func (s Status) String() string {
-	return statusText[int(s)]
+	return statusText[s]
 }
 
 // FromString returns a status matching the string provided. If the string does
@@ -37,21 +37,21 @@ func FromString(in string) (Status, error) {
 			return Status(status), nil
 		}
 	}
-	return Unknown, fmt.Errorf("String '%s' is not a valid status", in)
+	return StatusUnknown, fmt.Errorf("String '%s' is not a valid status", in)
 }
 
 // FromInt64 returns a status matching the int64 provided. If the input does
 // not match any status, 'Unknown' as well as an error are returned.
 func FromInt64(in int64) (Status, error) {
-	switch in {
-	case OK:
-		return OK, nil
-	case NOK:
-		return NOK, nil
-	case Unknown:
-		return Unknown, nil
+	switch Status(in) {
+	case StatusOK:
+		return StatusOK, nil
+	case StatusNOK:
+		return StatusNOK, nil
+	case StatusUnknown:
+		return StatusUnknown, nil
 	default:
-		return Unknown, fmt.Errorf("Integer '%d' is not a valid status", in)
+		return StatusUnknown, fmt.Errorf("Integer '%d' is not a valid status", in)
 	}
 }
 
@@ -64,11 +64,11 @@ func (s Status) Int() int {
 func (s Status) Colorize(in string) string {
 	var out string
 	switch s {
-	case OK:
+	case StatusOK:
 		out = ansi.Color(in, "green")
-	case NOK:
+	case StatusNOK:
 		out = ansi.Color(in, "red+b")
-	case Unknown:
+	case StatusUnknown:
 		out = ansi.Color(in, "cyan+b")
 	}
 	return out
@@ -78,15 +78,15 @@ func (s Status) Colorize(in string) string {
 // is false.
 func FromBool(ok bool) Status {
 	if ok {
-		return OK
+		return StatusOK
 	}
-	return NOK
+	return StatusNOK
 }
 
 // Bool returns on boolean representation of the status. Status 'Unknown' is
 // considered true.
 func (s Status) Bool() bool {
-	return s != NOK
+	return s != StatusNOK
 }
 
 // UnmarshalYAML implements the Unmarshaler interface of package yaml.

@@ -53,7 +53,7 @@ type BP struct {
 	Recipients       []string     `yaml:"recipients"`
 }
 
-func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
+func (bp BP) Status(chk checker.Checker, pp store.Accessor, r rules.Rules) store.ResultSet {
 	rs := store.ResultSet{
 		Responsible: bp.Responsible,
 		Name:        bp.Name,
@@ -69,7 +69,7 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 		if k.Responsible == "" {
 			k.Responsible = bp.Responsible
 		}
-		go func(k KPI, parentTags map[store.Kind]string, chk checker.Checker, pp store.Store, r rules.Rules) {
+		go func(k KPI, parentTags map[store.Kind]string, chk checker.Checker, pp store.Accessor, r rules.Rules) {
 			childRs := k.Status(rs.Tags, chk, pp, r)
 			ch <- &childRs
 		}(k, rs.Tags, chk, pp, r)
@@ -89,7 +89,7 @@ func (bp BP) Status(chk checker.Checker, pp store.Store, r rules.Rules) store.Re
 
 	ok, _ := calculate("AND", calcValues)
 	rs.Status = status.FromBool(ok)
-	rs.Was = status.Unknown
+	rs.Was = status.StatusUnknown
 	rs.StatusChanged = false
 	rs.Start = time.Now()
 	rs.Vals["in_availability"] = bp.Availability.Contains(rs.Start)
@@ -104,7 +104,7 @@ type KPI struct {
 	Responsible string    `yaml:"responsible"`
 }
 
-func (k KPI) Status(parentTags map[store.Kind]string, chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
+func (k KPI) Status(parentTags map[store.Kind]string, chk checker.Checker, pp store.Accessor, r rules.Rules) store.ResultSet {
 	tags := make(map[store.Kind]string)
 	for k, v := range parentTags {
 		tags[k] = v
@@ -126,7 +126,7 @@ func (k KPI) Status(parentTags map[store.Kind]string, chk checker.Checker, pp st
 		if s.Responsible == "" {
 			s.Responsible = k.Responsible
 		}
-		go func(s Service, parentTags map[store.Kind]string, chk checker.Checker, pp store.Store, r rules.Rules) {
+		go func(s Service, parentTags map[store.Kind]string, chk checker.Checker, pp store.Accessor, r rules.Rules) {
 			childRs := s.Status(rs.Tags, chk, pp, r)
 			ch <- &childRs
 		}(s, rs.Tags, chk, pp, r)
@@ -146,12 +146,12 @@ func (k KPI) Status(parentTags map[store.Kind]string, chk checker.Checker, pp st
 
 	ok, err := calculate(k.Operation, calcValues)
 	rs.Status = status.FromBool(ok)
-	rs.Was = status.Unknown
+	rs.Was = status.StatusUnknown
 	rs.StatusChanged = false
 	rs.Start = time.Now()
 	if err != nil {
 		rs.Err = err
-		rs.Status = status.Unknown
+		rs.Status = status.StatusUnknown
 	}
 	return rs
 }
@@ -162,7 +162,7 @@ type Service struct {
 	Responsible string `yaml:"responsible"`
 }
 
-func (s Service) Status(parentTags map[store.Kind]string, chk checker.Checker, pp store.Store, r rules.Rules) store.ResultSet {
+func (s Service) Status(parentTags map[store.Kind]string, chk checker.Checker, pp store.Accessor, r rules.Rules) store.ResultSet {
 	name := fmt.Sprintf("%s!%s", s.Host, s.Service)
 
 	tags := make(map[store.Kind]string)
@@ -184,7 +184,7 @@ func (s Service) Status(parentTags map[store.Kind]string, chk checker.Checker, p
 	rs.Vals = result.Values
 	st, _ := r.Analyze(result.Values)
 	rs.Status = st
-	rs.Was = status.Unknown
+	rs.Was = status.StatusUnknown
 	rs.StatusChanged = false
 	return rs
 }

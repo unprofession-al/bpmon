@@ -40,7 +40,7 @@ var BpTestSets = []bpTestSet{
 				},
 			},
 		},
-		status: status.OK,
+		status: status.StatusOK,
 	},
 }
 
@@ -64,22 +64,22 @@ type svcTestSet struct {
 var SvcTestSets = []svcTestSet{
 	{
 		svc:         Service{Host: "Host", Service: "good"},
-		status:      status.OK,
+		status:      status.StatusOK,
 		errExpected: false,
 	},
 	{
 		svc:         Service{Host: "Host", Service: "bad"},
-		status:      status.NOK,
+		status:      status.StatusNOK,
 		errExpected: false,
 	},
 	{
 		svc:         Service{Host: "Host", Service: "unknown"},
-		status:      status.Unknown,
+		status:      status.StatusUnknown,
 		errExpected: false,
 	},
 	{
 		svc:         Service{Host: "Host", Service: "error"},
-		status:      status.OK,
+		status:      status.StatusOK,
 		errExpected: true,
 	},
 }

@@ -34,7 +34,7 @@ func MockIcingaServicesHandler(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	t := icinga.Timestamp{time.Now()}
+	t := icinga.Timestamp(time.Now())
 
 	var data icinga.StatusResponse
 	if all {

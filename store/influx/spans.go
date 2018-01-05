@@ -82,7 +82,7 @@ func (i Influx) getEvents(rs store.ResultSet, start time.Time, end time.Time) ([
 	if err != nil {
 		// if no state at all is found
 		complete := store.Span{
-			Status:          status.Unknown,
+			Status:          status.StatusUnknown,
 			Pseudo:          true,
 			Annotation:      "no such data found",
 			Duration:        totalDuration,
@@ -117,7 +117,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 	duration := end.Sub(start).Seconds()
 	s := []store.Span{
 		store.Span{
-			Status:     status.OK,
+			Status:     status.StatusOK,
 			Annotation: "",
 			Start:      start,
 			End:        end,
@@ -158,7 +158,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 			filler := store.Span{
 				Start:      last.End,
 				End:        current.Start,
-				Status:     status.OK,
+				Status:     status.StatusOK,
 				Annotation: "",
 			}
 			s = append(s, filler)
@@ -181,7 +181,7 @@ func (i Influx) assumeEvents(rs store.ResultSet, start time.Time, end time.Time,
 		filler := store.Span{
 			Start:      lastEvent.End,
 			End:        end,
-			Status:     status.OK,
+			Status:     status.StatusOK,
 			Annotation: "",
 		}
 		s = append(s, filler)

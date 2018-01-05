@@ -46,17 +46,17 @@ func (chk CheckerMock) DefaultRules() rules.Rules {
 		10: rules.Rule{
 			Must:    []string{"bad"},
 			MustNot: []string{},
-			Then:    status.NOK,
+			Then:    status.StatusNOK,
 		},
 		20: rules.Rule{
 			Must:    []string{"unknown"},
 			MustNot: []string{},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 		9999: rules.Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.OK,
+			Then:    status.StatusOK,
 		},
 	}
 	return rules

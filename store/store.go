@@ -26,13 +26,13 @@ type Conf struct {
 
 var (
 	sMu sync.Mutex
-	s   = make(map[string]func(Conf) (Store, error))
+	s   = make(map[string]func(Conf) (Accessor, error))
 )
 
 // Register must be called in the init function of each store implementation.
 // The Register function will panic if two store impelmentations with the same
 // name try to register themselfs.
-func Register(name string, setupFunc func(Conf) (Store, error)) {
+func Register(name string, setupFunc func(Conf) (Accessor, error)) {
 	sMu.Lock()
 	defer sMu.Unlock()
 	if _, dup := s[name]; dup {
@@ -44,7 +44,7 @@ func Register(name string, setupFunc func(Conf) (Store, error)) {
 // New well return a configured instance of a store implementation. The
 // implementation requested is determined by the 'Kind' field of the
 // configuration struct.
-func New(conf Conf) (Store, error) {
+func New(conf Conf) (Accessor, error) {
 	setupFunc, ok := s[conf.Kind]
 	if !ok {
 		return nil, errors.New("store: store '" + conf.Kind + "' does not exist")
@@ -52,8 +52,8 @@ func New(conf Conf) (Store, error) {
 	return setupFunc(conf)
 }
 
-// Store is the interface that describes all operations exposed by a store.
-type Store interface {
+// Accessor is the interface that describes all operations exposed by a store.
+type Accessor interface {
 	// Write takes a (nested) ResultSet and persists all values (including all
 	// child values) to the store.
 	Write(input *ResultSet) error

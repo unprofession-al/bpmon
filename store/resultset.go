@@ -65,7 +65,7 @@ func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool, resp bool) string
 	if rs.Err != nil {
 		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.Err.Error())
 	}
-	if rs.Status == status.NOK && rs.Output != "" {
+	if rs.Status == status.StatusNOK && rs.Output != "" {
 		out += fmt.Sprintf("\n%sMessage from Monitoring: %s", ident, rs.Output)
 	}
 	if vals && len(rs.Vals) > 0 {
@@ -125,7 +125,7 @@ func (rs ResultSet) FilterByStatus(s []status.Status) (ResultSet, bool) {
 //
 // This is only executed if status.OK is peristed for the 'Kind' of the
 // 'ResultSet', otherwise the information would not make any sense.
-func (rs *ResultSet) AddPreviousStatus(pp Store, saveOK []string) {
+func (rs *ResultSet) AddPreviousStatus(pp Accessor, saveOK []string) {
 	if stringInSlice(string(rs.Kind()), saveOK) {
 		latest, err := pp.GetLatest(*rs)
 		if err == nil {

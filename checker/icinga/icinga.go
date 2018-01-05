@@ -74,22 +74,22 @@ func (i Icinga) DefaultRules() rules.Rules {
 		10: rules.Rule{
 			Must:    []string{IcingaFlagFailed},
 			MustNot: []string{},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 		20: rules.Rule{
 			Must:    []string{IcingaFlagUnknown},
 			MustNot: []string{},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 		30: rules.Rule{
 			Must:    []string{IcingaFlagCritical},
 			MustNot: []string{IcingaFlagScheduledDowntime},
-			Then:    status.NOK,
+			Then:    status.StatusNOK,
 		},
 		9999: rules.Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.OK,
+			Then:    status.StatusOK,
 		},
 	}
 	return rules
@@ -154,24 +154,23 @@ type LastCheckResult struct {
 	Output string  `json:"output"`
 }
 
-type Timestamp struct {
-	time.Time
-}
+type Timestamp time.Time
 
-func (t *Timestamp) MarshalJSON() ([]byte, error) {
-	ts := t.Time.Unix()
+func (t Timestamp) MarshalJSON() ([]byte, error) {
+	ts := time.Time(t).Unix()
 	stamp := fmt.Sprint(ts)
 
 	return []byte(stamp), nil
 }
 
 func (t *Timestamp) UnmarshalJSON(b []byte) error {
-	ts, err := strconv.ParseFloat(string(b), 64)
+	tsString, err := strconv.ParseFloat(string(b), 64)
 	if err != nil {
 		return err
 	}
 
-	t.Time = time.Unix(int64(ts), 0)
+	ts := time.Unix(int64(tsString), 0)
+	*t = Timestamp(ts)
 
 	return nil
 }
@@ -195,7 +194,7 @@ func (r StatusResponse) status() (at time.Time, msg string, vals map[string]bool
 	attrs := r.Results[0].Attrs
 
 	msg = attrs.LastCheckResult.Output
-	at = attrs.LastCheck.Time
+	at = time.Time(attrs.LastCheck)
 	vals[IcingaFlagFailed] = false
 	if attrs.Acknowledgement > 0.0 {
 		vals[IcingaFlagAcknowledged] = true

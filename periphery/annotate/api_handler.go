@@ -17,7 +17,7 @@ func ListEvents(res http.ResponseWriter, req *http.Request) {
 
 	// TODO: This two values should not be hard coded...
 	interval, _ := time.ParseDuration("300s")
-	stati := []status.Status{status.NOK}
+	stati := []status.Status{status.StatusNOK}
 
 	out, err := pp.GetEvents(start, end, interval, stati)
 	if err != nil {
