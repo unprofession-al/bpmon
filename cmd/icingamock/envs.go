@@ -13,8 +13,8 @@ import (
 
 type Environments map[string]*Hosts
 
-func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.StatusResponse, error) {
-	response := icinga.StatusResponse{}
+func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.Response, error) {
+	response := icinga.Response{}
 
 	env, ok := e[envN]
 	if !ok {
@@ -40,8 +40,8 @@ func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.StatusRe
 	return response, nil
 }
 
-func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Timestamp) (icinga.StatusResponse, error) {
-	response := icinga.StatusResponse{}
+func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Timestamp) (icinga.Response, error) {
+	response := icinga.Response{}
 
 	env, ok := e[envN]
 	if !ok {

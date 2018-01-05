@@ -43,13 +43,13 @@ func Setup(conf checker.Conf) (checker.Checker, error) {
 }
 
 const (
-	IcingaFlagOK                = "ok"
-	IcingaFlagUnknown           = "unknown"
-	IcingaFlagWarn              = "warn"
-	IcingaFlagCritical          = "critical"
-	IcingaFlagScheduledDowntime = "scheduled_downtime"
-	IcingaFlagAcknowledged      = "acknowledged"
-	IcingaFlagFailed            = "failed"
+	FlagOK                = "ok"
+	FlagUnknown           = "unknown"
+	FlagWarn              = "warn"
+	FlagCritical          = "critical"
+	FlagScheduledDowntime = "scheduled_downtime"
+	FlagAcknowledged      = "acknowledged"
+	FlagFailed            = "failed"
 )
 
 type Conf struct {
@@ -66,24 +66,24 @@ type Icinga struct {
 }
 
 type Fetcher interface {
-	Fetch(string, string) (StatusResponse, error)
+	Fetch(string, string) (Response, error)
 }
 
 func (i Icinga) DefaultRules() rules.Rules {
 	rules := rules.Rules{
 		10: rules.Rule{
-			Must:    []string{IcingaFlagFailed},
+			Must:    []string{FlagFailed},
 			MustNot: []string{},
 			Then:    status.StatusUnknown,
 		},
 		20: rules.Rule{
-			Must:    []string{IcingaFlagUnknown},
+			Must:    []string{FlagUnknown},
 			MustNot: []string{},
 			Then:    status.StatusUnknown,
 		},
 		30: rules.Rule{
-			Must:    []string{IcingaFlagCritical},
-			MustNot: []string{IcingaFlagScheduledDowntime},
+			Must:    []string{FlagCritical},
+			MustNot: []string{FlagScheduledDowntime},
 			Then:    status.StatusNOK,
 		},
 		9999: rules.Rule{
@@ -97,13 +97,13 @@ func (i Icinga) DefaultRules() rules.Rules {
 
 func icingaDefaultFlags() map[string]bool {
 	defaults := make(map[string]bool)
-	defaults[IcingaFlagOK] = false
-	defaults[IcingaFlagUnknown] = false
-	defaults[IcingaFlagWarn] = false
-	defaults[IcingaFlagCritical] = false
-	defaults[IcingaFlagScheduledDowntime] = false
-	defaults[IcingaFlagAcknowledged] = false
-	defaults[IcingaFlagFailed] = true
+	defaults[FlagOK] = false
+	defaults[FlagUnknown] = false
+	defaults[FlagWarn] = false
+	defaults[FlagCritical] = false
+	defaults[FlagScheduledDowntime] = false
+	defaults[FlagAcknowledged] = false
+	defaults[FlagFailed] = true
 	return defaults
 }
 
@@ -131,9 +131,9 @@ func (i Icinga) Status(host string, service string) checker.Result {
 	return r
 }
 
-// IcingaStatusResult describes the results returned by the icinga
+// Response describes the results returned by the icinga
 // api when a service status is requested.
-type StatusResponse struct {
+type Response struct {
 	Results []StatusResult `json:"results"`
 }
 
@@ -176,13 +176,13 @@ func (t *Timestamp) UnmarshalJSON(b []byte) error {
 }
 
 const (
-	IcingaStatusOK = iota
-	IcingaStatusWarn
-	IcingaStatusCritical
-	IcingaStatusUnknown
+	StatusOK = iota
+	StatusWarn
+	StatusCritical
+	StatusUnknown
 )
 
-func (r StatusResponse) status() (at time.Time, msg string, vals map[string]bool, err error) {
+func (r Response) status() (at time.Time, msg string, vals map[string]bool, err error) {
 	at = time.Now()
 	msg = ""
 	vals = icingaDefaultFlags()
@@ -195,24 +195,24 @@ func (r StatusResponse) status() (at time.Time, msg string, vals map[string]bool
 
 	msg = attrs.LastCheckResult.Output
 	at = time.Time(attrs.LastCheck)
-	vals[IcingaFlagFailed] = false
+	vals[FlagFailed] = false
 	if attrs.Acknowledgement > 0.0 {
-		vals[IcingaFlagAcknowledged] = true
+		vals[FlagAcknowledged] = true
 	}
 	if attrs.DowntimeDepth > 0.0 {
-		vals[IcingaFlagScheduledDowntime] = true
+		vals[FlagScheduledDowntime] = true
 	}
 	switch attrs.LastCheckResult.State {
-	case IcingaStatusOK:
-		vals[IcingaFlagOK] = true
-	case IcingaStatusWarn:
-		vals[IcingaFlagWarn] = true
-	case IcingaStatusCritical:
-		vals[IcingaFlagCritical] = true
-	case IcingaStatusUnknown:
-		vals[IcingaFlagUnknown] = true
+	case StatusOK:
+		vals[FlagOK] = true
+	case StatusWarn:
+		vals[FlagWarn] = true
+	case StatusCritical:
+		vals[FlagCritical] = true
+	case StatusUnknown:
+		vals[FlagUnknown] = true
 	default:
-		vals[IcingaFlagFailed] = true
+		vals[FlagFailed] = true
 		err = errors.New("Icinga status unknown")
 	}
 	return
@@ -224,8 +224,8 @@ type API struct {
 	pass    string
 }
 
-func (i API) Fetch(host, service string) (StatusResponse, error) {
-	var response StatusResponse
+func (i API) Fetch(host, service string) (Response, error) {
+	var response Response
 	var body []byte
 
 	// proper encoding for the host string
