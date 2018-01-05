@@ -11,6 +11,7 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 )
 
+// BusinessProcesses keepes a list of BusinessProcess
 type BusinessProcesses []BP
 
 func (bps BusinessProcesses) GenerateHashes(pepper string) map[string]string {
