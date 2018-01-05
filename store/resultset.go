@@ -154,11 +154,20 @@ func stringInSlice(a string, list []string) bool {
 // Kind describes the type of entity a ResultSet/Event/Store can represent.
 type Kind string
 
+// Kind constants describe all possible types that a ResultSet/Event/Store
+//can represent.
 const (
-	KindBusinessProcess         Kind = "BP"
+	// KindBusinessProcess is used for Business Processes
+	KindBusinessProcess Kind = "BP"
+
+	// KindKeyPerformanceIndicator is used for Key Performance Indicator
 	KindKeyPerformanceIndicator Kind = "KPI"
-	KindService                 Kind = "SVC"
-	KindUnknown                 Kind = "UNKNOWN"
+
+	// KindService is used for Service
+	KindService Kind = "SVC"
+
+	// KindUnknown is used for Unknown types
+	KindUnknown Kind = "UNKNOWN"
 )
 
 // String implements the Stringer interface.
