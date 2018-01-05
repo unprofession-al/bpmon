@@ -96,7 +96,7 @@ func (i IcingaMock) Fetch(host, service string) (Response, error) {
 }
 
 func TestStatusInterpreter(t *testing.T) {
-	i := Icinga{fecher: IcingaMock{endpoints: TestSets}}
+	i := Icinga{f: IcingaMock{endpoints: TestSets}}
 	for _, test := range TestSets {
 		result := i.Status(test.host, test.service)
 		if result.Error != nil {

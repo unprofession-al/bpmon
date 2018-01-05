@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strconv"
 	"time"
 
 	"github.com/unprofession-al/bpmon/checker"
@@ -16,74 +15,97 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
+// init registers the 'Checker' implementation.
 func init() {
 	checker.Register("icinga", Setup)
 }
 
+// Setup configures the 'Checker' implementation and returns it.
 func Setup(conf checker.Conf) (checker.Checker, error) {
 	u, err := url.Parse(conf.Connection)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	username := u.User.Username()
 	password, _ := u.User.Password()
 
 	baseURL := fmt.Sprintf("%s://%s%s/v1", u.Scheme, u.Host, u.Path)
-	fetcher := API{
-		baseURL: baseURL,
-		pass:    password,
-		user:    username,
+	fetcher := api{
+		baseURL:       baseURL,
+		pass:          password,
+		user:          username,
+		tlsSkipVerify: conf.TLSSkipVerify,
 	}
 
 	i := Icinga{
-		fecher: fetcher,
+		f: fetcher,
 	}
 
 	return i, nil
 }
 
+type flag string
+
 const (
-	FlagOK                = "ok"
-	FlagUnknown           = "unknown"
-	FlagWarn              = "warn"
-	FlagCritical          = "critical"
-	FlagScheduledDowntime = "scheduled_downtime"
-	FlagAcknowledged      = "acknowledged"
-	FlagFailed            = "failed"
+	FlagOK                flag = "ok"
+	FlagUnknown           flag = "unknown"
+	FlagWarn              flag = "warn"
+	FlagCritical          flag = "critical"
+	FlagScheduledDowntime flag = "scheduled_downtime"
+	FlagAcknowledged      flag = "acknowledged"
+	FlagFailed            flag = "failed"
 )
 
-type Conf struct {
-	Server string `yaml:"server"`
-	Path   string `yaml:"path"`
-	Port   int    `yaml:"port"`
-	Pass   string `yaml:"pass"`
-	User   string `yaml:"user"`
-	Proto  string `yaml:"proto"`
+func (f flag) String() string {
+	return string(f)
 }
 
+type flags map[flag]bool
+
+var flagDefaults = flags{
+	FlagOK:                false,
+	FlagUnknown:           false,
+	FlagWarn:              false,
+	FlagCritical:          false,
+	FlagScheduledDowntime: false,
+	FlagAcknowledged:      false,
+	FlagFailed:            true,
+}
+
+func (f flags) ToValues() map[string]bool {
+	out := make(map[string]bool)
+	for k, v := range flagDefaults {
+		out[k.String()] = v
+	}
+	return out
+}
+
+// Icinga holds the 'Checker' implementation. It allows BPMON to fetch the status
+// configured via the Icinga2 API
 type Icinga struct {
-	fecher Fetcher
+	f fetcher
 }
 
-type Fetcher interface {
+type fetcher interface {
 	Fetch(string, string) (Response, error)
 }
 
+// DefaultRules implements the 'Checker' interface.
 func (i Icinga) DefaultRules() rules.Rules {
 	rules := rules.Rules{
 		10: rules.Rule{
-			Must:    []string{FlagFailed},
+			Must:    []string{FlagFailed.String()},
 			MustNot: []string{},
 			Then:    status.StatusUnknown,
 		},
 		20: rules.Rule{
-			Must:    []string{FlagUnknown},
+			Must:    []string{FlagUnknown.String()},
 			MustNot: []string{},
 			Then:    status.StatusUnknown,
 		},
 		30: rules.Rule{
-			Must:    []string{FlagCritical},
-			MustNot: []string{FlagScheduledDowntime},
+			Must:    []string{FlagCritical.String()},
+			MustNot: []string{FlagScheduledDowntime.String()},
 			Then:    status.StatusNOK,
 		},
 		9999: rules.Rule{
@@ -95,33 +117,23 @@ func (i Icinga) DefaultRules() rules.Rules {
 	return rules
 }
 
-func icingaDefaultFlags() map[string]bool {
-	defaults := make(map[string]bool)
-	defaults[FlagOK] = false
-	defaults[FlagUnknown] = false
-	defaults[FlagWarn] = false
-	defaults[FlagCritical] = false
-	defaults[FlagScheduledDowntime] = false
-	defaults[FlagAcknowledged] = false
-	defaults[FlagFailed] = true
-	return defaults
-}
-
+// Values implements the 'Checker' interface.
 func (i Icinga) Values() []string {
 	var out []string
-	for key := range icingaDefaultFlags() {
-		out = append(out, key)
+	for key := range flagDefaults {
+		out = append(out, key.String())
 	}
 	return out
 }
 
+// Status implements the 'Checker' interface.
 func (i Icinga) Status(host string, service string) checker.Result {
 	r := checker.Result{
 		Timestamp: time.Now(),
-		Values:    icingaDefaultFlags(),
+		Values:    flagDefaults.ToValues(),
 	}
 
-	response, err := i.fecher.Fetch(host, service)
+	response, err := i.f.Fetch(host, service)
 	if err != nil {
 		r.Error = err
 		return r
@@ -131,61 +143,10 @@ func (i Icinga) Status(host string, service string) checker.Result {
 	return r
 }
 
-// Response describes the results returned by the icinga
-// api when a service status is requested.
-type Response struct {
-	Results []StatusResult `json:"results"`
-}
-
-type StatusResult struct {
-	Attrs StatusAttrs `json:"attrs"`
-	Name  string      `json:"name"`
-}
-
-type StatusAttrs struct {
-	Acknowledgement float64         `json:"acknowledgement"`
-	LastCheckResult LastCheckResult `json:"last_check_result"`
-	LastCheck       Timestamp       `json:"last_check"`
-	DowntimeDepth   float64         `json:"downtime_depth"`
-}
-
-type LastCheckResult struct {
-	State  float64 `json:"state"`
-	Output string  `json:"output"`
-}
-
-type Timestamp time.Time
-
-func (t Timestamp) MarshalJSON() ([]byte, error) {
-	ts := time.Time(t).Unix()
-	stamp := fmt.Sprint(ts)
-
-	return []byte(stamp), nil
-}
-
-func (t *Timestamp) UnmarshalJSON(b []byte) error {
-	tsString, err := strconv.ParseFloat(string(b), 64)
-	if err != nil {
-		return err
-	}
-
-	ts := time.Unix(int64(tsString), 0)
-	*t = Timestamp(ts)
-
-	return nil
-}
-
-const (
-	StatusOK = iota
-	StatusWarn
-	StatusCritical
-	StatusUnknown
-)
-
 func (r Response) status() (at time.Time, msg string, vals map[string]bool, err error) {
 	at = time.Now()
 	msg = ""
-	vals = icingaDefaultFlags()
+	vals = flagDefaults.ToValues()
 
 	if len(r.Results) != 1 {
 		err = errors.New("Not exactly one Result found in Icinga API response for service")
@@ -195,36 +156,37 @@ func (r Response) status() (at time.Time, msg string, vals map[string]bool, err 
 
 	msg = attrs.LastCheckResult.Output
 	at = time.Time(attrs.LastCheck)
-	vals[FlagFailed] = false
+	vals[FlagFailed.String()] = false
 	if attrs.Acknowledgement > 0.0 {
-		vals[FlagAcknowledged] = true
+		vals[FlagAcknowledged.String()] = true
 	}
 	if attrs.DowntimeDepth > 0.0 {
-		vals[FlagScheduledDowntime] = true
+		vals[FlagScheduledDowntime.String()] = true
 	}
 	switch attrs.LastCheckResult.State {
-	case StatusOK:
-		vals[FlagOK] = true
-	case StatusWarn:
-		vals[FlagWarn] = true
-	case StatusCritical:
-		vals[FlagCritical] = true
-	case StatusUnknown:
-		vals[FlagUnknown] = true
+	case statusOK:
+		vals[FlagOK.String()] = true
+	case statusWarn:
+		vals[FlagWarn.String()] = true
+	case statusCritical:
+		vals[FlagCritical.String()] = true
+	case statusUnknown:
+		vals[FlagUnknown.String()] = true
 	default:
-		vals[FlagFailed] = true
+		vals[FlagFailed.String()] = true
 		err = errors.New("Icinga status unknown")
 	}
 	return
 }
 
-type API struct {
-	baseURL string
-	user    string
-	pass    string
+type api struct {
+	baseURL       string
+	user          string
+	pass          string
+	tlsSkipVerify bool
 }
 
-func (i API) Fetch(host, service string) (Response, error) {
+func (a api) Fetch(host, service string) (Response, error) {
 	var response Response
 	var body []byte
 
@@ -235,18 +197,17 @@ func (i API) Fetch(host, service string) (Response, error) {
 	serviceURL := &url.URL{Path: service}
 	service = serviceURL.String()
 	// build url
-	url := fmt.Sprintf("%s/objects/services?service=%s!%s", i.baseURL, host, service)
+	url := fmt.Sprintf("%s/objects/services?service=%s!%s", a.baseURL, host, service)
 	// query api
-	// TODO: read rootca from file
 	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: a.tlsSkipVerify},
 	}
 	client := &http.Client{Transport: tr}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return response, err
 	}
-	req.SetBasicAuth(i.user, i.pass)
+	req.SetBasicAuth(a.user, a.pass)
 	resp, err := client.Do(req)
 	if err != nil {
 		return response, err

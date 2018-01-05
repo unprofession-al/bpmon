@@ -27,7 +27,7 @@ func init() {
 func Setup(conf store.Conf) (store.Accessor, error) {
 	u, err := url.Parse(conf.Connection)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	database := strings.TrimLeft(u.Path, "/")
 	username := u.User.Username()

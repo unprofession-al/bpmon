@@ -21,8 +21,9 @@ var (
 // passed to the store implementatinon itself via the registerd setup function.
 // The field 'Kind' is used to determine which provider is requested.
 type Conf struct {
-	Kind       string `yaml:"kind"`
-	Connection string `yaml:"connection"`
+	Kind          string `yaml:"kind"`
+	Connection    string `yaml:"connection"`
+	TLSSkipVerify bool   `yaml:"tls_skip_verify"`
 }
 
 // Checker interface needs to be implemented in order to provide a Checker
