@@ -8,12 +8,24 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
+// Rules is a collection of rules where the key defines the position of the
+// of how those rules are applied.
 type Rules map[int]Rule
 
+// Rule describes the conditions that must be fulfilled ('Must' and 'MustNot')
+// as well as the result of the rule if all conditions are fulfilled ('Then')
 type Rule struct {
-	Must    []string      `yaml:"must"`
-	MustNot []string      `yaml:"must_not"`
-	Then    status.Status `yaml:"then"`
+	// Must is a list of value keys that must be 'true' in order to fulfill
+	// the Rule.
+	Must []string `yaml:"must"`
+
+	// MustNot is a list of value keys that must be 'false' in order to fulfill
+	// the Rule.
+	MustNot []string `yaml:"must_not"`
+
+	// Then is the resulting 'Status' if all conditions are fulfilled
+	// as defined.
+	Then status.Status `yaml:"then"`
 }
 
 func (r Rules) Merge(additional Rules) error {
