@@ -31,7 +31,7 @@ var dashboardCmd = &cobra.Command{
 		if dashboardPepper != "" {
 			auth = true
 			fmt.Println("Pepper is provided, generating auth hashes...")
-			recipientHashes = bps.GenerateHashes(dashboardPepper)
+			recipientHashes = bps.GenerateRecipientHashes(dashboardPepper)
 			fmt.Printf("%15s: %s\n", "Recipient", "Hash")
 			for k, v := range recipientHashes {
 				fmt.Printf("%15s: %s\n", v, k)

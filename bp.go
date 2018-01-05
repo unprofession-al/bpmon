@@ -11,10 +11,10 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 )
 
-// BusinessProcesses keepes a list of BusinessProcess
+// BusinessProcesses keepes a list of BusinessProcess.
 type BusinessProcesses []BP
 
-func (bps BusinessProcesses) GenerateHashes(pepper string) map[string]string {
+func (bps BusinessProcesses) GenerateRecipientHashes(pepper string) map[string]string {
 	recipientList := make(map[string]struct{})
 	for _, bp := range bps {
 		for _, recipient := range bp.Recipients {
