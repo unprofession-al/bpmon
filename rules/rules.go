@@ -51,6 +51,8 @@ func (r Rules) Merge(additional Rules) error {
 //		* Checking if all fields listed in 'MustNot' are false.
 //		* Returning the status defined in 'Then' if the conditions
 //		  above apply.
+//		* Proceeding to the next rule if the current rules contiditions are
+//		  not fulfilled.
 //
 // If a 'Must' of 'MustNot' key does not exist in the values, an error
 // is returned.
