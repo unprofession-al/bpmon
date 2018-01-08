@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const HourMinuteSecond = "15:04:05"
+const timepattern = "15:04:05"
 
 type AvailabilitiesConf map[string]AvailabilityConf
 
@@ -119,7 +119,7 @@ func toAvailabilityTime(trStrings []string) (AvailabilityTime, error) {
 			break
 		}
 		if len(tStrings) != 2 {
-			return out, fmt.Errorf("'%s' does not look like a time range definition, time slots must be formated as in '%s-%s'", trString, HourMinuteSecond, HourMinuteSecond)
+			return out, fmt.Errorf("'%s' does not look like a time range definition, time slots must be formated as in '%s-%s'", trString, timepattern, timepattern)
 		}
 		start, err := toTime(tStrings[0])
 		if err != nil {
@@ -140,9 +140,9 @@ func toAvailabilityTime(trStrings []string) (AvailabilityTime, error) {
 
 func toTime(tString string) (time.Time, error) {
 	tString = strings.TrimSpace(tString)
-	t, err := time.Parse(HourMinuteSecond, tString)
+	t, err := time.Parse(timepattern, tString)
 	if err != nil {
-		return t, fmt.Errorf("'%s' does not look like a time, times must be formated as in '%s'", tString, HourMinuteSecond)
+		return t, fmt.Errorf("'%s' does not look like a time, times must be formated as in '%s'", tString, timepattern)
 	}
 	return t, err
 

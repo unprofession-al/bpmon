@@ -12,7 +12,10 @@ import (
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
-var dashboardPepper string
+var (
+	dashboardPepper string
+	dashboardStatic string
+)
 
 var dashboardCmd = &cobra.Command{
 	Use:   "dashboard",
@@ -40,6 +43,10 @@ var dashboardCmd = &cobra.Command{
 			fmt.Println("WARNING: No pepper is provided, all information are accessable without auth...")
 		}
 
+		if dashboardStatic != "" {
+			c.Dashboard.Static = dashboardStatic
+		}
+
 		router, err := dashboard.Setup(c.Dashboard, bps, pp, auth, recipientHashes)
 		if err != nil {
 			msg := fmt.Sprintf("Could not build router for server: %s", err.Error())
@@ -54,4 +61,5 @@ var dashboardCmd = &cobra.Command{
 func init() {
 	betaCmd.AddCommand(dashboardCmd)
 	dashboardCmd.PersistentFlags().StringVarP(&dashboardPepper, "pepper", "", "", "Pepper used to generate auth token")
+	dashboardCmd.PersistentFlags().StringVarP(&dashboardStatic, "static", "", "", "Path to custom html frontend")
 }
