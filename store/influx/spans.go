@@ -80,20 +80,23 @@ func (i Influx) getSpans(rs store.ResultSet, start time.Time, end time.Time) ([]
 	last, err := i.First(q)
 
 	if err != nil {
+		fmt.Println("err != nil")
+		debugString := fmt.Sprintf("error: %s - query: %s", err.Error(), q.Query())
 		// if no state at all is found
 		complete := store.Span{
-			Status:          status.StatusUnknown,
-			Pseudo:          true,
-			Annotation:      "no such data found",
-			Duration:        totalDuration,
-			DurationPercent: 100.0,
-			Start:           start,
-			End:             end,
-			Tags:            rs.Tags,
+			Status:     status.StatusUnknown,
+			Pseudo:     true,
+			Annotation: debugString,
+			Start:      start,
+			End:        earliestSpan,
+			Tags:       rs.Tags,
 		}
+		complete.Duration = complete.End.Sub(complete.Start).Seconds()
+		complete.DurationPercent = 100.0 / totalDuration * complete.Duration
 		complete.SetID()
 		out = append([]store.Span{complete}, out...)
 	} else {
+		fmt.Println("err ISSSSS nil")
 		duration := earliestSpan.Sub(start).Seconds()
 		durationPercent := 100.0 / totalDuration * duration
 		first := store.Span{
