@@ -74,13 +74,12 @@ func (i Influx) getSpans(rs store.ResultSet, start time.Time, end time.Time) ([]
 		out = append(out, current)
 	}
 
-	// get last state before the time window specified by 'start' and 'end'
+	// get last state before 'start'
 	gap, _ := time.ParseDuration("30m")
-	q = newSelectQuery().From(rs.Kind().String()).Between(end.Add(gap*-1), end).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
+	q = newSelectQuery().From(rs.Kind().String()).Between(start.Add(gap*-1), start).FilterTags(rs.Tags).OrderBy("time").Desc().Limit(1)
 	last, err := i.First(q)
 
 	if err != nil {
-		fmt.Println("err != nil")
 		debugString := fmt.Sprintf("error: %s - query: %s", err.Error(), q.Query())
 		// if no state at all is found
 		complete := store.Span{
@@ -96,7 +95,6 @@ func (i Influx) getSpans(rs store.ResultSet, start time.Time, end time.Time) ([]
 		complete.SetID()
 		out = append([]store.Span{complete}, out...)
 	} else {
-		fmt.Println("err ISSSSS nil")
 		duration := earliestSpan.Sub(start).Seconds()
 		durationPercent := 100.0 / totalDuration * duration
 		first := store.Span{
