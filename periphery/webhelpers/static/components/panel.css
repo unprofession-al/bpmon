@@ -14,7 +14,7 @@
 .panel-content {
     padding: 20px 30px;
     height: auto;
-    overflow: auto;
+    overflow: visible;
 }
 
 .panel-collapser {
