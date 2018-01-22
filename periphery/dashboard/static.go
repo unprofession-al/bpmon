@@ -193,7 +193,7 @@ var _escData = map[string]*_escFile{
 	"/index.html": {
 		local:   "static/index.html",
 		size:    3683,
-		modtime: 1514986929,
+		modtime: 1515496447,
 		compressed: `
 H4sIAAAAAAAC/5wXa2/bNvB7fgXLQX0AlZS0A7Y1koZ2XrEB6xq02YdiGIKTREvXUCRHnp0aw/77QD1s
 WZZTZ19s8d7vI5NHi/c/XX+6+pnV1MjsLPF/TIKqUi4U9wABZXbGGGNJIwhYUYN1glL+x/Xb8Hs+Rilo
@@ -221,7 +221,7 @@ J3CQaIwEQlWdQNy/Pe4hbOCYnZl/xT19djl2Ou5fHnH3ojz7LwAA///E0smsYw4AAA==
 	"/main.js": {
 		local:   "static/main.js",
 		size:    7284,
-		modtime: 1514555107,
+		modtime: 1515496447,
 		compressed: `
 H4sIAAAAAAAC/+xZX2/juBF/jj/FHBPU1NlRkju0D/YqRe82RdNrt8El9xQEBm2NbK5lUhUpO8Ge+9mL
 oSRbkmXnT7fYPeD8ENCc4XD+/jgTL0UKIpE/CIO//PwPCICdiUSeLS/O2LDTiTI1sVIrkEpa7sGnDgDA
