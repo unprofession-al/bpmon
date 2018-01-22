@@ -44,8 +44,8 @@ default: &default
     connection: https://user:pass@icinga.example.com:5665
   # Also the connection to the InfluxDB is required in order to persist the
   # state for reporting and such. 
-  influx:
-    kind
+  store:
+    kind: influx
     connection: http://user:pass@influx.example.com:8086/bpmon
     # the timeout is read as a go (golang) duration, please refer to 
     # https://golang.org/pkg/time/#Duration for a detailed explanation.
