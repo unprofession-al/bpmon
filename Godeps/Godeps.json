@@ -2,7 +2,25 @@
 	"ImportPath": "github.com/unprofession-al/bpmon",
 	"GoVersion": "go1.8",
 	"GodepVersion": "v79",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.6.0-6-g5ab525f",
+			"Rev": "5ab525f4fb1678e197ae59401e9050fa0b6cb5fd"
+		},
+		{
+			"ImportPath": "github.com/gorilla/websocket",
+			"Comment": "v1.2.0-23-gcdedf21",
+			"Rev": "cdedf21e585dae942951e34d6defc3215b4280fa"
+		},
+		{
+			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Comment": "v1.0",
+			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
+		},
 		{
 			"ImportPath": "github.com/influxdata/influxdb/client/v2",
 			"Comment": "v1.1.0-223-g8c2cfd14",
@@ -19,6 +37,10 @@
 			"Rev": "8c2cfd14af2511580277ddfd7a834b6aaa5f19ab"
 		},
 		{
+			"ImportPath": "github.com/justinas/alice",
+			"Rev": "03f45bd4b7dad4734bc4620e46a35789349abb20"
+		},
+		{
 			"ImportPath": "github.com/mattn/go-colorable",
 			"Comment": "v0.0.6-9-gd228849",
 			"Rev": "d228849504861217f796da67fae4f6e347643f15"
@@ -30,6 +52,21 @@
 		{
 			"ImportPath": "github.com/mgutz/ansi",
 			"Rev": "9520e82c474b0a04dd04f8a40959027271bab992"
+		},
+		{
+			"ImportPath": "github.com/rakyll/statik/fs",
+			"Comment": "v0.1.1-3-g016ca6f",
+			"Rev": "016ca6fdb1b26618ff8f53fbd1109ff834524f23"
+		},
+		{
+			"ImportPath": "github.com/spf13/cobra",
+			"Comment": "v0.0.1-21-g0c34d16",
+			"Rev": "0c34d16c3123764e413b9ed982ada58b1c3d53ea"
+		},
+		{
+			"ImportPath": "github.com/spf13/pflag",
+			"Comment": "v1.0.0-10-g4c012f6",
+			"Rev": "4c012f6dcd9546820e378d0bdda4d8fc772cdfea"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
