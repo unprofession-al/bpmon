@@ -87,7 +87,7 @@ func TestParseBP(t *testing.T) {
 			},
 		},
 	}
-	_, err := parseBP(bpconfig, a)
+	_, err := parseBP(bpconfig, a, "")
 	if err != nil {
 		t.Errorf("Could not parse BP config: %s", err.Error())
 	}
@@ -97,7 +97,7 @@ func TestParseBPUnknownAvailability(t *testing.T) {
 	a := Availabilities{
 		"Never": Availability{},
 	}
-	_, err := parseBP(bpconfig, a)
+	_, err := parseBP(bpconfig, a, "")
 	if err == nil {
 		t.Errorf("Found availability 'Test' that does not exist")
 	}

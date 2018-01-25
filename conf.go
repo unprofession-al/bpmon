@@ -14,13 +14,14 @@ import (
 )
 
 type conf struct {
-	Checker        checker.Conf          `yaml:"checker"`
-	Store          store.Conf            `yaml:"store"`
-	Availabilities AvailabilitiesConf    `yaml:"availabilities"`
-	Trigger        Trigger               `yaml:"trigger"`
-	Rules          rules.Rules           `yaml:"rules"`
-	Dashboard      configs.DashboardConf `yaml:"dashboard"`
-	Annotate       configs.AnnotateConf  `yaml:"annotate"`
+	GlobalRecipient string                `yaml:"global_recipient"`
+	Checker         checker.Conf          `yaml:"checker"`
+	Store           store.Conf            `yaml:"store"`
+	Availabilities  AvailabilitiesConf    `yaml:"availabilities"`
+	Trigger         Trigger               `yaml:"trigger"`
+	Rules           rules.Rules           `yaml:"rules"`
+	Dashboard       configs.DashboardConf `yaml:"dashboard"`
+	Annotate        configs.AnnotateConf  `yaml:"annotate"`
 }
 
 type Trigger struct {
@@ -63,7 +64,7 @@ func Configure(cfgFile, cfgSection, bpPath, bpPattern string) (conf, BusinessPro
 		if err != nil {
 			return c, bps, fmt.Errorf("Error while reading business process %s/%s: %s", bpPath, f.Name(), err.Error())
 		}
-		bp, err := parseBP(file, a)
+		bp, err := parseBP(file, a, c.GlobalRecipient)
 		if err != nil {
 			return c, bps, fmt.Errorf("Error while parsing business process%s/%s: %s", bpPath, f.Name(), err.Error())
 		}
@@ -94,7 +95,7 @@ func parseConf(cfg []byte, cfgSection string) (conf, error) {
 	return conf, nil
 }
 
-func parseBP(bpconf []byte, a Availabilities) (BP, error) {
+func parseBP(bpconf []byte, a Availabilities, gr string) (BP, error) {
 	bp := BP{}
 	err := yaml.Unmarshal(bpconf, &bp)
 	if err != nil {
@@ -110,6 +111,10 @@ func parseBP(bpconf []byte, a Availabilities) (BP, error) {
 		return bp, fmt.Errorf("The availability referenced '%s' does not exist", bp.AvailabilityName)
 	}
 	bp.Availability = availability
+
+	if gr != "" {
+		bp.Recipients = append(bp.Recipients, gr)
+	}
 
 	return bp, nil
 }
