@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/checker/icinga"
 )
 
 func MockIcingaServicesHandler(res http.ResponseWriter, req *http.Request) {
@@ -34,9 +34,9 @@ func MockIcingaServicesHandler(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	t := icinga.Timestamp{time.Now()}
+	t := icinga.Timestamp(time.Now())
 
-	data := icinga.IcingaStatusResponse{}
+	var data icinga.Response
 	if all {
 		data, err = envs.ToIcinga(env, t)
 		if err != nil {

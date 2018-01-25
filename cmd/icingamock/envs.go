@@ -1,21 +1,20 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/checker/icinga"
 	yaml "gopkg.in/yaml.v2"
 )
 
 type Environments map[string]*Hosts
 
-func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.IcingaStatusResponse, error) {
-	response := icinga.IcingaStatusResponse{}
+func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.Response, error) {
+	response := icinga.Response{}
 
 	env, ok := e[envN]
 	if !ok {
@@ -23,12 +22,12 @@ func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.IcingaSt
 	}
 	for hostname, services := range *env {
 		for servicename, service := range *services {
-			result := icinga.IcingaStatusResult{
-				Attrs: icinga.IcingaStatusAttrs{
+			result := icinga.Result{
+				Attrs: icinga.Attrs{
 					Acknowledgement: Btof(service.Acknowledgement),
 					DowntimeDepth:   Btof(service.Downtime),
 					LastCheck:       t,
-					LastCheckResult: icinga.IcingaStatusLastCheckResult{
+					LastCheckResult: icinga.LastCheckResult{
 						State:  float64(service.CheckState),
 						Output: service.CheckOutput,
 					},
@@ -41,8 +40,8 @@ func (e Environments) ToIcinga(envN string, t icinga.Timestamp) (icinga.IcingaSt
 	return response, nil
 }
 
-func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Timestamp) (icinga.IcingaStatusResponse, error) {
-	response := icinga.IcingaStatusResponse{}
+func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Timestamp) (icinga.Response, error) {
+	response := icinga.Response{}
 
 	env, ok := e[envN]
 	if !ok {
@@ -52,12 +51,12 @@ func (e Environments) SingleToIcinga(envN, hostN, serviceN string, t icinga.Time
 		if hostname == hostN {
 			for servicename, service := range *services {
 				if servicename == serviceN {
-					result := icinga.IcingaStatusResult{
-						Attrs: icinga.IcingaStatusAttrs{
+					result := icinga.Result{
+						Attrs: icinga.Attrs{
 							Acknowledgement: Btof(service.Acknowledgement),
 							DowntimeDepth:   Btof(service.Downtime),
 							LastCheck:       t,
-							LastCheckResult: icinga.IcingaStatusLastCheckResult{
+							LastCheckResult: icinga.LastCheckResult{
 								State:  float64(service.CheckState),
 								Output: service.CheckOutput,
 							},
@@ -83,7 +82,7 @@ func (e Environments) Get(name string) (*Hosts, error) {
 
 func (e Environments) List() []string {
 	var out []string
-	for n, _ := range e {
+	for n := range e {
 		out = append(out, n)
 	}
 	return out
@@ -169,7 +168,7 @@ func parseBP(bpconf []byte, env *Hosts) (*Hosts, error) {
 	bp := bpmon.BP{}
 	err := yaml.Unmarshal(bpconf, &bp)
 	if err != nil {
-		return env, errors.New(fmt.Sprintf("Error while parsing: %s", err.Error()))
+		return env, fmt.Errorf("Error while parsing: %s", err.Error())
 	}
 
 	for _, kpi := range bp.Kpis {

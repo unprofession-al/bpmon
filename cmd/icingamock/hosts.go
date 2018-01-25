@@ -15,7 +15,7 @@ func (h *Hosts) Get(name string) (*Services, error) {
 
 func (h Hosts) List() []string {
 	var out []string
-	for n, _ := range h {
+	for n := range h {
 		out = append(out, n)
 	}
 	return out

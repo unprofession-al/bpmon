@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const HourMinuteSecond = "15:04:05"
+const timeformat = "15:04:05"
 
 type AvailabilitiesConf map[string]AvailabilityConf
 
@@ -62,7 +62,7 @@ func toWeekday(str string) (time.Weekday, error) {
 	case time.Saturday.String():
 		return time.Saturday, nil
 	default:
-		return time.Monday, errors.New(fmt.Sprintf("'%s' does not look like the name of a weekday", str))
+		return time.Monday, fmt.Errorf("'%s' does not look like the name of a weekday", str)
 	}
 }
 
@@ -119,7 +119,7 @@ func toAvailabilityTime(trStrings []string) (AvailabilityTime, error) {
 			break
 		}
 		if len(tStrings) != 2 {
-			return out, errors.New(fmt.Sprintf("'%s' does not look like a time range definition, time slots must be formated as in '%s-%s'", trString, HourMinuteSecond, HourMinuteSecond))
+			return out, fmt.Errorf("'%s' does not look like a time range definition, time slots must be formated as in '%s-%s'", trString, timeformat, timeformat)
 		}
 		start, err := toTime(tStrings[0])
 		if err != nil {
@@ -140,9 +140,9 @@ func toAvailabilityTime(trStrings []string) (AvailabilityTime, error) {
 
 func toTime(tString string) (time.Time, error) {
 	tString = strings.TrimSpace(tString)
-	t, err := time.Parse(HourMinuteSecond, tString)
+	t, err := time.Parse(timeformat, tString)
 	if err != nil {
-		return t, errors.New(fmt.Sprintf("'%s' does not look like a time, times must be formated as in '%s'", tString, HourMinuteSecond))
+		return t, fmt.Errorf("'%s' does not look like a time, times must be formated as in '%s'", tString, timeformat)
 	}
 	return t, err
 

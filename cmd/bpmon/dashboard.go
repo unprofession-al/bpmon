@@ -8,33 +8,58 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/periphery/dashboard"
+	"github.com/unprofession-al/bpmon/store"
+	_ "github.com/unprofession-al/bpmon/store/influx"
+)
+
+var (
+	dashboardPepper string
+	dashboardStatic string
 )
 
 var dashboardCmd = &cobra.Command{
 	Use:   "dashboard",
-	Short: "Run all business process checks and print to stdout",
+	Short: "Run Dashboard Web UI",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, bp, err := bpmon.Configure(cfgFile, cfgSection, bpPath, bpPattern)
+		c, bps, err := bpmon.Configure(cfgFile, cfgSection, bpPath, bpPattern)
 		if err != nil {
 			msg := fmt.Sprintf("Could not read section %s form file %s, error was %s", cfgSection, cfgFile, err.Error())
 			log.Fatal(msg)
 		}
 
-		infl, _ := bpmon.NewInflux(c.Influx)
-		ep := bpmon.NewEventProvider(infl, c.Influx.SaveOK, c.Influx.GetLastStatus)
+		pp, _ := store.New(c.Store)
 
-		router, err := dashboard.Setup(c.Dashboard, bp, ep)
+		var recipientHashes map[string]string
+		auth := false
+		if dashboardPepper != "" {
+			auth = true
+			fmt.Println("Pepper is provided, generating auth hashes...")
+			recipientHashes = bps.GenerateRecipientHashes(dashboardPepper)
+			fmt.Printf("%15s: %s\n", "Recipient", "Hash")
+			for k, v := range recipientHashes {
+				fmt.Printf("%15s: %s\n", v, k)
+			}
+		} else {
+			fmt.Println("WARNING: No pepper is provided, all information are accessable without auth...")
+		}
+
+		if dashboardStatic != "" {
+			c.Dashboard.Static = dashboardStatic
+		}
+
+		router, err := dashboard.Setup(c.Dashboard, bps, pp, auth, recipientHashes)
 		if err != nil {
 			msg := fmt.Sprintf("Could not build router for server: %s", err.Error())
 			log.Fatal(msg)
 		}
 
-		listen := fmt.Sprintf("%s:%d", c.Dashboard.Address, c.Dashboard.Port)
-		fmt.Printf("Serving Dashboard at http://%s\nPress CTRL-c to stop...\n", listen)
-		log.Fatal(http.ListenAndServe(listen, router))
+		fmt.Printf("Serving Dashboard at http://%s\nPress CTRL-c to stop...\n", c.Dashboard.Listener)
+		log.Fatal(http.ListenAndServe(c.Dashboard.Listener, router))
 	},
 }
 
 func init() {
 	betaCmd.AddCommand(dashboardCmd)
+	dashboardCmd.PersistentFlags().StringVarP(&dashboardPepper, "pepper", "", "", "Pepper used to generate auth token")
+	dashboardCmd.PersistentFlags().StringVarP(&dashboardStatic, "static", "", "", "Path to custom html frontend")
 }

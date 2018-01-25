@@ -8,7 +8,8 @@ html, body, .container, .header, .events {
 }
 
 body {
-    background-color: var(--main-color-dark);
+    background: linear-gradient(-20deg, var(--main-color-brighter), var(--main-color-dark));
+    background-attachment: fixed;
 }
 
 .header {

@@ -5,6 +5,8 @@ package webhelpers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"time"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -34,15 +36,36 @@ func Respond(res http.ResponseWriter, req *http.Request, code int, data interfac
 
 	if err != nil {
 		out = errMesg
-		res.WriteHeader(http.StatusInternalServerError)
-	} else {
-		res.WriteHeader(code)
-		res.Write(out)
+		code = http.StatusInternalServerError
 	}
-	return
+	res.WriteHeader(code)
+	res.Write(out)
 }
 
 func GetAssetHandler(prefix string) http.Handler {
 	assetFS := FS(false)
 	return http.StripPrefix(prefix, http.FileServer(assetFS))
+}
+
+func GetStartEnd(req *http.Request) (start time.Time, end time.Time) {
+	end = time.Now()
+	start = end.AddDate(0, -1, 0)
+
+	startStr := req.URL.Query()["start"]
+	if len(startStr) > 0 {
+		i, err := strconv.ParseInt(startStr[0], 10, 64)
+		if err == nil {
+			start = time.Unix(i, 0)
+		}
+	}
+
+	endStr := req.URL.Query()["end"]
+	if len(endStr) > 0 {
+		i, err := strconv.ParseInt(endStr[0], 10, 64)
+		if err == nil {
+			end = time.Unix(i, 0)
+		}
+	}
+
+	return
 }

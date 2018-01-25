@@ -1,4 +1,4 @@
-//go:generate statik -src=./static -f
+//go:generate esc -o static.go -pkg main -prefix static static
 
 package main
 
@@ -9,9 +9,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
-	"github.com/rakyll/statik/fs"
-
-	_ "github.com/unprofession-al/bpmon/cmd/icingamock/statik"
 )
 
 var (
@@ -20,7 +17,6 @@ var (
 	bpDir      string
 	staticDir  string
 	hub        *Hub
-	restClient *Client
 	cfg        Configuration
 	envs       *Environments
 )
@@ -67,11 +63,10 @@ func main() {
 	r.HandleFunc("/ws", WsHandler).Methods("GET")
 
 	if staticDir == "" {
-		statikFS, err := fs.New()
 		if err != nil {
 			log.Fatal(err)
 		}
-		r.PathPrefix("/").Handler(http.FileServer(statikFS))
+		r.PathPrefix("/").Handler(http.FileServer(FS(false)))
 	} else {
 		r.PathPrefix("/").Handler(http.FileServer(http.Dir(staticDir)))
 	}

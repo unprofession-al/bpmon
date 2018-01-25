@@ -3,19 +3,28 @@ package dashboard
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/bpmon"
 	wh "github.com/unprofession-al/bpmon/periphery/webhelpers"
+	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
 	list := make(map[string]string)
-	for _, bp := range bps {
-		list[bp.Id] = bp.Name
+
+	if recipient := req.Context().Value(wh.KeyRecipient); recipient != nil {
+		for _, bp := range bps.GetByRecipient(recipient.(string)) {
+			list[bp.ID] = bp.Name
+		}
+	} else {
+		for _, bp := range bps {
+			list[bp.ID] = bp.Name
+		}
 	}
+
 	wh.Respond(res, req, http.StatusOK, list)
 }
 
@@ -26,7 +35,7 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 	// name := ""
 	found := false
 	for _, bp := range bps {
-		if bp.Id == bpid {
+		if bp.ID == bpid {
 			found = true
 			//name = bp.Name
 		}
@@ -38,13 +47,13 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	start, end := getStartEnd(req)
+	start, end := wh.GetStartEnd(req)
 
-	where := map[string]string{
-		"BP": bpid,
+	where := store.ResultSet{
+		Tags: map[store.Kind]string{store.KindBusinessProcess: bpid},
 	}
 	interval, _ := time.ParseDuration("300s")
-	points, err := ep.GetEvents(where, start, end, interval)
+	points, err := pp.GetSpans(where, start, end, interval, []status.Status{})
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
@@ -61,10 +70,10 @@ func ListKPIsHandler(res http.ResponseWriter, req *http.Request) {
 	list := make(map[string]string)
 	found := false
 	for _, bp := range bps {
-		if bp.Id == bpid {
+		if bp.ID == bpid {
 			found = true
 			for _, kpi := range bp.Kpis {
-				list[kpi.Id] = kpi.Name
+				list[kpi.ID] = kpi.Name
 			}
 		}
 	}
@@ -85,7 +94,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	bp := bpmon.BP{}
 	found := false
 	for _, currentBP := range bps {
-		if currentBP.Id == bpid {
+		if currentBP.ID == bpid {
 			found = true
 			bp = currentBP
 		}
@@ -99,7 +108,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	found = false
 	for _, currentKPI := range bp.Kpis {
-		if currentKPI.Id == kpiid {
+		if currentKPI.ID == kpiid {
 			found = true
 		}
 	}
@@ -110,14 +119,14 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	start, end := getStartEnd(req)
+	start, end := wh.GetStartEnd(req)
 
-	where := map[string]string{
-		"BP":  bpid,
-		"KPI": kpiid,
+	where := store.ResultSet{
+		Tags: map[store.Kind]string{store.KindBusinessProcess: bpid, store.KindKeyPerformanceIndicator: kpiid},
 	}
+
 	interval, _ := time.ParseDuration("300s")
-	points, err := ep.GetEvents(where, start, end, interval)
+	points, err := pp.GetSpans(where, start, end, interval, []status.Status{})
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		wh.Respond(res, req, http.StatusInternalServerError, msg)
@@ -125,27 +134,4 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	}
 
 	wh.Respond(res, req, http.StatusOK, points)
-}
-
-func getStartEnd(req *http.Request) (start time.Time, end time.Time) {
-	end = time.Now()
-	start = end.AddDate(0, -1, 0)
-
-	startStr := req.URL.Query()["start"]
-	if len(startStr) > 0 {
-		i, err := strconv.ParseInt(startStr[0], 10, 64)
-		if err == nil {
-			start = time.Unix(i, 0)
-		}
-	}
-
-	endStr := req.URL.Query()["end"]
-	if len(endStr) > 0 {
-		i, err := strconv.ParseInt(endStr[0], 10, 64)
-		if err == nil {
-			end = time.Unix(i, 0)
-		}
-	}
-
-	return
 }

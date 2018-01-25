@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 type bpTestSet struct {
@@ -26,12 +27,12 @@ var BpTestSets = []bpTestSet{
 	{
 		bp: BP{
 			Name:         "TestBP",
-			Id:           "test_bp",
+			ID:           "test_bp",
 			Availability: allDayLong,
 			Kpis: []KPI{
 				KPI{
 					Name:      "TestKPI",
-					Id:        "test_kpi",
+					ID:        "test_kpi",
 					Operation: "OR",
 					Services: []Service{
 						Service{Host: "Host", Service: "good"},
@@ -39,15 +40,15 @@ var BpTestSets = []bpTestSet{
 				},
 			},
 		},
-		status: status.Ok,
+		status: status.StatusOK,
 	},
 }
 
 func TestBusinessProcess(t *testing.T) {
-	ssp := SSPMock{}
-	pp := PPMock{}
+	chk := CheckerMock{}
+	pp := StoreMock{}
 	for _, bp := range BpTestSets {
-		rs := bp.bp.Status(ssp, pp, ssp.DefaultRules())
+		rs := bp.bp.Status(chk, pp, chk.DefaultRules())
 		if rs.Status != bp.status {
 			t.Errorf("Expected status to be '%s', got '%s'", bp.status, rs.Status)
 		}
@@ -57,38 +58,38 @@ func TestBusinessProcess(t *testing.T) {
 type svcTestSet struct {
 	svc         Service
 	status      status.Status
-	vals        map[string]bool
 	errExpected bool
 }
 
 var SvcTestSets = []svcTestSet{
 	{
 		svc:         Service{Host: "Host", Service: "good"},
-		status:      status.Ok,
+		status:      status.StatusOK,
 		errExpected: false,
 	},
 	{
 		svc:         Service{Host: "Host", Service: "bad"},
-		status:      status.Nok,
+		status:      status.StatusNOK,
 		errExpected: false,
 	},
 	{
 		svc:         Service{Host: "Host", Service: "unknown"},
-		status:      status.Unknown,
+		status:      status.StatusUnknown,
 		errExpected: false,
 	},
 	{
 		svc:         Service{Host: "Host", Service: "error"},
-		status:      status.Ok,
+		status:      status.StatusOK,
 		errExpected: true,
 	},
 }
 
 func TestServices(t *testing.T) {
-	pp := PPMock{}
-	ssp := SSPMock{}
+	pp := StoreMock{}
+	chk := CheckerMock{}
+	parentTags := map[store.Kind]string{store.KindBusinessProcess: "BP", store.KindKeyPerformanceIndicator: "KPI"}
 	for _, s := range SvcTestSets {
-		rs := s.svc.Status(ssp, pp, ssp.DefaultRules())
+		rs := s.svc.Status(parentTags, chk, pp, chk.DefaultRules())
 		if s.errExpected && rs.Err == nil {
 			t.Errorf("Error expected but got nil")
 		} else if !s.errExpected && rs.Err != nil {

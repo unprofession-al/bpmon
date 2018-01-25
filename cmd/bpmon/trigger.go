@@ -8,8 +8,11 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/checker"
+	_ "github.com/unprofession-al/bpmon/checker/icinga"
 	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/store"
+	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
 var triggerCmd = &cobra.Command{
@@ -24,32 +27,36 @@ var triggerCmd = &cobra.Command{
 
 		t := template.Must(template.New("t1").Parse(c.Trigger.Template))
 
-		i, err := icinga.NewIcinga(c.Icinga, c.Rules)
+		i, err := checker.New(c.Checker)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		r := i.DefaultRules()
-		r.Merge(c.Rules)
+		err = r.Merge(c.Rules)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		infl, _ := bpmon.NewInflux(c.Influx)
-		stripBy := []status.Status{status.Unknown, status.Ok}
-		var sets []bpmon.ResultSet
+		p, _ := store.New(c.Store)
+		filterBy := []status.Status{status.StatusNOK}
+		var sets []store.ResultSet
 		for _, bp := range b {
 			rs := bp.Status(i, nil, r)
-			if c.Influx.GetLastStatus {
-				rs.AddPreviousStatus(infl, c.Influx.SaveOK)
+			if c.Store.GetLastStatus {
+				rs.AddPreviousStatus(p, c.Store.SaveOK)
 			}
-			set, stripped := rs.StripByStatus(stripBy)
+			set, stripped := rs.FilterByStatus(filterBy)
 			if !stripped {
 				sets = append(sets, set)
 			}
 		}
 		var command bytes.Buffer
-		t.Execute(&command, sets)
+		err = t.Execute(&command, sets)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if len(sets) > 0 {
 			fmt.Println(command.String())
 		}

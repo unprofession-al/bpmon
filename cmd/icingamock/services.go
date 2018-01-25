@@ -15,7 +15,7 @@ func (s *Services) Get(name string) (*Service, error) {
 
 func (s Services) List() []string {
 	var out []string
-	for n, _ := range s {
+	for n := range s {
 		out = append(out, n)
 	}
 	return out

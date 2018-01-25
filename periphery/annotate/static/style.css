@@ -1,0 +1,74 @@
+.info, .tags {
+    overflow: hidden;
+    padding-right: 10px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+}
+
+.info {
+    width: 170px;
+}
+
+.buttons {
+    width: 250px;
+}
+
+.button.quick {
+    background-color: #dba578;
+}
+
+.annotation-editor {
+    clear: both;
+    float: left;
+    padding-top: 20px;
+    width: 100%;
+    text-align: center;
+    /*border: 1px solid blue;*/
+}
+
+.annotation-editor-top {
+    width: 100%;
+    clear: both;
+}
+
+.annotation-editor-bottom {
+    width: 100%;
+    clear: both;
+    float: right;
+    text-align: right;
+    padding-top: 20px;
+}
+
+.annotation-input {
+    height: 20px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.annotation-input br {
+    display:none;
+}
+
+.annotation-input * {
+    display:inline;
+    white-space:nowrap;
+}
+
+.annotation-input.regular {
+    background-color: #afd1ca;
+}
+
+.annotation-input.quick {
+    width: 300px;
+    background-color: #ffffff;
+}
+
+.annotation-input:empty:before {
+    color: #999;
+    font-size: 80%;
+    content: attr(data-placeholder);
+}
+

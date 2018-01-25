@@ -12,70 +12,70 @@ var testRules = map[string]Rules{
 		10: Rule{
 			Must:    []string{"bad"},
 			MustNot: []string{},
-			Then:    status.Nok,
+			Then:    status.StatusNOK,
 		},
 		11: Rule{
 			Must:    []string{},
 			MustNot: []string{"known"},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 		20: Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.Ok,
+			Then:    status.StatusOK,
 		},
 	},
 	"additional": Rules{
 		15: Rule{
 			Must:    []string{"unknown"},
 			MustNot: []string{},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 	},
 	"base+additional": Rules{
 		10: Rule{
 			Must:    []string{"bad"},
 			MustNot: []string{},
-			Then:    status.Nok,
+			Then:    status.StatusNOK,
 		},
 		11: Rule{
 			Must:    []string{},
 			MustNot: []string{"known"},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 		15: Rule{
 			Must:    []string{"unknown"},
 			MustNot: []string{},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 		20: Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.Ok,
+			Then:    status.StatusOK,
 		},
 	},
 	"overwrite": Rules{
 		10: Rule{
 			Must:    []string{"the worst"},
 			MustNot: []string{},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 	},
 	"base+overwrite": Rules{
 		10: Rule{
 			Must:    []string{"the worst"},
 			MustNot: []string{},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 		11: Rule{
 			Must:    []string{},
 			MustNot: []string{"known"},
-			Then:    status.Unknown,
+			Then:    status.StatusUnknown,
 		},
 		20: Rule{
 			Must:    []string{},
 			MustNot: []string{},
-			Then:    status.Ok,
+			Then:    status.StatusOK,
 		},
 	},
 }
@@ -106,7 +106,6 @@ func TestRuleMergingOverwrite(t *testing.T) {
 
 func TestRuleAnalyze(t *testing.T) {
 	testsets := map[string]struct {
-		desc        string
 		test        map[string]bool
 		status      status.Status
 		errExpected bool
@@ -117,14 +116,14 @@ func TestRuleAnalyze(t *testing.T) {
 				"bad":   false,
 				"known": true,
 			},
-			status:      status.Ok,
+			status:      status.StatusOK,
 			errExpected: false,
 		},
 		"must fail because key 'bad' and 'known' do not exist": {
 			test: map[string]bool{
 				"good": true,
 			},
-			status:      status.Unknown,
+			status:      status.StatusUnknown,
 			errExpected: true,
 		},
 		"unknown": {
@@ -133,7 +132,7 @@ func TestRuleAnalyze(t *testing.T) {
 				"bad":   false,
 				"known": false,
 			},
-			status:      status.Unknown,
+			status:      status.StatusUnknown,
 			errExpected: false,
 		},
 	}

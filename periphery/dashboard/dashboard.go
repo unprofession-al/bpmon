@@ -10,24 +10,33 @@ import (
 
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/configs"
-	"github.com/unprofession-al/bpmon/periphery/webhelpers"
+	wh "github.com/unprofession-al/bpmon/periphery/webhelpers"
+	"github.com/unprofession-al/bpmon/store"
 )
 
 var bps bpmon.BusinessProcesses
-var ep bpmon.EventProvider
+var pp store.Accessor
 
-func Setup(conf configs.DashboardConf, bpin bpmon.BusinessProcesses, epin bpmon.EventProvider) (http.Handler, error) {
-	ep = epin
-	bps = bpin
+var routes = make(map[string]wh.Leafs)
+
+func Setup(conf configs.DashboardConf, bpsIn bpmon.BusinessProcesses, ppIn store.Accessor, auth bool, recipientHashes map[string]string) (http.Handler, error) {
+	pp = ppIn
+	bps = bpsIn
+
 	r := mux.NewRouter().StrictSlash(true)
 
-	r.HandleFunc("/api/bps/", ListBPsHandler).Methods("GET")
-	r.HandleFunc("/api/bps/{bp}", GetBPTimelineHandler).Methods("GET")
-	r.HandleFunc("/api/bps/{bp}/kpis", ListKPIsHandler).Methods("GET")
-	r.HandleFunc("/api/bps/{bp}/kpis/{kpi}", GetKPITimelineHandler).Methods("GET")
+	apiRouter := mux.NewRouter()
+	api := apiRouter.PathPrefix("/api/").Subrouter()
+	wh.PopulateRouter(api, routes)
+	if auth {
+		ta := wh.TokenAuth{Tokens: recipientHashes}
+		r.Handle("/api/{_:.*}", ta.Create(apiRouter))
+	} else {
+		r.Handle("/api/{_:.*}", apiRouter)
+	}
 
 	if conf.Static == "" {
-		assetHandler := webhelpers.GetAssetHandler("/assets/")
+		assetHandler := wh.GetAssetHandler("/assets/")
 		r.PathPrefix("/assets/").Handler(assetHandler)
 
 		r.PathPrefix("/").Handler(http.FileServer(FS(false)))

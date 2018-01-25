@@ -16,9 +16,8 @@ manually as needed.
 
 ## Installation
 
-To install BPMON, you need Go 1.6. (older versions could potentially work as 
-well but are not tested). Please refer to https://golang.org/doc/install to 
-do so...
+To install BPMON, you need Go 1.7. Please refer to https://golang.org/doc/install 
+to do so...
 
 Simply run the following command (don't forget the three dots at the end!):
 ```
@@ -40,23 +39,17 @@ a look at an example:
 default: &default
   # First BPMON needs to have access to your Icinga2 API. Learn more on by reading 
   # https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
-  icinga:
-    server: icinga.example.com
-    port: 5665
-    pass: youllneverguess
-    user: bpmon
-    proto: https
+  checker:
+    kind: icinga
+    connection: https://user:pass@icinga.example.com:5665
   # Also the connection to the InfluxDB is required in order to persist the
   # state for reporting and such. 
-  influx:
-    connection:
-      server: influx.example.com
-      port: 8086
-      proto: http
-      # the timeout is read as a go (golang) duration, please refer to 
-      # https://golang.org/pkg/time/#Duration for a detailed explanation.
-      timeout: 2s
-    database: bpmon
+  store:
+    kind: influx
+    connection: http://user:pass@influx.example.com:8086/bpmon
+    # the timeout is read as a go (golang) duration, please refer to 
+    # https://golang.org/pkg/time/#Duration for a detailed explanation.
+    timeout: 2s
     # If a state is 'OK' only save it to InfluxDB if its an BP measurement 
     # (e.g. do not persist 'OK' states for KPIs and services for the sake of
     # a small amount of data). In that case BP 'OK' states are saved as 
@@ -68,18 +61,8 @@ default: &default
     # only when a status is changed from good to bad'. This only runs against
     # types listed in 'save_ok' since only these are persisted 'correctly'.
     get_last_status: true
-    # default tags and default fields can be set in order to full allow you
-    # to add either tags or fields according to your need to all entries 
-    # that BPMON is going to persist to InfluxDB. In this example, the field 
-    # 'annotated' is false (boolean). With an some custom tool or script this 
-    # field can be used to query for example all status changes from 'good' 
-    # to 'bad', add an anntation such as a reason and toggle the 'annotated'
-    # field to true.
-    # 'default_tags' is read as a map of strings while 'default_fields' is
-    # a map of interface{}s
-    default_tags: {}
-    default_field:
-      annotated: false
+  # global_recipient will be added to the repicient list af all BP
+  global_recipient: admin
   # Define your office hours et al. according to your service level 
   # agreements (SLA). You can later reference them in your BP definitions.
   availabilities:
@@ -102,8 +85,6 @@ default: &default
 test:
   # Inherit all settings fron the default anchor and extend/overwrite
   <<: *default
-  influx:
-    database: bpmont
   availabilities:
     officeHours:
       monday:    [ "09:00:00-12:00:00", "13:30:00-17:00:00" ]
@@ -174,6 +155,9 @@ availability: 9to5
 # end point, pass some uri parameters, send an email to a specific address etc.
 # The 'responsible' string is inherited by its KPIs if not overwritten...
 responsible: app.team@example.com
+# By providing a list of 'recipients' subcommands such as 'beta dashboard' can
+# use that information in order do provide some sort of authorization.
+recipients: [ UsersAppX ]
 # Now the KPIs...
 kpis:
   - 
@@ -222,6 +206,7 @@ Usage:
   bpmon [command]
 
 Available Commands:
+  beta        Access beta features of BPMON
   config      Print the configurantion used to stdout
   run         Run all business process checks and print to stdout
   trigger     Run all business process checks and trigger a custom command if issue occure
@@ -232,6 +217,7 @@ Flags:
   -c, --cfg string       path to the configuration file (default "/etc/bpmon/cfg.yaml")
   -p, --pattern string   pattern of business process configuration files to process (default "*.yaml")
   -s, --section string   name of the section to be read (default "default")
+  -v, --verbose          print log output (default true)
 
 Use "bpmon [command] --help" for more information about a command.
 ```

@@ -6,7 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/icinga"
+	"github.com/unprofession-al/bpmon/checker"
+	_ "github.com/unprofession-al/bpmon/checker/icinga"
+	"github.com/unprofession-al/bpmon/store"
+	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
 var (
@@ -25,22 +28,22 @@ var runCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		i, err := icinga.NewIcinga(c.Icinga, c.Rules)
+		i, err := checker.New(c.Checker)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		r := i.DefaultRules()
-		r.Merge(c.Rules)
+		err = r.Merge(c.Rules)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		infl, _ := bpmon.NewInflux(c.Influx)
+		p, _ := store.New(c.Store)
 		for _, bp := range b {
-			rs := bp.Status(i, infl, r)
-			if c.Influx.GetLastStatus {
-				rs.AddPreviousStatus(infl, c.Influx.SaveOK)
+			rs := bp.Status(i, p, r)
+			if c.Store.GetLastStatus {
+				rs.AddPreviousStatus(p, c.Store.SaveOK)
 			}
 			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues, printResponsible))
 		}

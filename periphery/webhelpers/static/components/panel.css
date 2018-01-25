@@ -13,6 +13,8 @@
 
 .panel-content {
     padding: 20px 30px;
+    height: auto;
+    overflow: visible;
 }
 
 .panel-collapser {
@@ -28,4 +30,5 @@
 
 .notification {
     background-color: var(--notify-color);
+    padding: 20px 30px;
 }

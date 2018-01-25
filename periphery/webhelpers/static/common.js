@@ -28,3 +28,9 @@ function formatTimestamp(ts) {
     var dateString =  date.toLocaleTimeString("de-ch", options)
 	return dateString
 }
+
+function getAuthToken() {
+    var url = new URL(window.location.href);
+    var authtoken = url.searchParams.get("authtoken");
+    return authtoken
+}
