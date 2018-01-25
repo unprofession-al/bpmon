@@ -61,6 +61,8 @@ default: &default
     # only when a status is changed from good to bad'. This only runs against
     # types listed in 'save_ok' since only these are persisted 'correctly'.
     get_last_status: true
+  # global_recipient will be added to the repicient list af all BP
+  global_recipient: admin
   # Define your office hours et al. according to your service level 
   # agreements (SLA). You can later reference them in your BP definitions.
   availabilities:
