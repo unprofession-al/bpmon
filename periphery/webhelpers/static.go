@@ -294,7 +294,7 @@ JwAA//92laDUxQEAAA==
 	"/common.js": {
 		local:   "static/common.js",
 		size:    984,
-		modtime: 1515496447,
+		modtime: 1516878354,
 		compressed: `
 H4sIAAAAAAAC/1xSW1PbPBB9xr9CI74Zy5+Dm9LSC8HM0NI7FMqlt7fFWtsqsuRK64S0w3/v2HGcBD9Z
 Z/ccnbOrvDEZKWtYqSRe1soYdCJifwPWf/8Jvq0tSGUKHiWZ94JL5WsNcz7ixhrk0SS4D4JByFhS+VxU
@@ -378,7 +378,7 @@ cyO/kYdt/X8/m8RIzAOa6SqgocsRWxpSDKSF/TMAAP//Tn8TEegBAAA=
 	"/components/layout.css": {
 		local:   "static/components/layout.css",
 		size:    1230,
-		modtime: 1516601028,
+		modtime: 1516878354,
 		compressed: `
 H4sIAAAAAAAC/7SU36riMBDG7/sUA8uCgpFa8bDUm32VsYnpYDpTYvTUXXz3JW3U2uOCNwdvZL7km9/8
 SUsvEuBvBgCgVCUcDAf1STrUJfzKf24nSkN8Uz/yvO222TXL6tC4BexEXxawjCeR2PgFLGuDuv9jzobD
@@ -394,7 +394,7 @@ NnGf5wl9XMbItZJTfBrFkOr6pnVRvG+9HlnHbmPcuVcfiHfacqv/XwAAAP//sFnJhs4EAAA=
 	"/components/panel.css": {
 		local:   "static/components/panel.css",
 		size:    719,
-		modtime: 1516601028,
+		modtime: 1516878354,
 		compressed: `
 H4sIAAAAAAAC/3SS0W6dMAyG789TWJom9UhLxTlbb9KncYgBixBHwXDopr77BAGtU4u4QPpt/7Y/5zlh
 pAB/LgAAThYz8m+OrQUn2VM2TpbXLfZgr52FW1V9L8KAueVonKjKYOFnlfbMzaVDLw8LFdzTAi9p2f65
@@ -469,7 +469,7 @@ V/CP1m8KvruE5ezx+RYu1tXsUVGweNCwaAql3wEAAP//0oorZNEEAAA=
 	"/components/typo.css": {
 		local:   "static/components/typo.css",
 		size:    250,
-		modtime: 1515496447,
+		modtime: 1516878354,
 		compressed: `
 H4sIAAAAAAAC/4zNQQrCMBCF4X1O8TbSTQppqwjpLbxBg00nYDKlGdAqvbugFbsR3P7DN8/xecZDAYDn
 JKXvYrjMFsWJHQsXGrlLucz9FHyrFqWo0qBagxoN2mvQYeWxm4aQSuHRojLjrd1WxyIcP4fXm+3qtQ8D

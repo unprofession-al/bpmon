@@ -130,10 +130,16 @@ func (rs *ResultSet) AddPreviousStatus(pp Accessor, saveOK []string) {
 		latest, err := pp.GetLatest(*rs)
 		if err == nil {
 			rs.Was = latest.Was
+			fmt.Println(rs.Was)
 			rs.WasChecked = true
 			if rs.Status != rs.Was {
 				rs.StatusChanged = true
+				fmt.Println("StatusChanged")
+			} else {
+				fmt.Println("StatusNotChanged")
 			}
+		} else {
+			fmt.Println(err.Error())
 		}
 	}
 

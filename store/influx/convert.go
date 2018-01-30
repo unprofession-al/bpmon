@@ -112,6 +112,7 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 				}
 			case "was":
 				out.WasChecked = true
+				fmt.Println(v)
 				raw, err := v.(json.Number).Int64()
 				if err != nil {
 					return out, err
