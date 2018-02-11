@@ -88,6 +88,7 @@ type Icinga struct {
 
 type fetcher interface {
 	Fetch(string, string) (Response, error)
+	Health() (string, error)
 }
 
 // DefaultRules implements the 'Checker' interface.
@@ -124,6 +125,11 @@ func (i Icinga) Values() []string {
 		out = append(out, key.String())
 	}
 	return out
+}
+
+// Health implements the 'Checker' interface.
+func (i Icinga) Health() (string, error) {
+	return i.f.Health()
 }
 
 // Status implements the 'Checker' interface.
@@ -225,4 +231,39 @@ func (a api) Fetch(host, service string) (Response, error) {
 
 	err = json.Unmarshal(body, &response)
 	return response, err
+}
+
+func (a api) Health() (string, error) {
+	var body []byte
+	response := ""
+
+	// build url
+	url := fmt.Sprintf("%s/status", a.baseURL)
+	// query api
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: a.tlsSkipVerify},
+	}
+	client := &http.Client{Transport: tr}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return response, err
+	}
+	req.SetBasicAuth(a.user, a.pass)
+	resp, err := client.Do(req)
+	if err != nil {
+		return response, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		err = errors.New("HTTP error " + resp.Status)
+		return response, err
+	}
+	// parse response body
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return response, err
+	}
+	response = string(body)
+
+	return response, nil
 }
