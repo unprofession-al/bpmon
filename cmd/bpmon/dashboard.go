@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	dashboardPepper string
-	dashboardStatic string
+	dashboardPepper           string
+	dashboardRecipientsHeader string
+	dashboardStatic           string
 )
 
 var dashboardCmd = &cobra.Command{
@@ -29,25 +30,37 @@ var dashboardCmd = &cobra.Command{
 
 		pp, _ := store.New(c.Store)
 
+		if dashboardPepper != "" && dashboardRecipientsHeader != "" {
+			log.Fatal("ERROR: pepper and recipients-header are, only one is allowed.")
+		}
+		if dashboardPepper == "" && dashboardRecipientsHeader == "" {
+			fmt.Println("WARNING: No pepper or recipients-header is provided, all information are accessable without auth...")
+		}
+
+		recipientsHeaderName := dashboardRecipientsHeader
+		authHeader := false
+		if dashboardRecipientsHeader != "" {
+			authHeader = true
+			fmt.Printf("Recipients-header is provided, using %s to read recipients...\n", dashboardRecipientsHeader)
+		}
+
 		var recipientHashes map[string]string
-		auth := false
+		authPepper := false
 		if dashboardPepper != "" {
-			auth = true
+			authPepper = true
 			fmt.Println("Pepper is provided, generating auth hashes...")
 			recipientHashes = bps.GenerateRecipientHashes(dashboardPepper)
 			fmt.Printf("%15s: %s\n", "Recipient", "Hash")
 			for k, v := range recipientHashes {
 				fmt.Printf("%15s: %s\n", v, k)
 			}
-		} else {
-			fmt.Println("WARNING: No pepper is provided, all information are accessable without auth...")
 		}
 
 		if dashboardStatic != "" {
 			c.Dashboard.Static = dashboardStatic
 		}
 
-		router, err := dashboard.Setup(c.Dashboard, bps, pp, auth, recipientHashes)
+		router, err := dashboard.Setup(c.Dashboard, bps, pp, authPepper, recipientHashes, authHeader, recipientsHeaderName)
 		if err != nil {
 			msg := fmt.Sprintf("Could not build router for server: %s", err.Error())
 			log.Fatal(msg)
@@ -61,5 +74,6 @@ var dashboardCmd = &cobra.Command{
 func init() {
 	betaCmd.AddCommand(dashboardCmd)
 	dashboardCmd.PersistentFlags().StringVarP(&dashboardPepper, "pepper", "", "", "Pepper used to generate auth token")
+	dashboardCmd.PersistentFlags().StringVarP(&dashboardRecipientsHeader, "recipients-header", "", "", "HTTP header name to read recipients from")
 	dashboardCmd.PersistentFlags().StringVarP(&dashboardStatic, "static", "", "", "Path to custom html frontend")
 }
