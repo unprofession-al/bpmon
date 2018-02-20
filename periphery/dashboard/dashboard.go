@@ -19,7 +19,7 @@ var pp store.Accessor
 
 var routes = make(map[string]wh.Leafs)
 
-func Setup(conf configs.DashboardConf, bpsIn bpmon.BusinessProcesses, ppIn store.Accessor, auth bool, recipientHashes map[string]string) (http.Handler, error) {
+func Setup(conf configs.DashboardConf, bpsIn bpmon.BusinessProcesses, ppIn store.Accessor, tokenAuth bool, recipientHashes map[string]string, recipientsHeaderAuth bool, recipientsHeaderName string) (http.Handler, error) {
 	pp = ppIn
 	bps = bpsIn
 
@@ -28,9 +28,11 @@ func Setup(conf configs.DashboardConf, bpsIn bpmon.BusinessProcesses, ppIn store
 	apiRouter := mux.NewRouter()
 	api := apiRouter.PathPrefix("/api/").Subrouter()
 	wh.PopulateRouter(api, routes)
-	if auth {
+	if tokenAuth {
 		ta := wh.TokenAuth{Tokens: recipientHashes}
 		r.Handle("/api/{_:.*}", ta.Create(apiRouter))
+	} else if recipientsHeaderAuth {
+		r.Handle("/api/{_:.*}", wh.RecipientsHeaderAuth(apiRouter, recipientsHeaderName))
 	} else {
 		r.Handle("/api/{_:.*}", apiRouter)
 	}
