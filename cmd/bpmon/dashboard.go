@@ -31,7 +31,7 @@ var dashboardCmd = &cobra.Command{
 		pp, _ := store.New(c.Store)
 
 		if dashboardPepper != "" && dashboardRecipientsHeader != "" {
-			log.Fatal("ERROR: pepper and recipients-header are, only one is allowed.")
+			log.Fatal("ERROR: pepper and recipients-header are set, only one is allowed.")
 		}
 		if dashboardPepper == "" && dashboardRecipientsHeader == "" {
 			fmt.Println("WARNING: No pepper or recipients-header is provided, all information are accessable without auth...")
