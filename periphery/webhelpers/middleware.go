@@ -42,7 +42,7 @@ func RecipientsHeaderAuth(next http.Handler, RecipientsHeaderName string) http.H
 
 		header := r.Header.Get(RecipientsHeaderName)
 		if header != "" {
-			groups = strings.Split(r.Header.Get(RecipientsHeaderName), ",")
+			groups = strings.Split(header, ",")
 		}
 
 		if len(groups) < 1 {
