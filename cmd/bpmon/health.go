@@ -32,13 +32,10 @@ var healthCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		_, checkerErr := ch.Health()
-		_, storeErr := st.Health()
+		hb := c.Heartbeat
+		rs := hb.Trigger(ch, st)
 
-		if checkerErr != nil && storeErr != nil {
-			log.Fatal("dependencies failed")
-		}
-
+		fmt.Println(rs.PrettyPrint(0, true, true, true))
 	},
 }
 
