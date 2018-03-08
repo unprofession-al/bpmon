@@ -11,6 +11,7 @@
 
 .buttons {
     width: 250px;
+    padding-bottom: 22px;
 }
 
 .button.quick {
@@ -37,6 +38,7 @@
     float: right;
     text-align: right;
     padding-top: 20px;
+    padding-bottom: 24px;
 }
 
 .annotation-input {
