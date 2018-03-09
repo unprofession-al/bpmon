@@ -38,7 +38,7 @@ function quickAnnotate(id) {
             success: function(data){
                 var url = new URL(window.location.href);
                 var days = url.searchParams.get("days");
-                loadCount(days);
+                loadEvents(days);
                 $('#'+id).fadeOut(100);
             }
         });
@@ -57,7 +57,7 @@ function annotate(id) {
             success: function(data){
                 var url = new URL(window.location.href);
                 var days = url.searchParams.get("days");
-                loadCount(days);
+                loadEvents(days);
                 $('#'+id).fadeOut(100);
             }
         });

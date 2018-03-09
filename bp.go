@@ -32,12 +32,14 @@ func (bps BusinessProcesses) GenerateRecipientHashes(pepper string) map[string]s
 	return recipients
 }
 
-func (bps BusinessProcesses) GetByRecipient(recipient string) BusinessProcesses {
+func (bps BusinessProcesses) GetByRecipients(recipients []string) BusinessProcesses {
 	var out BusinessProcesses
 	for _, bp := range bps {
 		for _, r := range bp.Recipients {
-			if recipient == r {
-				out = append(out, bp)
+			for _, recipient := range recipients {
+				if recipient == r {
+					out = append(out, bp)
+				}
 			}
 		}
 	}

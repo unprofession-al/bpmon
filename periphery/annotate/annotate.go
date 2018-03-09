@@ -18,13 +18,20 @@ var bps bpmon.BusinessProcesses
 var pp store.Accessor
 var routes = make(map[string]wh.Leafs)
 
-func Setup(conf configs.AnnotateConf, bpin bpmon.BusinessProcesses, ppin store.Accessor) (http.Handler, error) {
+func Setup(conf configs.AnnotateConf, bpin bpmon.BusinessProcesses, ppin store.Accessor, authHeaderName string, authHeaderValues []string) (http.Handler, error) {
 	pp = ppin
 	bps = bpin
 
 	r := mux.NewRouter().StrictSlash(true)
-	api := r.PathPrefix("/api/").Subrouter()
+
+	apiRouter := mux.NewRouter()
+	api := apiRouter.PathPrefix("/api/").Subrouter()
 	wh.PopulateRouter(api, routes)
+	if authHeaderName != "" {
+		r.Handle("/api/{_:.*}", wh.HeaderAuthMatcher(apiRouter, authHeaderName, authHeaderValues))
+	} else {
+		r.Handle("/api/{_:.*}", apiRouter)
+	}
 
 	if conf.Static == "" {
 		assetHandler := wh.GetAssetHandler("/assets/")
@@ -35,6 +42,7 @@ func Setup(conf configs.AnnotateConf, bpin bpmon.BusinessProcesses, ppin store.A
 		r.PathPrefix("/").Handler(http.FileServer(http.Dir(conf.Static)))
 	}
 
+	// chain := alice.New(wh.Logger).Then(r)
 	chain := alice.New().Then(r)
 
 	return chain, nil
