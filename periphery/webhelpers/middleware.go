@@ -89,12 +89,13 @@ func HeaderAuthMatcher(next http.Handler, HeaderName string, HeaderValuesAllowed
 }
 
 type logmgs struct {
-	Timestamp string        `json:"timestamp"`
-	Status    int           `json:"status"`
-	Size      int           `json:"size"`
-	Method    string        `json:"method"`
-	Request   string        `json:"request"`
-	Latency   time.Duration `json:"latency"`
+	Timestamp      string        `json:"timestamp"`
+	Status         int           `json:"status"`
+	Size           int           `json:"size"`
+	Method         string        `json:"method"`
+	Request        string        `json:"request"`
+	RequestHeaders http.Header   `json:"request_headers"`
+	Latency        time.Duration `json:"latency"`
 }
 
 type customResponseWriter struct {
@@ -130,12 +131,13 @@ func Logger(next http.Handler) http.Handler {
 		end := time.Now()
 
 		msg := &logmgs{
-			Timestamp: end.Format("2006/01/02-15:04:05.000"),
-			Status:    crw.status,
-			Size:      crw.size,
-			Latency:   end.Sub(start),
-			Method:    r.Method,
-			Request:   r.URL.Path,
+			Timestamp:      end.Format("2006/01/02-15:04:05.000"),
+			Status:         crw.status,
+			Size:           crw.size,
+			Latency:        end.Sub(start),
+			Method:         r.Method,
+			Request:        r.URL.Path,
+			RequestHeaders: r.Header,
 		}
 
 		b, _ := json.Marshal(msg)
