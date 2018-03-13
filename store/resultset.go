@@ -134,6 +134,12 @@ func (rs *ResultSet) AddPreviousStatus(pp Accessor, saveOK []string) {
 			if rs.Status != rs.Was {
 				rs.StatusChanged = true
 			}
+		} else {
+			rs.Was = status.StatusUnknown
+			rs.WasChecked = true
+			if rs.Status != rs.Was {
+				rs.StatusChanged = true
+			}
 		}
 	}
 

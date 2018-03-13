@@ -1,3 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
-./bpmon ${CMD}
+if [[ ${CMD} == ./bpmon* ]]; then
+    eval ${CMD}
+else
+    ./bpmon ${CMD}
+fi
