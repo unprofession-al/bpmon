@@ -19,7 +19,7 @@ type conf struct {
 	Store           store.Conf            `yaml:"store"`
 	Availabilities  AvailabilitiesConf    `yaml:"availabilities"`
 	Trigger         Trigger               `yaml:"trigger"`
-	Heartbeat       Heartbeat             `yaml:"heartbeat"`
+	Health          Health                `yaml:"health"`
 	Rules           rules.Rules           `yaml:"rules"`
 	Dashboard       configs.DashboardConf `yaml:"dashboard"`
 	Annotate        configs.AnnotateConf  `yaml:"annotate"`
@@ -40,8 +40,8 @@ func Configure(cfgFile, cfgSection, bpPath, bpPattern string) (conf, BusinessPro
 		return c, nil, fmt.Errorf("Error while parsing section '%s' configuration file '%s': %s", cfgSection, cfgFile, err.Error())
 	}
 
-	if c.Heartbeat.Template == "" {
-		c.Heartbeat.Template = c.Trigger.Template
+	if c.Health.Template == "" {
+		c.Health.Template = c.Trigger.Template
 	}
 
 	a, err := c.Availabilities.Parse()

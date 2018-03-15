@@ -8,7 +8,7 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 )
 
-type Heartbeat struct {
+type Health struct {
 	Template        string `yaml:"template"`
 	StoreRequired   bool   `yaml:"store_required"`
 	CheckerRequired bool   `yaml:"checker_required"`
@@ -17,11 +17,11 @@ type Heartbeat struct {
 	ID              string `yaml:"id"`
 }
 
-func (hb Heartbeat) Trigger(c checker.Checker, s store.Accessor) *store.ResultSet {
-	tags := map[store.Kind]string{store.KindBusinessProcess: hb.ID}
+func (h Health) Check(c checker.Checker, s store.Accessor) *store.ResultSet {
+	tags := map[store.Kind]string{store.KindBusinessProcess: h.ID}
 	rs := store.ResultSet{
-		Name:          hb.Name,
-		ID:            hb.ID,
+		Name:          h.Name,
+		ID:            h.ID,
 		Start:         time.Now(),
 		Tags:          tags,
 		Children:      []*store.ResultSet{},
@@ -30,11 +30,11 @@ func (hb Heartbeat) Trigger(c checker.Checker, s store.Accessor) *store.ResultSe
 	}
 
 	checkerOut, checkerErr := c.Health()
-	checkerKPI := getHeartbeatKPI(checkerOut, checkerErr, hb.CheckerRequired, rs, "checker")
+	checkerKPI := getHealthKPI(checkerOut, checkerErr, h.CheckerRequired, rs, "checker")
 	rs.Children = append(rs.Children, checkerKPI)
 
 	storeOut, storeErr := s.Health()
-	storeKPI := getHeartbeatKPI(storeOut, storeErr, hb.StoreRequired, rs, "store")
+	storeKPI := getHealthKPI(storeOut, storeErr, h.StoreRequired, rs, "store")
 	rs.Children = append(rs.Children, storeKPI)
 
 	var statusValues []bool
@@ -46,7 +46,7 @@ func (hb Heartbeat) Trigger(c checker.Checker, s store.Accessor) *store.ResultSe
 	return &rs
 }
 
-func getHeartbeatKPI(out string, err error, required bool, parent store.ResultSet, kind string) *store.ResultSet {
+func getHealthKPI(out string, err error, required bool, parent store.ResultSet, kind string) *store.ResultSet {
 	id := parent.ID + "_" + kind + "_kpi"
 	name := parent.Name + " " + kind + " KPI"
 
@@ -69,13 +69,13 @@ func getHeartbeatKPI(out string, err error, required bool, parent store.ResultSe
 		StatusChanged: false,
 	}
 
-	svc := getHeartbeatSVC(out, err, parent, kind)
+	svc := getHealthSVC(out, err, parent, kind)
 
 	rs.Children = append(rs.Children, svc)
 	return &rs
 }
 
-func getHeartbeatSVC(out string, err error, parent store.ResultSet, kind string) *store.ResultSet {
+func getHealthSVC(out string, err error, parent store.ResultSet, kind string) *store.ResultSet {
 	id := parent.ID + "_" + kind + "_svc"
 	name := parent.Name + " " + kind + " SVC"
 
