@@ -32,8 +32,8 @@ var healthCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		hb := c.Heartbeat
-		rs := hb.Trigger(ch, st)
+		health := c.Health
+		rs := health.Check(ch, st)
 
 		fmt.Println(rs.PrettyPrint(0, true, true, true))
 	},
