@@ -140,12 +140,22 @@ func (rs *ResultSet) AddPreviousStatus(pp Accessor, saveOK []string) {
 			if rs.Status != rs.Was {
 				rs.StatusChanged = true
 			}
+			rs.AppendOutput("Error occured while AddPreviousStatus: " + err.Error())
 		}
 	}
 
 	for _, childRs := range rs.Children {
 		childRs.AddPreviousStatus(pp, saveOK)
 	}
+}
+
+// AppendOutput appends another string to the Output field and delimits outputs
+// with a ` | `.
+func (rs *ResultSet) AppendOutput(output string) {
+	if rs.Output != "" {
+		rs.Output = rs.Output + " | "
+	}
+	rs.Output = rs.Output + output
 }
 
 func stringInSlice(a string, list []string) bool {

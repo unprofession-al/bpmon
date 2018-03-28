@@ -183,7 +183,7 @@ func (s Service) Status(parentTags map[store.Kind]string, chk checker.Checker, p
 	result := chk.Status(s.Host, s.Service)
 	rs.Err = result.Error
 	rs.Start = result.Timestamp
-	rs.Output = result.Message
+	rs.AppendOutput(result.Message)
 	rs.Vals = result.Values
 	st, _ := r.Analyze(result.Values)
 	rs.Status = st
