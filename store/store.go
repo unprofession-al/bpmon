@@ -54,6 +54,9 @@ func New(conf Conf) (Accessor, error) {
 
 // Accessor is the interface that describes all operations exposed by a store.
 type Accessor interface {
+	// Health tries to connect to the store implementation and checks its status.
+	Health() (string, error)
+
 	// Write takes a (nested) ResultSet and persists all values (including all
 	// child values) to the store.
 	Write(input *ResultSet) error

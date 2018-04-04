@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
 	"github.com/unprofession-al/bpmon/store"
@@ -18,6 +19,7 @@ type Influx struct {
 	database      string
 	printQueries  bool
 	getLastStatus bool
+	timeout       time.Duration
 }
 
 func init() {
@@ -46,9 +48,15 @@ func Setup(conf store.Conf) (store.Accessor, error) {
 		database:      database,
 		printQueries:  conf.Debug,
 		getLastStatus: conf.GetLastStatus,
+		timeout:       conf.Timeout,
 	}
 
 	return cli, err
+}
+
+func (i Influx) Health() (string, error) {
+	_, out, err := i.cli.Ping(i.timeout)
+	return out, err
 }
 
 func (i Influx) Write(rs *store.ResultSet) error {

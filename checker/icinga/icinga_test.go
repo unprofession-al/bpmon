@@ -84,6 +84,10 @@ type IcingaMock struct {
 	endpoints []testset
 }
 
+func (i IcingaMock) Health() (string, error) {
+	return "all fine", nil
+}
+
 func (i IcingaMock) Fetch(host, service string) (Response, error) {
 	var response Response
 	for _, ep := range i.endpoints {

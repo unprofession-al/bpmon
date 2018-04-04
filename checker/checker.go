@@ -29,6 +29,10 @@ type Conf struct {
 // Checker interface needs to be implemented in order to provide a Checker
 // backend such as Icinga.
 type Checker interface {
+	// Health tries to connect to the checker implementation and checks its
+	// status.
+	Health() (string, error)
+
 	// Status takes a host string as well as a service string and returns
 	// 'Result' of the stuct of the check.
 	Status(host string, service string) Result

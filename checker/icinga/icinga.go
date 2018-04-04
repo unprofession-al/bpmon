@@ -44,50 +44,10 @@ func Setup(conf checker.Conf) (checker.Checker, error) {
 	return i, nil
 }
 
-type flag string
-
-const (
-	FlagOK                flag = "ok"
-	FlagUnknown           flag = "unknown"
-	FlagWarn              flag = "warn"
-	FlagCritical          flag = "critical"
-	FlagScheduledDowntime flag = "scheduled_downtime"
-	FlagAcknowledged      flag = "acknowledged"
-	FlagFailed            flag = "failed"
-)
-
-func (f flag) String() string {
-	return string(f)
-}
-
-type flags map[flag]bool
-
-var flagDefaults = flags{
-	FlagOK:                false,
-	FlagUnknown:           false,
-	FlagWarn:              false,
-	FlagCritical:          false,
-	FlagScheduledDowntime: false,
-	FlagAcknowledged:      false,
-	FlagFailed:            true,
-}
-
-func (f flags) ToValues() map[string]bool {
-	out := make(map[string]bool)
-	for k, v := range flagDefaults {
-		out[k.String()] = v
-	}
-	return out
-}
-
 // Icinga holds the 'Checker' implementation. It allows BPMON to fetch the status
 // configured via the Icinga2 API
 type Icinga struct {
 	f fetcher
-}
-
-type fetcher interface {
-	Fetch(string, string) (Response, error)
 }
 
 // DefaultRules implements the 'Checker' interface.
@@ -124,6 +84,11 @@ func (i Icinga) Values() []string {
 		out = append(out, key.String())
 	}
 	return out
+}
+
+// Health implements the 'Checker' interface.
+func (i Icinga) Health() (string, error) {
+	return i.f.Health()
 }
 
 // Status implements the 'Checker' interface.
@@ -179,6 +144,11 @@ func (r Response) status() (at time.Time, msg string, vals map[string]bool, err 
 	return
 }
 
+type fetcher interface {
+	Fetch(string, string) (Response, error)
+	Health() (string, error)
+}
+
 type api struct {
 	baseURL       string
 	user          string
@@ -188,7 +158,6 @@ type api struct {
 
 func (a api) Fetch(host, service string) (Response, error) {
 	var response Response
-	var body []byte
 
 	// proper encoding for the host string
 	hostURL := &url.URL{Path: host}
@@ -198,31 +167,42 @@ func (a api) Fetch(host, service string) (Response, error) {
 	service = serviceURL.String()
 	// build url
 	url := fmt.Sprintf("%s/objects/services?service=%s!%s", a.baseURL, host, service)
-	// query api
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: a.tlsSkipVerify},
-	}
-	client := &http.Client{Transport: tr}
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return response, err
-	}
-	req.SetBasicAuth(a.user, a.pass)
-	resp, err := client.Do(req)
-	if err != nil {
-		return response, err
-	}
-
-	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		err = errors.New("HTTP error " + resp.Status)
-		return response, err
-	}
-	// parse response body
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err := a.get(url)
 	if err != nil {
 		return response, err
 	}
 
 	err = json.Unmarshal(body, &response)
 	return response, err
+}
+
+func (a api) Health() (string, error) {
+	url := fmt.Sprintf("%s/status", a.baseURL)
+	body, err := a.get(url)
+	return string(body), err
+}
+
+func (a api) get(url string) ([]byte, error) {
+	var body []byte
+
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: a.tlsSkipVerify},
+	}
+	client := &http.Client{Transport: tr}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return body, err
+	}
+	req.SetBasicAuth(a.user, a.pass)
+	resp, err := client.Do(req)
+	if err != nil {
+		return body, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode > 299 {
+		err = errors.New("HTTP error " + resp.Status)
+		return body, err
+	}
+
+	return ioutil.ReadAll(resp.Body)
 }

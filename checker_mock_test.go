@@ -41,6 +41,10 @@ func (chk CheckerMock) Values() []string {
 	return []string{"good", "bad", "unknown", "error"}
 }
 
+func (chk CheckerMock) Health() (string, error) {
+	return "all fine", nil
+}
+
 func (chk CheckerMock) DefaultRules() rules.Rules {
 	rules := rules.Rules{
 		10: rules.Rule{
