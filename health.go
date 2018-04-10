@@ -1,34 +1,12 @@
 package bpmon
 
 import (
-	"errors"
 	"time"
 
 	"github.com/unprofession-al/bpmon/checker"
 	"github.com/unprofession-al/bpmon/status"
 	"github.com/unprofession-al/bpmon/store"
 )
-
-type HealthConfig struct {
-	Template        string `yaml:"template"`
-	StoreRequired   bool   `yaml:"store_required"`
-	CheckerRequired bool   `yaml:"checker_required"`
-	Responsible     string `yaml:"responsible"`
-	Name            string `yaml:"name"`
-	ID              string `yaml:"id"`
-}
-
-func (hc HealthConfig) Validate() (error, []string) {
-	errs := []string{}
-	if hc.Template == "" {
-		errs = append(errs, "Field 'template' cannot be empty.")
-	}
-	if len(errs) > 0 {
-		err := errors.New("Config of 'health' has errors")
-		return err, errs
-	}
-	return nil, errs
-}
 
 type Health struct {
 	Template        string `yaml:"template"`
