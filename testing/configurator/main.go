@@ -9,23 +9,19 @@ import (
 )
 
 func main() {
-	fmt.Println("--------------")
 
 	err := configuration.Load("/home/daniel/stxt/git/bpmon_config/test.yaml")
-
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println("--------------")
-
-	c := configuration.GetAll()
-
+	c := configuration.GetSection("default")
 	d, err := yaml.Marshal(&c)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
-	fmt.Printf("--- t dump:\n%s\n\n", string(d))
+	fmt.Printf("%s\n", string(d))
 
+	c.Validate()
 }
