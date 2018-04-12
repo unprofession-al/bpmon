@@ -9,19 +9,21 @@ import (
 )
 
 func main() {
-
-	err := configuration.Load("/home/daniel/stxt/git/bpmon_config/test.yaml")
+	c, err := configuration.Load("/home/daniel/stxt/git/bpmon_config/test.yaml")
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	c := configuration.GetSection("default")
-	d, err := yaml.Marshal(&c)
+	s := c.Section("default")
+	d, err := yaml.Marshal(&s)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
 
 	fmt.Printf("%s\n", string(d))
 
-	c.Validate()
+	_, errs := s.Validate()
+	for _, i := range errs {
+		fmt.Println(i)
+	}
 }
