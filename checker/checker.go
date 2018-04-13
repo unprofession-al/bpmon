@@ -26,6 +26,39 @@ type Conf struct {
 	TLSSkipVerify bool   `yaml:"tls_skip_verify"`
 }
 
+// Validate returns an list of error messages as well as an error if a configuration
+// contains invalid values.
+func (c Conf) Validate() ([]string, error) {
+	errs := []string{}
+	if c.Kind == "" {
+		errs = append(errs, "Field 'kind' cannot be empty.")
+	}
+	if c.Connection == "" {
+		errs = append(errs, "Field 'connection' cannot be empty.")
+	}
+	if len(errs) > 0 {
+		err := errors.New("Config of 'checker' has errors")
+		return errs, err
+	}
+	return errs, nil
+}
+
+// UnmarshalYAML ensures reasonable defaults.
+func (c *Conf) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	type ConfDefaulted Conf
+
+	var defaults = ConfDefaulted{
+		Kind:          "icinga",
+		Connection:    "http://127.0.0.1:8765/icinga/_",
+		TLSSkipVerify: false,
+	}
+
+	out := defaults
+	err := unmarshal(&out)
+	*c = Conf(out)
+	return err
+}
+
 // Checker interface needs to be implemented in order to provide a Checker
 // backend such as Icinga.
 type Checker interface {

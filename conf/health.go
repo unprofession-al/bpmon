@@ -2,6 +2,17 @@ package configuration
 
 import "errors"
 
+type HealthConfigDefaulted HealthConfig
+
+var defaults = HealthConfigDefaulted{
+	Template:        "{{.}}",
+	StoreRequired:   false,
+	CheckerRequired: true,
+	Responsible:     "",
+	Name:            "",
+	ID:              "bla",
+}
+
 type HealthConfig struct {
 	Template        string            `yaml:"template"`
 	StoreRequired   bool              `yaml:"store_required"`
@@ -12,30 +23,23 @@ type HealthConfig struct {
 	Bla             map[string]string `yaml:"bla"`
 }
 
-func (hc HealthConfig) Validate() (error, []string) {
+func HealthConfigDefaults() HealthConfig {
+	return HealthConfig(defaults)
+}
+
+func (hc HealthConfig) Validate() ([]string, error) {
 	errs := []string{}
 	if hc.Template == "" {
 		errs = append(errs, "Field 'template' cannot be empty.")
 	}
 	if len(errs) > 0 {
 		err := errors.New("Config of 'health' has errors")
-		return err, errs
+		return errs, err
 	}
-	return nil, errs
+	return errs, nil
 }
 
 func (hc *HealthConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type HealthConfigDefaulted HealthConfig
-
-	var defaults = HealthConfigDefaulted{
-		Template:        "{{.}}",
-		StoreRequired:   false,
-		CheckerRequired: true,
-		Responsible:     "",
-		Name:            "",
-		ID:              "bla",
-	}
-
 	out := defaults
 	err := unmarshal(&out)
 	*hc = HealthConfig(out)

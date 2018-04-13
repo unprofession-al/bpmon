@@ -1,4 +1,4 @@
-package configuration
+package bpmon
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-type Config map[string]Section
+type Conf map[string]ConfSection
 
-type Section struct {
+type ConfSection struct {
 	Health HealthConfig `yaml:"health"`
 }
 
-func Load(path string) (Config, error) {
-	c := Config{}
+func Load(path string) (Conf, error) {
+	c := ConfDefaults()
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -28,13 +28,21 @@ func Load(path string) (Config, error) {
 	return c, nil
 }
 
-func (s Section) Validate() (error, []string) {
+func ConfDefaults() Conf {
+	c := make(Conf)
+	c["default"] = ConfSection{
+		Health: HealthConfigDefaults(),
+	}
+	return c
+}
+
+func (s ConfSection) Validate() ([]string, error) {
 	return s.Health.Validate()
 }
 
-func (c Config) Section(name string) Section {
+func (c Conf) Section(name string) ConfSection {
 	if section, ok := c[name]; ok {
 		return section
 	}
-	return Section{}
+	return ConfSection{}
 }
