@@ -15,8 +15,8 @@ import (
 
 type conf struct {
 	GlobalRecipient string                `yaml:"global_recipient"`
-	Checker         checker.Conf          `yaml:"checker"`
-	Store           store.Conf            `yaml:"store"`
+	Checker         checker.Config        `yaml:"checker"`
+	Store           store.Config          `yaml:"store"`
 	Availabilities  AvailabilitiesConf    `yaml:"availabilities"`
 	Trigger         Trigger               `yaml:"trigger"`
 	Health          Health                `yaml:"health"`

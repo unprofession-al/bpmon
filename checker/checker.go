@@ -14,21 +14,32 @@ import (
 
 var (
 	cMu sync.Mutex
-	c   = make(map[string]func(Conf) (Checker, error))
+	c   = make(map[string]func(Config) (Checker, error))
 )
 
-// Conf keeps the configuration of the checker implementation. This struct is
+// Config keeps the configuration of the checker implementation. This struct is
 // passed to the store implementatinon itself via the registerd setup function.
 // The field 'Kind' is used to determine which provider is requested.
-type Conf struct {
-	Kind          string `yaml:"kind"`
-	Connection    string `yaml:"connection"`
-	TLSSkipVerify bool   `yaml:"tls_skip_verify"`
+type Config struct {
+	Kind          string        `yaml:"kind"`
+	Connection    string        `yaml:"connection"`
+	TLSSkipVerify bool          `yaml:"tls_skip_verify"`
+	Timeout       time.Duration `yaml:"timeout"`
 }
 
-// Validate returns an list of error messages as well as an error if a configuration
-// contains invalid values.
-func (c Conf) Validate() ([]string, error) {
+func ConfigDefaults() Config {
+	return Config(configDefaults)
+}
+
+type ConfigDefaulted Config
+
+var configDefaults = ConfigDefaulted{
+	Kind:          "icinga",
+	TLSSkipVerify: false,
+	Timeout:       time.Duration(10 * time.Second),
+}
+
+func (c Config) Validate() ([]string, error) {
 	errs := []string{}
 	if c.Kind == "" {
 		errs = append(errs, "Field 'kind' cannot be empty.")
@@ -43,19 +54,10 @@ func (c Conf) Validate() ([]string, error) {
 	return errs, nil
 }
 
-// UnmarshalYAML ensures reasonable defaults.
-func (c *Conf) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	type ConfDefaulted Conf
-
-	var defaults = ConfDefaulted{
-		Kind:          "icinga",
-		Connection:    "http://127.0.0.1:8765/icinga/_",
-		TLSSkipVerify: false,
-	}
-
-	out := defaults
+func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	out := configDefaults
 	err := unmarshal(&out)
-	*c = Conf(out)
+	*c = Config(out)
 	return err
 }
 
@@ -82,7 +84,7 @@ type Checker interface {
 // Register must be called in the init function of each checker implementation.
 // The Register function will panic if two checker impelmentations with the
 // same name try to register themselfs.
-func Register(name string, setupFunc func(Conf) (Checker, error)) {
+func Register(name string, setupFunc func(Config) (Checker, error)) {
 	cMu.Lock()
 	defer cMu.Unlock()
 	if _, dup := c[name]; dup {
@@ -94,7 +96,7 @@ func Register(name string, setupFunc func(Conf) (Checker, error)) {
 // New well return a configured instance of a checker implementation. The
 // implementation requested is determined by the 'Kind' field of the
 // configuration struct.
-func New(conf Conf) (Checker, error) {
+func New(conf Config) (Checker, error) {
 	setupFunc, ok := c[conf.Kind]
 	if !ok {
 		return nil, errors.New("checker: checker '" + conf.Kind + "' does not exist")

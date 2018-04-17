@@ -16,6 +16,19 @@ var configCmd = &cobra.Command{
 	Use:   "config",
 	Short: "Print the configurantion used to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
+
+		configNew, err := bpmon.Load(cfgFile)
+		if err != nil {
+			fmt.Println(err)
+		}
+		errs, err := configNew.Validate()
+		if err != nil {
+			fmt.Println(err)
+			for _, msg := range errs {
+				fmt.Println(msg)
+			}
+		}
+
 		c, _, err := bpmon.Configure(cfgFile, cfgSection, "", "")
 		if err != nil {
 			msg := fmt.Sprintf("Could not read section '%s' from file '%s':  %s", cfgSection, cfgFile, err.Error())

@@ -11,28 +11,66 @@ import (
 	"github.com/unprofession-al/bpmon/status"
 )
 
-// Conf keeps the counfiguration for a store implementation. This struct
+// Config keeps the counfiguration for a store implementation. This struct
 // is passed to the store implementatinon itself via the registerd setup
 // function. The field 'Kind' is used to determine which provider is
 // requested.
-type Conf struct {
+type Config struct {
 	Kind          string        `yaml:"kind"`
 	Connection    string        `yaml:"connection"`
 	Timeout       time.Duration `yaml:"timeout"`
 	SaveOK        []string      `yaml:"save_ok"`
 	GetLastStatus bool          `yaml:"get_last_status"`
 	Debug         bool          `yaml:"debug"`
+	TLSSkipVerify bool          `yaml:"tls_skip_verify"`
+}
+
+func ConfigDefaults() Config {
+	return Config(configDefaults)
+}
+
+type ConfigDefaulted Config
+
+var configDefaults = ConfigDefaulted{
+	Kind:          "influx",
+	Timeout:       time.Duration(10 * time.Second),
+	SaveOK:        []string{"BP"},
+	GetLastStatus: true,
+	Debug:         false,
+	TLSSkipVerify: false,
+}
+
+func (c Config) Validate() ([]string, error) {
+	errs := []string{}
+	if c.Kind == "" {
+		errs = append(errs, "Field 'kind' cannot be empty.")
+	}
+	if c.Connection == "" {
+		errs = append(errs, "Field 'connection' cannot be empty.")
+	}
+	if len(errs) > 0 {
+		err := errors.New("Config of 'store' has errors")
+		return errs, err
+	}
+	return errs, nil
+}
+
+func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	out := configDefaults
+	err := unmarshal(&out)
+	*c = Config(out)
+	return err
 }
 
 var (
 	sMu sync.Mutex
-	s   = make(map[string]func(Conf) (Accessor, error))
+	s   = make(map[string]func(Config) (Accessor, error))
 )
 
 // Register must be called in the init function of each store implementation.
 // The Register function will panic if two store impelmentations with the same
 // name try to register themselfs.
-func Register(name string, setupFunc func(Conf) (Accessor, error)) {
+func Register(name string, setupFunc func(Config) (Accessor, error)) {
 	sMu.Lock()
 	defer sMu.Unlock()
 	if _, dup := s[name]; dup {
@@ -44,12 +82,12 @@ func Register(name string, setupFunc func(Conf) (Accessor, error)) {
 // New well return a configured instance of a store implementation. The
 // implementation requested is determined by the 'Kind' field of the
 // configuration struct.
-func New(conf Conf) (Accessor, error) {
-	setupFunc, ok := s[conf.Kind]
+func New(c Config) (Accessor, error) {
+	setupFunc, ok := s[c.Kind]
 	if !ok {
-		return nil, errors.New("store: store '" + conf.Kind + "' does not exist")
+		return nil, errors.New("store: store '" + c.Kind + "' does not exist")
 	}
-	return setupFunc(conf)
+	return setupFunc(c)
 }
 
 // Accessor is the interface that describes all operations exposed by a store.

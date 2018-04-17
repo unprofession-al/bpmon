@@ -1,17 +1,6 @@
-package configuration
+package conf
 
 import "errors"
-
-type HealthConfigDefaulted HealthConfig
-
-var defaults = HealthConfigDefaulted{
-	Template:        "{{.}}",
-	StoreRequired:   false,
-	CheckerRequired: true,
-	Responsible:     "",
-	Name:            "",
-	ID:              "bla",
-}
 
 type HealthConfig struct {
 	Template        string            `yaml:"template"`
@@ -24,7 +13,18 @@ type HealthConfig struct {
 }
 
 func HealthConfigDefaults() HealthConfig {
-	return HealthConfig(defaults)
+	return HealthConfig(healthConfigDefaults)
+}
+
+type HealthConfigDefaulted HealthConfig
+
+var healthConfigDefaults = HealthConfigDefaulted{
+	Template:        "{{.}}",
+	StoreRequired:   false,
+	CheckerRequired: true,
+	Responsible:     "",
+	Name:            "",
+	ID:              "bla",
 }
 
 func (hc HealthConfig) Validate() ([]string, error) {
@@ -40,7 +40,7 @@ func (hc HealthConfig) Validate() ([]string, error) {
 }
 
 func (hc *HealthConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	out := defaults
+	out := healthConfigDefaults
 	err := unmarshal(&out)
 	*hc = HealthConfig(out)
 	return err
