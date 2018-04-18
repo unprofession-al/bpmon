@@ -6,13 +6,16 @@ import (
 	"io/ioutil"
 
 	"github.com/unprofession-al/bpmon/checker"
+	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/store"
 	yaml "gopkg.in/yaml.v2"
 )
 
-type Conf map[string]ConfSection
+const ConfigDefaultSection = "default"
 
-func (c Conf) Validate() (out []string, err error) {
+type Config map[string]ConfigSection
+
+func (c Config) Validate() (out []string, err error) {
 	var errs []string
 	for n, s := range c {
 		errs = fmtErrors(s.Validate(n))
@@ -24,15 +27,16 @@ func (c Conf) Validate() (out []string, err error) {
 	return
 }
 
-type ConfSection struct {
+type ConfigSection struct {
 	Health         HealthConfig       `yaml:"health"`
 	Checker        checker.Config     `yaml:"checker"`
 	Store          store.Config       `yaml:"store"`
 	Availabilities AvailabilitiesConf `yaml:"availabilities"`
+	Rules          rules.Rules        `yaml:"rules"`
 }
 
-func Load(path string) (Conf, error) {
-	c := ConfDefaults()
+func Load(path string) (Config, error) {
+	c := ConfigDefaults()
 
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -46,9 +50,9 @@ func Load(path string) (Conf, error) {
 	return c, nil
 }
 
-func ConfDefaults() Conf {
-	c := make(Conf)
-	c["default"] = ConfSection{
+func ConfigDefaults() Config {
+	c := make(Config)
+	c[ConfigDefaultSection] = ConfigSection{
 		Health:  HealthConfigDefaults(),
 		Checker: checker.ConfigDefaults(),
 		Store:   store.ConfigDefaults(),
@@ -56,7 +60,7 @@ func ConfDefaults() Conf {
 	return c
 }
 
-func (s ConfSection) Validate(name string) (out []string, err error) {
+func (s ConfigSection) Validate(name string) (out []string, err error) {
 	var errs []string
 
 	errs = fmtErrors(s.Health.Validate())
@@ -89,9 +93,9 @@ func fmtErrors(errs []string, err error) []string {
 	return out
 }
 
-func (c Conf) Section(name string) ConfSection {
+func (c Config) Section(name string) (ConfigSection, error) {
 	if section, ok := c[name]; ok {
-		return section
+		return section, nil
 	}
-	return ConfSection{}
+	return ConfigSection{}, fmt.Errorf("Section '%s' not found", name)
 }
