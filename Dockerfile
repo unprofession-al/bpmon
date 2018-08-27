@@ -24,11 +24,7 @@ RUN set -x \
 	&& rm -rf /go \
 	&& echo "Build complete."
 
-FROM alpine
-RUN apk add --update \
-    bash \
-    curl
+FROM scratch
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /usr/bin/bpmon /bpmon
-COPY hacking/docker/entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["./entrypoint.sh"]
-EXPOSE 8910
+ENTRYPOINT ["./bpmon"]

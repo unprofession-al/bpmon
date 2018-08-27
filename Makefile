@@ -24,25 +24,17 @@ ifneq ($(GITUNTRACKEDCHANGES),)
 	GITCOMMIT := $(GITCOMMIT)-dirty
 endif
 CTIMEVAR=-X $(PKG)/version.GITCOMMIT=$(GITCOMMIT) -X $(PKG)/version.VERSION=$(VERSION)
-GO_LDFLAGS=-ldflags "-w $(CTIMEVAR)"
-GO_LDFLAGS_STATIC=-ldflags "-w $(CTIMEVAR) -extldflags -static"
+GO_LDFLAGS=-ldflags "-w $(CTIMEVAR) -s -extldflags -static"
 
 # List the GOOS and GOARCH to build
 GOOSARCHES = darwin/amd64 darwin/386 freebsd/amd64 freebsd/386 linux/arm linux/arm64 linux/amd64 linux/386 windows/amd64 windows/386
 
 .PHONY: build
-build: $(NAME) ## Builds a dynamic executable or package
-
-$(NAME): *.go VERSION.txt
+build: ## Builds a static executable
 	@echo "+ $@"
-	go build -tags "$(BUILDTAGS)" ${GO_LDFLAGS} -o $(NAME) ./$(CMD)
-
-.PHONY: static
-static: ## Builds a static executable
-	@echo "+ $@"
-	CGO_ENABLED=0 go build \
+	CGO_ENABLED=0 go build -a -installsuffix cgo\
 				-tags "$(BUILDTAGS) static_build" \
-				${GO_LDFLAGS_STATIC} -o $(NAME) ./$(CMD)
+				${GO_LDFLAGS} -o $(NAME) ./$(CMD)
 
 all: clean build fmt lint test staticcheck vet install ## Runs a clean, build, fmt, lint, test, staticcheck, vet and install
 
