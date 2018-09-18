@@ -72,12 +72,12 @@ func (a Availability) Contains(t time.Time) bool {
 	wd := t.Weekday()
 	at, ok := a[wd]
 
-	if at.AllDay {
-		return true
-	}
-
 	if !ok {
 		return false
+	}
+
+	if at.AllDay {
+		return true
 	}
 
 	for _, tRange := range a[wd].TimeRanges {
