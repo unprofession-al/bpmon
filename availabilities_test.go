@@ -140,6 +140,10 @@ func TestContains(t *testing.T) {
 			timestamp:       ParseDate("Fri 2017/03/17 09:00:00.001"),
 			inAvalilability: true,
 		},
+		{
+			timestamp:       ParseDate("Sat 2017/03/18 09:00:00.001"),
+			inAvalilability: false,
+		},
 	}
 
 	for _, test := range tests {
