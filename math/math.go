@@ -1,4 +1,4 @@
-package bpmon
+package math
 
 import (
 	"errors"
@@ -58,7 +58,7 @@ func minpercent(values []bool, minpercent float64) bool {
 	return false
 }
 
-func calculate(operation string, values []bool) (bool, error) {
+func Calculate(operation string, values []bool) (bool, error) {
 	var out bool
 
 	op, arg, err := parseOp(operation)

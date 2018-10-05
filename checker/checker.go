@@ -27,7 +27,7 @@ type Config struct {
 	Timeout       time.Duration `yaml:"timeout"`
 }
 
-func ConfigDefaults() Config {
+func Defaults() Config {
 	return Config(configDefaults)
 }
 

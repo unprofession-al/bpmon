@@ -9,7 +9,7 @@ import (
 	"github.com/justinas/alice"
 
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/configs"
+	"github.com/unprofession-al/bpmon/config"
 	wh "github.com/unprofession-al/bpmon/periphery/webhelpers"
 	"github.com/unprofession-al/bpmon/store"
 )
@@ -18,7 +18,7 @@ var bps bpmon.BusinessProcesses
 var pp store.Accessor
 var routes = make(map[string]wh.Leafs)
 
-func Setup(conf configs.AnnotateConf, bpin bpmon.BusinessProcesses, ppin store.Accessor, authHeaderName string, authHeaderValues []string) (http.Handler, error) {
+func Setup(conf config.AnnotateConfig, bpin bpmon.BusinessProcesses, ppin store.Accessor, authHeaderName string, authHeaderValues []string) (http.Handler, error) {
 	pp = ppin
 	bps = bpin
 

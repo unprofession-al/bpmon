@@ -1,4 +1,4 @@
-package bpmon
+package availabilities
 
 import (
 	"fmt"

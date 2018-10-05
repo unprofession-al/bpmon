@@ -1,4 +1,4 @@
-package bpmon
+package math
 
 import "testing"
 
@@ -35,7 +35,7 @@ var MathTestSets = []mathTestSet{
 
 func TestOperations(t *testing.T) {
 	for _, test := range MathTestSets {
-		res, _ := calculate(test.op, test.val)
+		res, _ := Calculate(test.op, test.val)
 		if res != test.res {
 			t.Errorf("Expected operation '%s' with data %v to be %v, is %v", test.op, test.val, test.res, res)
 		}
@@ -44,21 +44,21 @@ func TestOperations(t *testing.T) {
 
 func TestUnknownOperation(t *testing.T) {
 	op := "UNKNOWN"
-	_, err := calculate(op, []bool{true, true})
+	_, err := Calculate(op, []bool{true, true})
 	if err == nil {
 		t.Errorf("Unknown operation '%s' did not fail", op)
 	}
 }
 
 func TestEmptyOperation(t *testing.T) {
-	_, err := calculate("", []bool{true, true})
+	_, err := Calculate("", []bool{true, true})
 	if err == nil {
 		t.Errorf("Empty operation did not return error")
 	}
 }
 
 func TestMalformedOperation(t *testing.T) {
-	_, err := calculate("MIN 4,3", []bool{true, true})
+	_, err := Calculate("MIN 4,3", []bool{true, true})
 	if err == nil {
 		t.Errorf("Malformed operation did not return error")
 	}

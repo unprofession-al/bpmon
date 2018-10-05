@@ -1,4 +1,4 @@
-package bpmon
+package availabilities
 
 import (
 	"errors"
@@ -9,9 +9,9 @@ import (
 
 const timeformat = "15:04:05"
 
-type AvailabilitiesConf map[string]AvailabilityConf
+type AvailabilitiesConfig map[string]AvailabilityConfig
 
-func (ac AvailabilitiesConf) Parse() (Availabilities, error) {
+func (ac AvailabilitiesConfig) Parse() (Availabilities, error) {
 	a := make(Availabilities)
 	for name, daysConf := range ac {
 		availability, err := daysConf.Parse()
@@ -25,9 +25,9 @@ func (ac AvailabilitiesConf) Parse() (Availabilities, error) {
 
 type Availabilities map[string]Availability
 
-type AvailabilityConf map[string][]string
+type AvailabilityConfig map[string][]string
 
-func (ac AvailabilityConf) Parse() (Availability, error) {
+func (ac AvailabilityConfig) Parse() (Availability, error) {
 	a := make(Availability)
 	for day, tsString := range ac {
 		wd, err := toWeekday(day)

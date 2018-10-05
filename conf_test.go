@@ -3,6 +3,8 @@ package bpmon
 import (
 	"testing"
 	"time"
+
+	"github.com/unprofession-al/bpmon/availabilities"
 )
 
 var confyaml = []byte(`---
@@ -77,12 +79,12 @@ func TestParseConfUnknownSection(t *testing.T) {
 }
 
 func TestParseBP(t *testing.T) {
-	a := Availabilities{
-		"Test": Availability{
-			time.Monday: AvailabilityTime{
+	a := availabilities.Availabilities{
+		"Test": availabilities.Availability{
+			time.Monday: availabilities.AvailabilityTime{
 				AllDay: true,
 			},
-			time.Friday: AvailabilityTime{
+			time.Friday: availabilities.AvailabilityTime{
 				AllDay: true,
 			},
 		},
@@ -94,8 +96,8 @@ func TestParseBP(t *testing.T) {
 }
 
 func TestParseBPUnknownAvailability(t *testing.T) {
-	a := Availabilities{
-		"Never": Availability{},
+	a := availabilities.Availabilities{
+		"Never": availabilities.Availability{},
 	}
 	_, err := parseBP(bpconfig, a, "")
 	if err == nil {

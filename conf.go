@@ -5,28 +5,27 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/unprofession-al/bpmon/availabilities"
 	"github.com/unprofession-al/bpmon/checker"
-	"github.com/unprofession-al/bpmon/configs"
+	"github.com/unprofession-al/bpmon/config"
+	"github.com/unprofession-al/bpmon/health"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/trigger"
 
 	"gopkg.in/yaml.v2"
 )
 
 type conf struct {
-	GlobalRecipient string                `yaml:"global_recipient"`
-	Checker         checker.Config        `yaml:"checker"`
-	Store           store.Config          `yaml:"store"`
-	Availabilities  AvailabilitiesConf    `yaml:"availabilities"`
-	Trigger         Trigger               `yaml:"trigger"`
-	Health          Health                `yaml:"health"`
-	Rules           rules.Rules           `yaml:"rules"`
-	Dashboard       configs.DashboardConf `yaml:"dashboard"`
-	Annotate        configs.AnnotateConf  `yaml:"annotate"`
-}
-
-type Trigger struct {
-	Template string `yaml:"template"`
+	GlobalRecipient string                              `yaml:"global_recipient"`
+	Checker         checker.Config                      `yaml:"checker"`
+	Store           store.Config                        `yaml:"store"`
+	Availabilities  availabilities.AvailabilitiesConfig `yaml:"availabilities"`
+	Trigger         trigger.Config                      `yaml:"trigger"`
+	Health          health.Config                       `yaml:"health"`
+	Rules           rules.Rules                         `yaml:"rules"`
+	Dashboard       config.DashboardConfig              `yaml:"dashboard"`
+	Annotate        config.AnnotateConfig               `yaml:"annotate"`
 }
 
 func Configure(cfgFile, cfgSection, bpPath, bpPattern string) (conf, BusinessProcesses, error) {
@@ -94,32 +93,8 @@ func parseConf(cfg []byte, cfgSection string) (conf, error) {
 		return conf, fmt.Errorf("No section '%s' found in configuration", cfgSection)
 	}
 
-	conf.Dashboard = configs.GetDashboardConf(conf.Dashboard)
-	conf.Annotate = configs.GetAnnotateConf(conf.Annotate)
+	//conf.Dashboard = config.GetDashboardConf(conf.Dashboard)
+	//conf.Annotate = config.GetAnnotateConf(conf.Annotate)
 
 	return conf, nil
-}
-
-func parseBP(bpconf []byte, a Availabilities, gr string) (BP, error) {
-	bp := BP{}
-	err := yaml.Unmarshal(bpconf, &bp)
-	if err != nil {
-		return bp, fmt.Errorf("Error while parsing: %s", err.Error())
-	}
-
-	if bp.AvailabilityName == "" {
-		return bp, fmt.Errorf("There is no availability defined in business process config")
-	}
-
-	availability, ok := a[bp.AvailabilityName]
-	if !ok {
-		return bp, fmt.Errorf("The availability referenced '%s' does not exist", bp.AvailabilityName)
-	}
-	bp.Availability = availability
-
-	if gr != "" {
-		bp.Recipients = append(bp.Recipients, gr)
-	}
-
-	return bp, nil
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/unprofession-al/bpmon/availabilities"
 	"github.com/unprofession-al/bpmon/status"
 	"github.com/unprofession-al/bpmon/store"
 )
@@ -13,14 +14,14 @@ type bpTestSet struct {
 	status status.Status
 }
 
-var allDayLong = Availability{
-	time.Monday:    AvailabilityTime{AllDay: true},
-	time.Tuesday:   AvailabilityTime{AllDay: true},
-	time.Wednesday: AvailabilityTime{AllDay: true},
-	time.Thursday:  AvailabilityTime{AllDay: true},
-	time.Friday:    AvailabilityTime{AllDay: true},
-	time.Saturday:  AvailabilityTime{AllDay: true},
-	time.Sunday:    AvailabilityTime{AllDay: true},
+var allDayLong = availabilities.Availability{
+	time.Monday:    availabilities.AvailabilityTime{AllDay: true},
+	time.Tuesday:   availabilities.AvailabilityTime{AllDay: true},
+	time.Wednesday: availabilities.AvailabilityTime{AllDay: true},
+	time.Thursday:  availabilities.AvailabilityTime{AllDay: true},
+	time.Friday:    availabilities.AvailabilityTime{AllDay: true},
+	time.Saturday:  availabilities.AvailabilityTime{AllDay: true},
+	time.Sunday:    availabilities.AvailabilityTime{AllDay: true},
 }
 
 var BpTestSets = []bpTestSet{

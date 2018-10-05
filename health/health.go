@@ -1,64 +1,35 @@
-package bpmon
+package health
 
 import (
-	"errors"
+	"text/template"
 	"time"
 
 	"github.com/unprofession-al/bpmon/checker"
+	"github.com/unprofession-al/bpmon/math"
 	"github.com/unprofession-al/bpmon/status"
 	"github.com/unprofession-al/bpmon/store"
 )
 
-type HealthConfigDefaulted HealthConfig
-
-var defaults = HealthConfigDefaulted{
-	Template:        "{{.}}",
-	StoreRequired:   false,
-	CheckerRequired: true,
-	Responsible:     "",
-	Name:            "",
-	ID:              "bla",
-}
-
-type HealthConfig struct {
-	Template        string `yaml:"template"`
-	StoreRequired   bool   `yaml:"store_required"`
-	CheckerRequired bool   `yaml:"checker_required"`
-	Responsible     string `yaml:"responsible"`
-	Name            string `yaml:"name"`
-	ID              string `yaml:"id"`
-}
-
-func HealthConfigDefaults() HealthConfig {
-	return HealthConfig(defaults)
-}
-
-func (hc HealthConfig) Validate() ([]string, error) {
-	errs := []string{}
-	if hc.Template == "" {
-		errs = append(errs, "Field 'template' cannot be empty.")
-	}
-	if len(errs) > 0 {
-		err := errors.New("Config of 'health' has errors")
-		return errs, err
-	}
-	return errs, nil
-}
-
-func (hc *HealthConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	out := defaults
-	err := unmarshal(&out)
-	*hc = HealthConfig(out)
-	return err
-}
-
 type Health struct {
-	Template        string `yaml:"template"`
-	StoreRequired   bool   `yaml:"store_required"`
-	CheckerRequired bool   `yaml:"checker_required"`
-	Responsible     string `yaml:"responsible"`
-	Name            string `yaml:"name"`
-	ID              string `yaml:"id"`
+	Template        *template.Template
+	StoreRequired   bool
+	CheckerRequired bool
+	Responsible     string
+	Name            string
+	ID              string
+}
+
+func New(c Config) (Health, error) {
+	t, err := template.New("t1").Parse(c.Template)
+	h := Health{
+		Template:        t,
+		StoreRequired:   c.StoreRequired,
+		CheckerRequired: c.CheckerRequired,
+		Responsible:     c.Responsible,
+		Name:            c.Name,
+		ID:              c.ID,
+	}
+	return h, err
 }
 
 func (h Health) Check(c checker.Checker, s store.Accessor) *store.ResultSet {
@@ -84,7 +55,7 @@ func (h Health) Check(c checker.Checker, s store.Accessor) *store.ResultSet {
 	var statusValues []bool
 	statusValues = append(statusValues, checkerKPI.Status.Bool())
 	statusValues = append(statusValues, storeKPI.Status.Bool())
-	ok, _ := calculate("AND", statusValues)
+	ok, _ := math.Calculate("AND", statusValues)
 	rs.Status = status.FromBool(ok)
 
 	return &rs

@@ -8,6 +8,7 @@ import (
 	"github.com/unprofession-al/bpmon"
 	"github.com/unprofession-al/bpmon/checker"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
+	"github.com/unprofession-al/bpmon/health"
 	"github.com/unprofession-al/bpmon/store"
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
@@ -32,8 +33,12 @@ var healthCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		health := c.Health
-		rs := health.Check(ch, st)
+		h, err := health.New(c.Health)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		rs := h.Check(ch, st)
 
 		fmt.Println(rs.PrettyPrint(0, true, true, true))
 	},

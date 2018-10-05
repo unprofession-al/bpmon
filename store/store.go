@@ -25,7 +25,7 @@ type Config struct {
 	TLSSkipVerify bool          `yaml:"tls_skip_verify"`
 }
 
-func ConfigDefaults() Config {
+func Defaults() Config {
 	return Config(configDefaults)
 }
 
