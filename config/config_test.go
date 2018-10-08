@@ -1,4 +1,4 @@
-package bpmon
+package config
 
 import (
 	"testing"

@@ -5,11 +5,8 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
-	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/checker"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
 	"github.com/unprofession-al/bpmon/config"
-	"github.com/unprofession-al/bpmon/store"
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
@@ -36,34 +33,12 @@ var runCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		s, err := c.Section(cfgSection)
+		s, i, r, b, p, err := fromSection(c, cfgSection)
 		if err != nil {
 			msg := fmt.Sprintf("Could not read section '%s' from file '%s':  %s", cfgSection, cfgFile, err.Error())
 			log.Fatal(msg)
 		}
 
-		i, err := checker.New(s.Checker)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		r := i.DefaultRules()
-		err = r.Merge(s.Rules)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		a, err := s.Availabilities.Parse()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		b, err := bpmon.LoadBP(bpPath, bpPattern, a, s.GlobalRecipient)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		p, _ := store.New(s.Store)
 		for _, bp := range b {
 			rs := bp.Status(i, p, r)
 			if s.Store.GetLastStatus {
