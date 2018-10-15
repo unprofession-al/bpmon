@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	"github.com/unprofession-al/bpmon/availabilities"
 	"github.com/unprofession-al/bpmon/checker"
@@ -30,44 +31,70 @@ func (c Config) Validate() (out []string, err error) {
 	return
 }
 
-type ConfigSection struct {
-	GlobalRecipient string                              `yaml:"global_recipient"`
-	Health          health.Config                       `yaml:"health"`
-	Trigger         trigger.Config                      `yaml:"trigger"`
-	Checker         checker.Config                      `yaml:"checker"`
-	Store           store.Config                        `yaml:"store"`
-	Availabilities  availabilities.AvailabilitiesConfig `yaml:"availabilities"`
-	Rules           rules.Rules                         `yaml:"rules"`
-	Dashboard       DashboardConfig                     `yaml:"dashboard"`
-	Annotate        AnnotateConfig                      `yaml:"annotate"`
-}
-
-func Load(path string) (Config, error) {
-	c := Config{}
-
+func New(path string, inject bool) (c Config, raw []byte, err error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return c, fmt.Errorf("Error while reading configuration file '%s': %s", path, err.Error())
+		return c, data, fmt.Errorf("Error while reading configuration file '%s': %s", path, err.Error())
 	}
 
-	err = yaml.Unmarshal(data, &c)
+	if inject {
+		key := "injected_defaults_" + time.Now().Format("20060102150405")
+		raw, err = injectDefaults(data, key)
+		if err != nil {
+			return c, raw, fmt.Errorf("Error while injection defaults: %s", err.Error())
+		}
+	} else {
+		raw = data
+	}
+
+	err = yaml.Unmarshal(raw, &c)
 	if err != nil {
-		return c, fmt.Errorf("Error while unmarshalling configuration from yaml: %s", err.Error())
+		return c, raw, fmt.Errorf("Error while unmarshalling configuration from yaml: %s", err.Error())
 	}
-	return c, nil
+	return c, raw, nil
 }
 
-func (c *ConfigSection) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	// ConfigSection Struct needs to be aliased in order to avoid an infinite recursiv
-	// loop while unmarshalling
-	type cs ConfigSection
-	out := cs(Defaults())
-	err := unmarshal(&out)
-	*c = ConfigSection(out)
-	return err
+func ExampleYAML() []byte {
+	section := ConfigDefaultSection
+	defaultData := Config{section: defaultConfigSection()}
+	uncommented, _ := yaml.Marshal(defaultData)
+	commented := injectComments(uncommented, section)
+	return commented
 }
 
-func Defaults() ConfigSection {
+type ConfigSection struct {
+	// global_recipient will be added to the repicient list af all BP
+	GlobalRecipient string `yaml:"global_recipient"`
+
+	// health ... TODO
+	Health health.Config `yaml:"health"`
+
+	// If a service is failed, this command (rendered as a golang template) is
+	// printed to the stdout. This allows to easily wrap BPMON into an eval
+	// statement in your shell script.
+	Trigger trigger.Config `yaml:"trigger"`
+
+	// First BPMON needs to have access to your Icinga2 API. Learn more on by reading
+	// https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
+	Checker checker.Config `yaml:"checker"`
+
+	// Also the connection to the InfluxDB is required in order to persist the
+	// state for reporting and such
+	Store store.Config `yaml:"store"`
+
+	// Define your office hours et al. according to your service level
+	// agreements (SLA). You can later reference them in your BP definitions.
+	Availabilities availabilities.AvailabilitiesConfig `yaml:"availabilities"`
+
+	// Extend the default rules; in that case: Do not run the alarming command
+	// if a critical service is aready aknowledged to avoid alarm spamming.
+	Rules rules.Rules `yaml:"rules"`
+
+	Dashboard DashboardConfig `yaml:"dashboard"`
+	Annotate  AnnotateConfig  `yaml:"annotate"`
+}
+
+func defaultConfigSection() ConfigSection {
 	return ConfigSection{
 		Health:    health.Defaults(),
 		Trigger:   trigger.Defaults(),

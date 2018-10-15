@@ -14,7 +14,7 @@ var writeCmd = &cobra.Command{
 	Use:   "write",
 	Short: "Insert data into InfluxDB",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, err := config.Load(cfgFile)
+		c, _, err := config.New(cfgFile, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}

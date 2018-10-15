@@ -54,13 +54,6 @@ func (c Config) Validate() ([]string, error) {
 	return errs, nil
 }
 
-func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	out := configDefaults
-	err := unmarshal(&out)
-	*c = Config(out)
-	return err
-}
-
 // Checker interface needs to be implemented in order to provide a Checker
 // backend such as Icinga.
 type Checker interface {

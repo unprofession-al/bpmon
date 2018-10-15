@@ -24,13 +24,3 @@ func (ac AnnotateConfig) AnnotateValidate() ([]string, error) {
 	}
 	return errs, nil
 }
-
-func (ac *AnnotateConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	// Config Struct needs to be aliased in order to avoid an infinite recursiv
-	// loop while unmarshalling
-	type cd AnnotateConfig
-	out := cd(AnnotateDefaults())
-	err := unmarshal(&out)
-	*ac = AnnotateConfig(out)
-	return err
-}

@@ -217,7 +217,7 @@ NlvKUOxRwnFeFFijPzOq5lhywJTDSyaG2ZSz7BxXuaAMT61y30sfQKeojn1Uph7g5F6V8W+os/nePD43
 	"/main.js": {
 		local:   "static/main.js",
 		size:    2950,
-		modtime: 1520511554,
+		modtime: 1522847014,
 		compressed: `
 H4sIAAAAAAAC/+xVXW/bNhR9z6+4YAyYmlXa2bA9OFWGAulDh6LplvRpGAJWvLK4SJeaSNnxWv/3gZTk
 yY48ZMNQYMD0Yov34xyS5x5lDaVOG4LCSPV6jeQsj+DTGQDARKzQ/XB7846zuaz0fH0x/1jNMSQxmMFG
@@ -240,7 +240,7 @@ ZB/skwfK9MsxdPocstek3Z73cCs+7Y8AAAD//76WoVOGCwAA
 	"/style.css": {
 		local:   "static/style.css",
 		size:    1143,
-		modtime: 1520512692,
+		modtime: 1522847014,
 		compressed: `
 H4sIAAAAAAAC/4xT247TQAx971dYQkhQkW4aWHY7/RpPxklGO2sPE4d2Qfw72lxK2iYSebTnXGyf7DxX
 8gV2inULvzcAAPKTUhXkZKDxzhEf+2pE5zzXWfJ1owb2eTxfN1SigX1xW7aiKq9T589m0yuOUifvtDGw

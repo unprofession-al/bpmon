@@ -55,13 +55,6 @@ func (c Config) Validate() ([]string, error) {
 	return errs, nil
 }
 
-func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	out := configDefaults
-	err := unmarshal(&out)
-	*c = Config(out)
-	return err
-}
-
 var (
 	sMu sync.Mutex
 	s   = make(map[string]func(Config) (Accessor, error))

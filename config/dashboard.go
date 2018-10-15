@@ -24,13 +24,3 @@ func (dc DashboardConfig) DashboardValidate() ([]string, error) {
 	}
 	return errs, nil
 }
-
-func (dc *DashboardConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	// Config Struct needs to be aliased in order to avoid an infinite recursiv
-	// loop while unmarshalling
-	type cd DashboardConfig
-	out := cd(DashboardDefaults())
-	err := unmarshal(&out)
-	*dc = DashboardConfig(out)
-	return err
-}

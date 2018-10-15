@@ -13,11 +13,12 @@ import (
 )
 
 var (
-	cfgFile    string
-	cfgSection string
-	bpPath     string
-	bpPattern  string
-	verbose    bool
+	cfgFile        string
+	cfgSection     string
+	bpPath         string
+	bpPattern      string
+	verbose        bool
+	injectDefaults bool
 )
 
 var RootCmd = &cobra.Command{
@@ -36,6 +37,7 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&bpPath, "bp", "b", "/etc/bpmon/bp.d", "path to business process configuration files")
 	RootCmd.PersistentFlags().StringVarP(&bpPattern, "pattern", "p", "*.yaml", "pattern of business process configuration files to process")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", true, "print log output")
+	RootCmd.PersistentFlags().BoolVarP(&injectDefaults, "defaults", "d", true, "inject defaults in main config file")
 	RootCmd.AddCommand(betaCmd)
 }
 

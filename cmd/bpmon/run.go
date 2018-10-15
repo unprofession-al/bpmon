@@ -20,7 +20,7 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "Run all business process checks and print to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, err := config.Load(cfgFile)
+		c, _, err := config.New(cfgFile, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}
