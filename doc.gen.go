@@ -8,12 +8,12 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
-	"html/template"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"text/template"
 	"time"
 )
 

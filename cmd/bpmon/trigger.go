@@ -3,8 +3,8 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"html/template"
 	"log"
+	"text/template"
 
 	"github.com/spf13/cobra"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
