@@ -3,13 +3,73 @@ package bpmon
 import (
 	"crypto/sha256"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"time"
 
+	"github.com/unprofession-al/bpmon/availabilities"
 	"github.com/unprofession-al/bpmon/checker"
+	"github.com/unprofession-al/bpmon/math"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/status"
 	"github.com/unprofession-al/bpmon/store"
+	yaml "gopkg.in/yaml.v2"
 )
+
+func LoadBP(bpPath string, bpPattern string, a availabilities.Availabilities, gr string) (BusinessProcesses, error) {
+	var bps BusinessProcesses
+	if bpPath == "" {
+		return bps, nil
+	}
+	files, err := ioutil.ReadDir(bpPath)
+	if err != nil {
+		return bps, fmt.Errorf("Error while reading business configuration files from '%s': %s", bpPath, err.Error())
+	}
+	for _, f := range files {
+		match, err := filepath.Match(bpPattern, f.Name())
+		if err != nil {
+			return bps, fmt.Errorf("Error while matching file pattern '%s' in '%s': %s", bpPattern, bpPath, err.Error())
+		}
+		if !match {
+			continue
+		}
+		file, err := ioutil.ReadFile(bpPath + "/" + f.Name())
+		if err != nil {
+			return bps, fmt.Errorf("Error while reading business process %s/%s: %s", bpPath, f.Name(), err.Error())
+		}
+		bp, err := parseBP(file, a, gr)
+		if err != nil {
+			return bps, fmt.Errorf("Error while parsing business process%s/%s: %s", bpPath, f.Name(), err.Error())
+		}
+		bps = append(bps, bp)
+	}
+
+	return bps, nil
+}
+
+func parseBP(bpconf []byte, a availabilities.Availabilities, gr string) (BP, error) {
+	bp := BP{}
+	err := yaml.Unmarshal(bpconf, &bp)
+	if err != nil {
+		return bp, fmt.Errorf("Error while parsing: %s", err.Error())
+	}
+
+	if bp.AvailabilityName == "" {
+		return bp, fmt.Errorf("There is no availability defined in business process config")
+	}
+
+	availability, ok := a[bp.AvailabilityName]
+	if !ok {
+		return bp, fmt.Errorf("The availability referenced '%s' does not exist", bp.AvailabilityName)
+	}
+	bp.Availability = availability
+
+	if gr != "" {
+		bp.Recipients = append(bp.Recipients, gr)
+	}
+
+	return bp, nil
+}
 
 // BusinessProcesses keepes a list of BusinessProcess.
 type BusinessProcesses []BP
@@ -47,13 +107,13 @@ func (bps BusinessProcesses) GetByRecipients(recipients []string) BusinessProces
 }
 
 type BP struct {
-	Name             string       `yaml:"name"`
-	ID               string       `yaml:"id"`
-	Kpis             []KPI        `yaml:"kpis"`
-	AvailabilityName string       `yaml:"availability"`
-	Availability     Availability `yaml:"-"`
-	Responsible      string       `yaml:"responsible"`
-	Recipients       []string     `yaml:"recipients"`
+	Name             string                      `yaml:"name"`
+	ID               string                      `yaml:"id"`
+	Kpis             []KPI                       `yaml:"kpis"`
+	AvailabilityName string                      `yaml:"availability"`
+	Availability     availabilities.Availability `yaml:"-"`
+	Responsible      string                      `yaml:"responsible"`
+	Recipients       []string                    `yaml:"recipients"`
 }
 
 func (bp BP) Status(chk checker.Checker, pp store.Accessor, r rules.Rules) store.ResultSet {
@@ -90,7 +150,7 @@ func (bp BP) Status(chk checker.Checker, pp store.Accessor, r rules.Rules) store
 		}
 	}
 
-	ok, _ := calculate("AND", calcValues)
+	ok, _ := math.Calculate("AND", calcValues)
 	rs.Status = status.FromBool(ok)
 	rs.Was = status.StatusUnknown
 	rs.StatusChanged = false
@@ -147,7 +207,7 @@ func (k KPI) Status(parentTags map[store.Kind]string, chk checker.Checker, pp st
 		}
 	}
 
-	ok, err := calculate(k.Operation, calcValues)
+	ok, err := math.Calculate(k.Operation, calcValues)
 	rs.Status = status.FromBool(ok)
 	rs.Was = status.StatusUnknown
 	rs.StatusChanged = false

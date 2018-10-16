@@ -5,10 +5,9 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
-	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/checker"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/config"
+	"github.com/unprofession-al/bpmon/health"
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
@@ -16,24 +15,31 @@ var healthCmd = &cobra.Command{
 	Use:   "health",
 	Short: "Check health of store and checker",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := bpmon.Configure(cfgFile, cfgSection, bpPath, bpPattern)
+		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
 		if err != nil {
-			msg := fmt.Sprintf("Could not read section %s form file %s, error was %s", cfgSection, cfgFile, err.Error())
+			fmt.Println(err)
+		}
+
+		errs, err := c.Validate()
+		if err != nil {
+			for _, msg := range errs {
+				fmt.Println(msg)
+			}
+			log.Fatal(err)
+		}
+
+		s, i, _, _, p, err := fromSection(c, cfgSection)
+		if err != nil {
+			msg := fmt.Sprintf("Could not read section '%s' from file '%s':  %s", cfgSection, cfgFile, err.Error())
 			log.Fatal(msg)
 		}
 
-		ch, err := checker.New(c.Checker)
+		h, err := health.New(s.Health)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		st, err := store.New(c.Store)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		health := c.Health
-		rs := health.Check(ch, st)
+		rs := h.Check(i, p)
 
 		fmt.Println(rs.PrettyPrint(0, true, true, true))
 	},

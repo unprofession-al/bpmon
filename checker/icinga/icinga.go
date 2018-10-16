@@ -21,7 +21,7 @@ func init() {
 }
 
 // Setup configures the 'Checker' implementation and returns it.
-func Setup(conf checker.Conf) (checker.Checker, error) {
+func Setup(conf checker.Config) (checker.Checker, error) {
 	u, err := url.Parse(conf.Connection)
 	if err != nil {
 		return nil, err
@@ -34,6 +34,7 @@ func Setup(conf checker.Conf) (checker.Checker, error) {
 		baseURL:       baseURL,
 		pass:          password,
 		user:          username,
+		timeout:       conf.Timeout,
 		tlsSkipVerify: conf.TLSSkipVerify,
 	}
 
@@ -153,6 +154,7 @@ type api struct {
 	baseURL       string
 	user          string
 	pass          string
+	timeout       time.Duration
 	tlsSkipVerify bool
 }
 
@@ -188,7 +190,10 @@ func (a api) get(url string) ([]byte, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: a.tlsSkipVerify},
 	}
-	client := &http.Client{Transport: tr}
+	client := &http.Client{
+		Transport: tr,
+		Timeout:   a.timeout,
+	}
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return body, err
