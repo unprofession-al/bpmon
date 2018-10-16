@@ -22,7 +22,10 @@ type Config struct {
 	SaveOK        []string      `yaml:"save_ok"`
 	GetLastStatus bool          `yaml:"get_last_status"`
 	Debug         bool          `yaml:"debug"`
-	TLSSkipVerify bool          `yaml:"tls_skip_verify"`
+
+	// BPMON verifies if a https connection is trusted. If you wont to trust a
+	// connection with an invalid certificate you have to set this to true
+	TLSSkipVerify bool `yaml:"tls_skip_verify"`
 }
 
 func Defaults() Config {

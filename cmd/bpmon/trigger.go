@@ -18,7 +18,7 @@ var triggerCmd = &cobra.Command{
 	Use:   "trigger",
 	Short: "Run all business process checks and trigger a custom command if issue occure",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := config.New(cfgFile, injectDefaults)
+		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}

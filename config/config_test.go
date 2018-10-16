@@ -2,105 +2,30 @@ package config
 
 import (
 	"testing"
-	"time"
 
-	"github.com/unprofession-al/bpmon/availabilities"
+	"github.com/kylelemons/godebug/pretty"
 )
 
-var confyaml = []byte(`---
-default: &default
-  icinga:
-    server: icinca.example.com
-    port: 5665
-    pass: pa55w0rd
-    user: bpmon
-    proto: https
-  influx:
-    connection:
-      server: influx.example.com
-      port: 8086
-      proto: http
-    database: bpmon
-    save_ok: [ BP ]
-  availabilities:
-    7x24:
-      monday:    [ "allday" ]
-      tuesday:   [ "allday" ]
-      wednesday: [ "allday" ]
-      thursday:  [ "allday" ]
-      friday:    [ "allday" ]
-      saturday:  [ "allday" ]
-      sunday:    [ "allday" ]
-test:
-  <<: *default
-  influx:
-    database: bpmon_test
-  availabilities:
-    9to5:
-      monday:    [ "09:00:00-12:00:00", "13:00:00-17:00:00" ]
-      tuesday:   [ "09:00:00-12:00:00", "13:00:00-17:00:00" ]
-      wednesday: [ "09:00:00-12:00:00", "13:00:00-17:00:00" ]
-      thursday:  [ "09:00:00-12:00:00", "13:00:00-17:00:00" ]
-      friday:    [ "09:00:00-12:00:00", "13:00:00-17:00:00" ]
+func TestDefaultedConfig(t *testing.T) {
+	c, _, err := New(InputData, true)
+	if err != nil {
+		t.Errorf("Loading string failed with error: %s", err.Error())
+	}
+
+	for section, data := range ExpectedResultsDefaulted {
+		t.Run(section, func(t *testing.T) {
+
+			if diff := pretty.Compare(data, c[section]); diff != "" {
+				t.Errorf("Comparing section '%s' failed (-got +want):\n%s", section, diff)
+			}
+		})
+	}
+}
+
+var InputData = []byte(`---
+defaults:
 `)
 
-var bpconfig = []byte(`---
-name: Test BP
-id: testbp
-availability: Test
-kpis:
-  - name: Test KPI
-    id: testkpi
-    operation: AND
-    services:
-      - host: test.example.com
-        service: svc0
-      - host: test.example.com
-        service: svc1
-      - host: test.example.com
-        service: svc2
-`)
-
-func TestParseConf(t *testing.T) {
-	c, err := parseConf(confyaml, "test")
-	if err != nil {
-		t.Errorf("Could not parse config: %s", err.Error())
-	}
-	if _, ok := c.Availabilities["9to5"]; !ok {
-		t.Errorf("Config not parsed correctly")
-	}
-}
-
-func TestParseConfUnknownSection(t *testing.T) {
-	_, err := parseConf(confyaml, "foo")
-	if err == nil {
-		t.Errorf("Found section 'foo' that does not exist")
-	}
-}
-
-func TestParseBP(t *testing.T) {
-	a := availabilities.Availabilities{
-		"Test": availabilities.Availability{
-			time.Monday: availabilities.AvailabilityTime{
-				AllDay: true,
-			},
-			time.Friday: availabilities.AvailabilityTime{
-				AllDay: true,
-			},
-		},
-	}
-	_, err := parseBP(bpconfig, a, "")
-	if err != nil {
-		t.Errorf("Could not parse BP config: %s", err.Error())
-	}
-}
-
-func TestParseBPUnknownAvailability(t *testing.T) {
-	a := availabilities.Availabilities{
-		"Never": availabilities.Availability{},
-	}
-	_, err := parseBP(bpconfig, a, "")
-	if err == nil {
-		t.Errorf("Found availability 'Test' that does not exist")
-	}
+var ExpectedResultsDefaulted = Config{
+	"defaults": defaultConfigSection(),
 }

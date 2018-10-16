@@ -21,10 +21,24 @@ var (
 // passed to the store implementatinon itself via the registerd setup function.
 // The field 'Kind' is used to determine which provider is requested.
 type Config struct {
-	Kind          string        `yaml:"kind"`
-	Connection    string        `yaml:"connection"`
-	TLSSkipVerify bool          `yaml:"tls_skip_verify"`
-	Timeout       time.Duration `yaml:"timeout"`
+	// kind defines the checker implementation to be used by BPMON. Currently
+	// only icinga is implemented.
+	Kind string `yaml:"kind"`
+
+	// The connection string describes how to connect to your Icinga API. The
+	// string needs to follow the pattern:
+	//   [protocol]://[user]:[passwd]@[hostname]:[port]
+	Connection string `yaml:"connection"`
+
+	// BPMON verifies if a https connection is trusted. If you wont to trust a
+	// connection with an invalid certificate you have to set this to true.
+	TLSSkipVerify bool `yaml:"tls_skip_verify"`
+
+	// timeout defines how long BPMON waits for each request to the checker to
+	// recieve a response. The string is parsed as a goland duration, refer to
+	// its documentation for more details:
+	//   https://golang.org/pkg/time/#ParseDuration
+	Timeout time.Duration `yaml:"timeout"`
 }
 
 func Defaults() Config {

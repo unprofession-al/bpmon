@@ -15,7 +15,7 @@ var healthCmd = &cobra.Command{
 	Use:   "health",
 	Short: "Check health of store and checker",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := config.New(cfgFile, injectDefaults)
+		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}

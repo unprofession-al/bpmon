@@ -31,12 +31,15 @@ func (c Config) Validate() (out []string, err error) {
 	return
 }
 
-func New(path string, inject bool) (c Config, raw []byte, err error) {
+func NewFromFile(path string, inject bool) (c Config, raw []byte, err error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return c, data, fmt.Errorf("Error while reading configuration file '%s': %s", path, err.Error())
 	}
+	return New(data, inject)
+}
 
+func New(data []byte, inject bool) (c Config, raw []byte, err error) {
 	if inject {
 		key := "injected_defaults_" + time.Now().Format("20060102150405")
 		raw, err = injectDefaults(data, key)
@@ -54,12 +57,14 @@ func New(path string, inject bool) (c Config, raw []byte, err error) {
 	return c, raw, nil
 }
 
-func ExampleYAML() []byte {
+func ExampleYAML(inject bool) []byte {
 	section := ConfigDefaultSection
 	defaultData := Config{section: defaultConfigSection()}
-	uncommented, _ := yaml.Marshal(defaultData)
-	commented := injectComments(uncommented, section)
-	return commented
+	example, _ := yaml.Marshal(defaultData)
+	if inject {
+		example = injectComments(example, section)
+	}
+	return example
 }
 
 type ConfigSection struct {

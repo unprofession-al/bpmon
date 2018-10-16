@@ -16,10 +16,21 @@ agreements (SLA). You can later reference them in your BP definitions.
 	doc[section+".checker"] = `First BPMON needs to have access to your Icinga2 API. Learn more on by reading
 https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
 `
-	doc[section+".checker.connection"] = ``
-	doc[section+".checker.kind"] = ``
-	doc[section+".checker.timeout"] = ``
-	doc[section+".checker.tls_skip_verify"] = ``
+	doc[section+".checker.connection"] = `The connection string describes how to connect to your Icinga API. The
+string needs to follow the pattern:
+  [protocol]://[user]:[passwd]@[hostname]:[port]
+`
+	doc[section+".checker.kind"] = `kind defines the checker implementation to be used by BPMON. Currently
+only icinga is implemented.
+`
+	doc[section+".checker.timeout"] = `timeout defines how long BPMON waits for each request to the checker to
+recieve a response. The string is parsed as a goland duration, refer to
+its documentation for more details:
+  https://golang.org/pkg/time/#ParseDuration
+`
+	doc[section+".checker.tls_skip_verify"] = `BPMON verifies if a https connection is trusted. If you wont to trust a
+connection with an invalid certificate you have to set this to true.
+`
 	doc[section+".dashboard"] = ``
 	doc[section+".dashboard.listener"] = ``
 	doc[section+".dashboard.static"] = ``
@@ -45,7 +56,9 @@ state for reporting and such
 	doc[section+".store.kind"] = ``
 	doc[section+".store.save_ok"] = ``
 	doc[section+".store.timeout"] = ``
-	doc[section+".store.tls_skip_verify"] = ``
+	doc[section+".store.tls_skip_verify"] = `BPMON verifies if a https connection is trusted. If you wont to trust a
+connection with an invalid certificate you have to set this to true
+`
 	doc[section+".trigger"] = `If a service is failed, this command (rendered as a golang template) is
 printed to the stdout. This allows to easily wrap BPMON into an eval
 statement in your shell script.

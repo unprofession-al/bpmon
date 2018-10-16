@@ -21,7 +21,7 @@ var annotateCmd = &cobra.Command{
 	Use:   "annotate",
 	Short: "Run Web UI to annotate events",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := config.New(cfgFile, injectDefaults)
+		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}

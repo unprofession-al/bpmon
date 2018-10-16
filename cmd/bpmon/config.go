@@ -20,7 +20,7 @@ var configPrintCmd = &cobra.Command{
 	Use:   "print",
 	Short: "Print the given configurantion section as interpreted by BPMON to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := config.New(cfgFile, injectDefaults)
+		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -47,11 +47,15 @@ var configPrintCmd = &cobra.Command{
 	},
 }
 
+var (
+	configInitComments bool
+)
+
 var configInitCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Print a configurantion with default values and comments to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		out := config.ExampleYAML()
+		out := config.ExampleYAML(configInitComments)
 		fmt.Println(string(out))
 	},
 }
@@ -60,7 +64,7 @@ var configRawCmd = &cobra.Command{
 	Use:   "raw",
 	Short: "Print the configuration with its injected defaults to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		_, raw, err := config.New(cfgFile, injectDefaults)
+		_, raw, err := config.NewFromFile(cfgFile, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -72,5 +76,6 @@ func init() {
 	RootCmd.AddCommand(configCmd)
 	configCmd.AddCommand(configPrintCmd)
 	configCmd.AddCommand(configInitCmd)
+	configInitCmd.PersistentFlags().BoolVarP(&configInitComments, "comments", "", true, "print documentation comments")
 	configCmd.AddCommand(configRawCmd)
 }

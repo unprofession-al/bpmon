@@ -1,35 +1,37 @@
 {
 	"ImportPath": "github.com/unprofession-al/bpmon/cmd/bpmon",
-	"GoVersion": "go1.8",
+	"GoVersion": "go1.11",
 	"GodepVersion": "v79",
 	"Deps": [
 		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
+			"Comment": "v1.0",
 			"Rev": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75"
 		},
 		{
 			"ImportPath": "github.com/influxdata/influxdb/client/v2",
-			"Comment": "v1.1.0-223-g8c2cfd14",
-			"Rev": "8c2cfd14af2511580277ddfd7a834b6aaa5f19ab"
+			"Comment": "v1.4.0rc0-49-g97ab61add",
+			"Rev": "97ab61addb82be06cc4174c3fc6d83bbfe37aeca"
 		},
 		{
 			"ImportPath": "github.com/influxdata/influxdb/models",
-			"Comment": "v1.1.0-223-g8c2cfd14",
-			"Rev": "8c2cfd14af2511580277ddfd7a834b6aaa5f19ab"
+			"Comment": "v1.4.0rc0-49-g97ab61add",
+			"Rev": "97ab61addb82be06cc4174c3fc6d83bbfe37aeca"
 		},
 		{
 			"ImportPath": "github.com/influxdata/influxdb/pkg/escape",
-			"Comment": "v1.1.0-223-g8c2cfd14",
-			"Rev": "8c2cfd14af2511580277ddfd7a834b6aaa5f19ab"
+			"Comment": "v1.4.0rc0-49-g97ab61add",
+			"Rev": "97ab61addb82be06cc4174c3fc6d83bbfe37aeca"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-colorable",
-			"Comment": "v0.0.6-9-gd228849",
-			"Rev": "d228849504861217f796da67fae4f6e347643f15"
+			"Comment": "v0.0.9-8-g6fcc0c1",
+			"Rev": "6fcc0c1fd9b620311d821b106a400b35dc95c497"
 		},
 		{
 			"ImportPath": "github.com/mattn/go-isatty",
-			"Rev": "30a891c33c7cde7b02a981314b4228ec99380cca"
+			"Comment": "v0.0.3-7-g6ca4dbf",
+			"Rev": "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
 		},
 		{
 			"ImportPath": "github.com/mgutz/ansi",
@@ -37,19 +39,22 @@
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",
-			"Rev": "1dd5ff2e11b6dca62fdcb275eb804b94607d8b06"
+			"Comment": "v0.0.3-7-g8d114be",
+			"Rev": "8d114be902bc9f08717804830a55c48378108a28"
 		},
 		{
 			"ImportPath": "github.com/spf13/pflag",
-			"Rev": "25f8b5b07aece3207895bf19f7ab517eb3b22a40"
+			"Comment": "v1.0.3",
+			"Rev": "298182f68c66c05229eb03ac171abe6e309ee79a"
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
-			"Rev": "d75a52659825e75fff6158388dddc6a5b04f9ba5"
+			"Rev": "fa43e7bc11baaae89f3f902b2b4d832b68234844"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",
-			"Rev": "a5b47d31c556af34a302ce5d659e6fea44d90de0"
+			"Comment": "v2.2.1",
+			"Rev": "5420a8b6744d3b0345ab293f6fcba19c978f1183"
 		}
 	]
 }
