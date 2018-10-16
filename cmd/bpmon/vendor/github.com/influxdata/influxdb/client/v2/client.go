@@ -7,9 +7,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
+	"mime"
 	"net/http"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/influxdata/influxdb/models"
@@ -321,7 +325,7 @@ func (p *Point) PrecisionString(precison string) string {
 
 // Name returns the measurement name of the point.
 func (p *Point) Name() string {
-	return p.pt.Name()
+	return string(p.pt.Name())
 }
 
 // Tags returns the tags associated with the point.
@@ -405,6 +409,8 @@ type Query struct {
 	Command    string
 	Database   string
 	Precision  string
+	Chunked    bool
+	ChunkSize  int
 	Parameters map[string]interface{}
 }
 
@@ -491,6 +497,12 @@ func (c *client) Query(q Query) (*Response, error) {
 	params.Set("q", q.Command)
 	params.Set("db", q.Database)
 	params.Set("params", string(jsonParameters))
+	if q.Chunked {
+		params.Set("chunked", "true")
+		if q.ChunkSize > 0 {
+			params.Set("chunk_size", strconv.Itoa(q.ChunkSize))
+		}
+	}
 
 	if q.Precision != "" {
 		params.Set("epoch", q.Precision)
@@ -503,24 +515,121 @@ func (c *client) Query(q Query) (*Response, error) {
 	}
 	defer resp.Body.Close()
 
-	var response Response
-	dec := json.NewDecoder(resp.Body)
-	dec.UseNumber()
-	decErr := dec.Decode(&response)
+	// If we lack a X-Influxdb-Version header, then we didn't get a response from influxdb
+	// but instead some other service. If the error code is also a 500+ code, then some
+	// downstream loadbalancer/proxy/etc had an issue and we should report that.
+	if resp.Header.Get("X-Influxdb-Version") == "" && resp.StatusCode >= http.StatusInternalServerError {
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil || len(body) == 0 {
+			return nil, fmt.Errorf("received status code %d from downstream server", resp.StatusCode)
+		}
 
-	// ignore this error if we got an invalid status code
-	if decErr != nil && decErr.Error() == "EOF" && resp.StatusCode != http.StatusOK {
-		decErr = nil
+		return nil, fmt.Errorf("received status code %d from downstream server, with response body: %q", resp.StatusCode, body)
 	}
-	// If we got a valid decode error, send that back
-	if decErr != nil {
-		return nil, fmt.Errorf("unable to decode json: received status code %d err: %s", resp.StatusCode, decErr)
+
+	// If we get an unexpected content type, then it is also not from influx direct and therefore
+	// we want to know what we received and what status code was returned for debugging purposes.
+	if cType, _, _ := mime.ParseMediaType(resp.Header.Get("Content-Type")); cType != "application/json" {
+		// Read up to 1kb of the body to help identify downstream errors and limit the impact of things
+		// like downstream serving a large file
+		body, err := ioutil.ReadAll(io.LimitReader(resp.Body, 1024))
+		if err != nil || len(body) == 0 {
+			return nil, fmt.Errorf("expected json response, got %q, with status: %v", cType, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf("expected json response, got %q, with status: %v and response body: %q", cType, resp.StatusCode, body)
 	}
+
+	var response Response
+	if q.Chunked {
+		cr := NewChunkedResponse(resp.Body)
+		for {
+			r, err := cr.NextResponse()
+			if err != nil {
+				// If we got an error while decoding the response, send that back.
+				return nil, err
+			}
+
+			if r == nil {
+				break
+			}
+
+			response.Results = append(response.Results, r.Results...)
+			if r.Err != "" {
+				response.Err = r.Err
+				break
+			}
+		}
+	} else {
+		dec := json.NewDecoder(resp.Body)
+		dec.UseNumber()
+		decErr := dec.Decode(&response)
+
+		// ignore this error if we got an invalid status code
+		if decErr != nil && decErr.Error() == "EOF" && resp.StatusCode != http.StatusOK {
+			decErr = nil
+		}
+		// If we got a valid decode error, send that back
+		if decErr != nil {
+			return nil, fmt.Errorf("unable to decode json: received status code %d err: %s", resp.StatusCode, decErr)
+		}
+	}
+
 	// If we don't have an error in our json response, and didn't get statusOK
 	// then send back an error
 	if resp.StatusCode != http.StatusOK && response.Error() == nil {
-		return &response, fmt.Errorf("received status code %d from server",
-			resp.StatusCode)
+		return &response, fmt.Errorf("received status code %d from server", resp.StatusCode)
 	}
+	return &response, nil
+}
+
+// duplexReader reads responses and writes it to another writer while
+// satisfying the reader interface.
+type duplexReader struct {
+	r io.Reader
+	w io.Writer
+}
+
+func (r *duplexReader) Read(p []byte) (n int, err error) {
+	n, err = r.r.Read(p)
+	if err == nil {
+		r.w.Write(p[:n])
+	}
+	return n, err
+}
+
+// ChunkedResponse represents a response from the server that
+// uses chunking to stream the output.
+type ChunkedResponse struct {
+	dec    *json.Decoder
+	duplex *duplexReader
+	buf    bytes.Buffer
+}
+
+// NewChunkedResponse reads a stream and produces responses from the stream.
+func NewChunkedResponse(r io.Reader) *ChunkedResponse {
+	resp := &ChunkedResponse{}
+	resp.duplex = &duplexReader{r: r, w: &resp.buf}
+	resp.dec = json.NewDecoder(resp.duplex)
+	resp.dec.UseNumber()
+	return resp
+}
+
+// NextResponse reads the next line of the stream and returns a response.
+func (r *ChunkedResponse) NextResponse() (*Response, error) {
+	var response Response
+
+	if err := r.dec.Decode(&response); err != nil {
+		if err == io.EOF {
+			return nil, nil
+		}
+		// A decoding error happened. This probably means the server crashed
+		// and sent a last-ditch error message to us. Ensure we have read the
+		// entirety of the connection to get any remaining error text.
+		io.Copy(ioutil.Discard, r.duplex)
+		return nil, errors.New(strings.TrimSpace(r.buf.String()))
+	}
+
+	r.buf.Reset()
 	return &response, nil
 }
