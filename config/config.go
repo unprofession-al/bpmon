@@ -96,7 +96,6 @@ type ConfigSection struct {
 	Rules rules.Rules `yaml:"rules"`
 
 	Dashboard DashboardConfig `yaml:"dashboard"`
-	Annotate  AnnotateConfig  `yaml:"annotate"`
 }
 
 func defaultConfigSection() ConfigSection {
@@ -106,7 +105,6 @@ func defaultConfigSection() ConfigSection {
 		Checker:   checker.Defaults(),
 		Store:     store.Defaults(),
 		Dashboard: DashboardDefaults(),
-		Annotate:  AnnotateDefaults(),
 	}
 }
 

@@ -112,25 +112,11 @@ type Accessor interface {
 	// provided all spans will be returned.
 	GetSpans(input ResultSet, start time.Time, end time.Time, interval time.Duration, statusRequested []status.Status) ([]Span, error)
 
-	// GetEvents fetches all Events (check results that do have the same status
-	// as before) of a certain kind between 'start' and 'end'.
-	//
-	// If an event cannot be determinded because of a 'StatusChanged' flag, a
-	// potential interval is required to _assume_ if a gap between to
-	// measurements represents a status change or should be considered a status
-	// change to 'status.OK'. This interval should be sightly larger than the
-	// interval of your execution interval of 'bpmon write' in order to bp as
-	// accurate as possible.
-	//
-	// Also the results can be filtered by their status. If no status list is
-	// provided all events will be returned.
-	GetEvents(kind Kind, start time.Time, end time.Time, interval time.Duration, statusRequested []status.Status) ([]Event, error)
-
 	// GetLatest returns a representation of the latest persisted ResultSet
 	// matching the 'Tags' of the 'ResultSet' provided as input.
 	GetLatest(input ResultSet) (ResultSet, error)
 
-	// AnnotateEvent persists an annotation string on the event described via
+	// Annotate persists an annotation string on the event described via
 	// its 'ID'. It also updates its field 'Annotated' to 'true'.
-	AnnotateEvent(id ID, annotation string) (ResultSet, error)
+	Annotate(id ID, annotation string) (ResultSet, error)
 }

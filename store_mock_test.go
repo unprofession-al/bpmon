@@ -25,10 +25,6 @@ func (s StoreMock) GetSpans(rs store.ResultSet, start time.Time, end time.Time, 
 	return []store.Span{}, nil
 }
 
-func (s StoreMock) AnnotateEvent(id store.ID, annotation string) (store.ResultSet, error) {
+func (s StoreMock) Annotate(id store.ID, annotation string) (store.ResultSet, error) {
 	return store.ResultSet{}, nil
-}
-
-func (s StoreMock) GetEvents(kind store.Kind, start time.Time, end time.Time, interval time.Duration, stati []status.Status) ([]store.Event, error) {
-	return []store.Event{}, nil
 }

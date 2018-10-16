@@ -196,3 +196,23 @@ func (i Influx) assumeSpans(rs store.ResultSet, start time.Time, end time.Time, 
 	}
 	return s, nil
 }
+
+func (i Influx) Annotate(id store.ID, annotation string) (store.ResultSet, error) {
+	rs, err := id.GetResultSet()
+	if err != nil {
+		return rs, err
+	}
+
+	filter := fmt.Sprintf("time = %d", rs.Start.UnixNano())
+	q := newSelectQuery().From(rs.Kind().String()).FilterTags(rs.Tags).Filter(filter).Limit(1)
+	rs, err = i.First(q)
+	if err != nil {
+		return rs, err
+	}
+
+	rs.Annotated = true
+	rs.Annotation = annotation
+	err = i.Write(&rs)
+
+	return rs, err
+}

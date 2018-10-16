@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -134,4 +135,25 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	}
 
 	wh.Respond(res, req, http.StatusOK, points)
+}
+
+func AnnotateHandler(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	id := store.ID(vars["id"])
+
+	b, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+	message := string(b)
+
+	out, err := pp.Annotate(id, message)
+	if err != nil {
+		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	wh.Respond(res, req, http.StatusCreated, out)
 }
