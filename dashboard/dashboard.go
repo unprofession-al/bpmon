@@ -12,10 +12,12 @@ import (
 )
 
 type Dashboard struct {
-	bp       bpmon.BusinessProcesses
-	store    store.Accessor
-	listener string
-	handler  http.Handler
+	bp         bpmon.BusinessProcesses
+	store      store.Accessor
+	listener   string
+	handler    http.Handler
+	grantWrite []string
+	auth       bool
 }
 
 const (
@@ -26,9 +28,10 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 	msg := ""
 
 	d := Dashboard{
-		bp:       bp,
-		listener: c.Listener,
-		store:    store,
+		bp:         bp,
+		listener:   c.Listener,
+		store:      store,
+		grantWrite: c.GrantWrite,
 	}
 
 	r := mux.NewRouter().StrictSlash(true)
@@ -40,9 +43,11 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 	if authPepper != "" && authHeader != "" {
 		return d, msg, fmt.Errorf("ERROR: pepper and recipients-header are set, only one is allowed.")
 	} else if authPepper == "" && authHeader == "" {
+		d.auth = false
 		msg = "WARNING: No pepper or recipients-header is provided, all information are accessable without auth..."
 		r.Handle("/api/{_:.*}", apiRouter)
 	} else if authHeader != "" {
+		d.auth = true
 		msg = fmt.Sprintf("Recipients-header is provided, using HTTP Header '%s' to read recipients...\n", authHeader)
 		m := HeaderAuth{
 			HeaderName: authHeader,
@@ -50,6 +55,7 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 		}
 		r.Handle("/api/{_:.*}", m.Inject(apiRouter))
 	} else if authPepper != "" {
+		d.auth = true
 		var recipientHashes map[string]string
 		msg = fmt.Sprintf("Pepper is provided, generating auth hashes...\n")
 		recipientHashes = bp.GenerateRecipientHashes(authPepper)
@@ -81,6 +87,11 @@ func (d Dashboard) Run() {
 func (d Dashboard) getRoutes() map[string]Leafs {
 	return map[string]Leafs{
 		"v1": Leafs{
+			"whoami": Leaf{
+				E: Endpoints{
+					"GET": Endpoint{N: "WhoAmI", H: d.WhoamiHandler},
+				},
+			},
 			"annotate": Leaf{
 				L: Leafs{
 					"{id}": Leaf{

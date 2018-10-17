@@ -137,6 +137,29 @@ func (d Dashboard) GetKPITimelineHandler(res http.ResponseWriter, req *http.Requ
 }
 
 func (d Dashboard) AnnotateHandler(res http.ResponseWriter, req *http.Request) {
+	if recipients := req.Context().Value(KeyRecipients); recipients != nil {
+		allow := false
+		for _, r := range recipients.([]string) {
+			for _, w := range d.grantWrite {
+				if r == w {
+					allow = true
+					break
+				}
+			}
+			if allow {
+				break
+			}
+		}
+		if !allow {
+			msg := "you are not allowed to annotate"
+			Respond(res, req, http.StatusUnauthorized, msg)
+			return
+		}
+	} else {
+		msg := "No credentials provided"
+		Respond(res, req, http.StatusUnauthorized, msg)
+		return
+	}
 	vars := mux.Vars(req)
 
 	id := store.ID(vars["id"])
@@ -155,4 +178,27 @@ func (d Dashboard) AnnotateHandler(res http.ResponseWriter, req *http.Request) {
 	}
 
 	Respond(res, req, http.StatusCreated, out)
+}
+
+func (d Dashboard) WhoamiHandler(res http.ResponseWriter, req *http.Request) {
+	out := struct {
+		Roles      []string `json:"roles" yaml:"roles"`
+		GrantWrite bool     `json:"grantWrite" yaml:"grant_write"`
+	}{
+		Roles:      []string{},
+		GrantWrite: false,
+	}
+
+	if recipients := req.Context().Value(KeyRecipients); recipients != nil {
+		for _, r := range recipients.([]string) {
+			out.Roles = append(out.Roles, r)
+			for _, w := range d.grantWrite {
+				if r == w {
+					out.GrantWrite = true
+				}
+			}
+		}
+	}
+
+	Respond(res, req, http.StatusOK, out)
 }
