@@ -18,6 +18,10 @@ type Dashboard struct {
 	handler  http.Handler
 }
 
+const (
+	KeyRecipients key = iota
+)
+
 func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, tokenAuth bool, recipientHashes map[string]string, recipientsHeaderAuth bool, recipientsHeaderName string) Dashboard {
 	d := Dashboard{
 		bp:       bp,
@@ -31,10 +35,17 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, tokenAuth b
 	api := apiRouter.PathPrefix("/api/").Subrouter()
 	PopulateRouter(api, d.getRoutes())
 	if tokenAuth {
-		ta := TokenAuth{Tokens: recipientHashes}
-		r.Handle("/api/{_:.*}", ta.Create(apiRouter))
+		m := TokenAuth{
+			Tokens:     recipientHashes,
+			ContextKey: KeyRecipients,
+		}
+		r.Handle("/api/{_:.*}", m.Inject(apiRouter))
 	} else if recipientsHeaderAuth {
-		r.Handle("/api/{_:.*}", RecipientsHeaderAuth(apiRouter, recipientsHeaderName))
+		m := HeaderAuth{
+			HeaderName: recipientsHeaderName,
+			ContextKey: KeyRecipients,
+		}
+		r.Handle("/api/{_:.*}", m.Inject(apiRouter))
 	} else {
 		r.Handle("/api/{_:.*}", apiRouter)
 	}
