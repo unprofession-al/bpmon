@@ -22,7 +22,9 @@ const (
 	KeyRecipients key = iota
 )
 
-func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, tokenAuth bool, recipientHashes map[string]string, recipientsHeaderAuth bool, recipientsHeaderName string) Dashboard {
+func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper string, authHeader string) (Dashboard, string, error) {
+	msg := ""
+
 	d := Dashboard{
 		bp:       bp,
 		listener: c.Listener,
@@ -34,20 +36,32 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, tokenAuth b
 	apiRouter := mux.NewRouter()
 	api := apiRouter.PathPrefix("/api/").Subrouter()
 	PopulateRouter(api, d.getRoutes())
-	if tokenAuth {
+
+	if authPepper != "" && authHeader != "" {
+		return d, msg, fmt.Errorf("ERROR: pepper and recipients-header are set, only one is allowed.")
+	} else if authPepper == "" && authHeader == "" {
+		msg = "WARNING: No pepper or recipients-header is provided, all information are accessable without auth..."
+		r.Handle("/api/{_:.*}", apiRouter)
+	} else if authHeader != "" {
+		msg = fmt.Sprintf("Recipients-header is provided, using HTTP Header '%s' to read recipients...\n", authHeader)
+		m := HeaderAuth{
+			HeaderName: authHeader,
+			ContextKey: KeyRecipients,
+		}
+		r.Handle("/api/{_:.*}", m.Inject(apiRouter))
+	} else if authPepper != "" {
+		var recipientHashes map[string]string
+		msg = fmt.Sprintf("Pepper is provided, generating auth hashes...\n")
+		recipientHashes = bp.GenerateRecipientHashes(authPepper)
+		msg = msg + fmt.Sprintf("%15s: %s\n", "Recipient", "Hash")
+		for k, v := range recipientHashes {
+			msg = msg + fmt.Sprintf("%15s: %s\n", v, k)
+		}
 		m := TokenAuth{
 			Tokens:     recipientHashes,
 			ContextKey: KeyRecipients,
 		}
 		r.Handle("/api/{_:.*}", m.Inject(apiRouter))
-	} else if recipientsHeaderAuth {
-		m := HeaderAuth{
-			HeaderName: recipientsHeaderName,
-			ContextKey: KeyRecipients,
-		}
-		r.Handle("/api/{_:.*}", m.Inject(apiRouter))
-	} else {
-		r.Handle("/api/{_:.*}", apiRouter)
 	}
 
 	if c.Static != "" {
@@ -56,7 +70,7 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, tokenAuth b
 
 	d.handler = alice.New().Then(r)
 
-	return d
+	return d, msg, nil
 }
 
 func (d Dashboard) Run() {

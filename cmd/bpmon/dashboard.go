@@ -11,9 +11,9 @@ import (
 )
 
 var (
-	dashboardPepper           string
-	dashboardRecipientsHeader string
-	dashboardStatic           string
+	dashboardPepper string
+	dashboardHeader string
+	dashboardStatic string
 )
 
 var dashboardCmd = &cobra.Command{
@@ -33,43 +33,23 @@ var dashboardCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		s, _, _, bp, pp, err := fromSection(c, cfgSection)
+		s, _, _, bp, store, err := fromSection(c, cfgSection)
 		if err != nil {
 			msg := fmt.Sprintf("Could not read section '%s' from file '%s':  %s", cfgSection, cfgFile, err.Error())
 			log.Fatal(msg)
-		}
-
-		if dashboardPepper != "" && dashboardRecipientsHeader != "" {
-			log.Fatal("ERROR: pepper and recipients-header are set, only one is allowed.")
-		}
-		if dashboardPepper == "" && dashboardRecipientsHeader == "" {
-			fmt.Println("WARNING: No pepper or recipients-header is provided, all information are accessable without auth...")
-		}
-
-		recipientsHeaderName := dashboardRecipientsHeader
-		authHeader := false
-		if dashboardRecipientsHeader != "" {
-			authHeader = true
-			fmt.Printf("Recipients-header is provided, using %s to read recipients...\n", dashboardRecipientsHeader)
-		}
-
-		var recipientHashes map[string]string
-		authPepper := false
-		if dashboardPepper != "" {
-			authPepper = true
-			fmt.Println("Pepper is provided, generating auth hashes...")
-			recipientHashes = bp.GenerateRecipientHashes(dashboardPepper)
-			fmt.Printf("%15s: %s\n", "Recipient", "Hash")
-			for k, v := range recipientHashes {
-				fmt.Printf("%15s: %s\n", v, k)
-			}
 		}
 
 		if dashboardStatic != "" {
 			s.Dashboard.Static = dashboardStatic
 		}
 
-		d := dashboard.New(s.Dashboard, bp, pp, authPepper, recipientHashes, authHeader, recipientsHeaderName)
+		d, msg, err := dashboard.New(s.Dashboard, bp, store, dashboardPepper, dashboardHeader)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Println(msg)
+
 		d.Run()
 	},
 }
@@ -77,6 +57,6 @@ var dashboardCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(dashboardCmd)
 	dashboardCmd.PersistentFlags().StringVarP(&dashboardPepper, "pepper", "", "", "Pepper used to generate auth token")
-	dashboardCmd.PersistentFlags().StringVarP(&dashboardRecipientsHeader, "recipients-header", "", "", "HTTP header name to read recipients from")
+	dashboardCmd.PersistentFlags().StringVarP(&dashboardHeader, "header", "", "", "HTTP header name to read recipients from")
 	dashboardCmd.PersistentFlags().StringVarP(&dashboardStatic, "static", "", "", "Path to custom html frontend")
 }
