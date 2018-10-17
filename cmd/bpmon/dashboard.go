@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon/config"
-	"github.com/unprofession-al/bpmon/periphery/dashboard"
+	"github.com/unprofession-al/bpmon/dashboard"
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
@@ -82,7 +82,7 @@ var dashboardCmd = &cobra.Command{
 }
 
 func init() {
-	betaCmd.AddCommand(dashboardCmd)
+	RootCmd.AddCommand(dashboardCmd)
 	dashboardCmd.PersistentFlags().StringVarP(&dashboardPepper, "pepper", "", "", "Pepper used to generate auth token")
 	dashboardCmd.PersistentFlags().StringVarP(&dashboardRecipientsHeader, "recipients-header", "", "", "HTTP header name to read recipients from")
 	dashboardCmd.PersistentFlags().StringVarP(&dashboardStatic, "static", "", "", "Path to custom html frontend")

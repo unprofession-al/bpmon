@@ -1,6 +1,4 @@
-//go:generate esc -o static.go -pkg webhelpers -prefix static static
-
-package webhelpers
+package dashboard
 
 import (
 	"encoding/json"
@@ -40,11 +38,6 @@ func Respond(res http.ResponseWriter, req *http.Request, code int, data interfac
 	}
 	res.WriteHeader(code)
 	res.Write(out)
-}
-
-func GetAssetHandler(prefix string) http.Handler {
-	assetFS := FS(false)
-	return http.StripPrefix(prefix, http.FileServer(assetFS))
 }
 
 func GetStartEnd(req *http.Request) (start time.Time, end time.Time) {

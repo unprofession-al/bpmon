@@ -1,4 +1,4 @@
-package webhelpers
+package dashboard
 
 import (
 	"net/http"

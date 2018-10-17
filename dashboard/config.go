@@ -1,19 +1,19 @@
-package config
+package dashboard
 
 import "errors"
 
-type DashboardConfig struct {
+type Config struct {
 	Listener string `yaml:"listener"`
 	Static   string `yaml:"static"`
 }
 
-func DashboardDefaults() DashboardConfig {
-	return DashboardConfig{
+func Defaults() Config {
+	return Config{
 		Listener: "127.0.0.1:8910",
 	}
 }
 
-func (dc DashboardConfig) DashboardValidate() ([]string, error) {
+func (dc Config) Validate() ([]string, error) {
 	errs := []string{}
 	if dc.Listener == "" {
 		errs = append(errs, "Field 'listener' cannot be empty.")

@@ -38,7 +38,6 @@ func init() {
 	RootCmd.PersistentFlags().StringVarP(&bpPattern, "pattern", "p", "*.yaml", "pattern of business process configuration files to process")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", true, "print log output")
 	RootCmd.PersistentFlags().BoolVarP(&injectDefaults, "defaults", "d", true, "inject defaults in main config file")
-	RootCmd.AddCommand(betaCmd)
 }
 
 func fromSection(cnf config.Config, sectionName string) (s config.ConfigSection, c checker.Checker, r rules.Rules, b bpmon.BusinessProcesses, p store.Accessor, err error) {

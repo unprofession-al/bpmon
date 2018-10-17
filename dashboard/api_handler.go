@@ -8,7 +8,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/bpmon"
-	wh "github.com/unprofession-al/bpmon/periphery/webhelpers"
 	"github.com/unprofession-al/bpmon/status"
 	"github.com/unprofession-al/bpmon/store"
 )
@@ -16,7 +15,7 @@ import (
 func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
 	list := make(map[string]string)
 
-	if recipients := req.Context().Value(wh.KeyRecipients); recipients != nil {
+	if recipients := req.Context().Value(KeyRecipients); recipients != nil {
 		for _, bp := range bps.GetByRecipients(recipients.([]string)) {
 			list[bp.ID] = bp.Name
 		}
@@ -26,7 +25,7 @@ func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	wh.Respond(res, req, http.StatusOK, list)
+	Respond(res, req, http.StatusOK, list)
 }
 
 func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
@@ -44,24 +43,24 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	if !found {
 		msg := fmt.Sprintf("Business process %s not found", bpid)
-		wh.Respond(res, req, http.StatusNotFound, msg)
+		Respond(res, req, http.StatusNotFound, msg)
 		return
 	}
 
-	start, end := wh.GetStartEnd(req)
+	start, end := GetStartEnd(req)
 
-	where := store.ResultSet{
+	re := store.ResultSet{
 		Tags: map[store.Kind]string{store.KindBusinessProcess: bpid},
 	}
 	interval, _ := time.ParseDuration("300s")
-	points, err := pp.GetSpans(where, start, end, interval, []status.Status{})
+	points, err := pp.GetSpans(re, start, end, interval, []status.Status{})
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
-		wh.Respond(res, req, http.StatusInternalServerError, msg)
+		Respond(res, req, http.StatusInternalServerError, msg)
 		return
 	}
 
-	wh.Respond(res, req, http.StatusOK, points)
+	Respond(res, req, http.StatusOK, points)
 }
 
 func ListKPIsHandler(res http.ResponseWriter, req *http.Request) {
@@ -80,11 +79,11 @@ func ListKPIsHandler(res http.ResponseWriter, req *http.Request) {
 	}
 	if !found {
 		msg := fmt.Sprintf("Business process %s not found", bpid)
-		wh.Respond(res, req, http.StatusNotFound, msg)
+		Respond(res, req, http.StatusNotFound, msg)
 		return
 	}
 
-	wh.Respond(res, req, http.StatusOK, list)
+	Respond(res, req, http.StatusOK, list)
 }
 
 func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
@@ -103,7 +102,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	if !found {
 		msg := fmt.Sprintf("Business process %s not found", bpid)
-		wh.Respond(res, req, http.StatusNotFound, msg)
+		Respond(res, req, http.StatusNotFound, msg)
 		return
 	}
 
@@ -116,25 +115,25 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 
 	if !found {
 		msg := fmt.Sprintf("KPI %s of Business process %s not found", kpiid, bpid)
-		wh.Respond(res, req, http.StatusNotFound, msg)
+		Respond(res, req, http.StatusNotFound, msg)
 		return
 	}
 
-	start, end := wh.GetStartEnd(req)
+	start, end := GetStartEnd(req)
 
-	where := store.ResultSet{
+	re := store.ResultSet{
 		Tags: map[store.Kind]string{store.KindBusinessProcess: bpid, store.KindKeyPerformanceIndicator: kpiid},
 	}
 
 	interval, _ := time.ParseDuration("300s")
-	points, err := pp.GetSpans(where, start, end, interval, []status.Status{})
+	points, err := pp.GetSpans(re, start, end, interval, []status.Status{})
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
-		wh.Respond(res, req, http.StatusInternalServerError, msg)
+		Respond(res, req, http.StatusInternalServerError, msg)
 		return
 	}
 
-	wh.Respond(res, req, http.StatusOK, points)
+	Respond(res, req, http.StatusOK, points)
 }
 
 func AnnotateHandler(res http.ResponseWriter, req *http.Request) {
@@ -144,16 +143,16 @@ func AnnotateHandler(res http.ResponseWriter, req *http.Request) {
 
 	b, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
+		Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 	message := string(b)
 
 	out, err := pp.Annotate(id, message)
 	if err != nil {
-		wh.Respond(res, req, http.StatusInternalServerError, err.Error())
+		Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	wh.Respond(res, req, http.StatusCreated, out)
+	Respond(res, req, http.StatusCreated, out)
 }

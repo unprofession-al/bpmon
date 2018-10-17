@@ -8,6 +8,7 @@ import (
 
 	"github.com/unprofession-al/bpmon/availabilities"
 	"github.com/unprofession-al/bpmon/checker"
+	"github.com/unprofession-al/bpmon/dashboard"
 	"github.com/unprofession-al/bpmon/health"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/store"
@@ -95,7 +96,7 @@ type ConfigSection struct {
 	// if a critical service is aready aknowledged to avoid alarm spamming.
 	Rules rules.Rules `yaml:"rules"`
 
-	Dashboard DashboardConfig `yaml:"dashboard"`
+	Dashboard dashboard.Config `yaml:"dashboard"`
 }
 
 func defaultConfigSection() ConfigSection {
@@ -104,7 +105,7 @@ func defaultConfigSection() ConfigSection {
 		Trigger:   trigger.Defaults(),
 		Checker:   checker.Defaults(),
 		Store:     store.Defaults(),
-		Dashboard: DashboardDefaults(),
+		Dashboard: dashboard.Defaults(),
 	}
 }
 
@@ -121,6 +122,9 @@ func (s ConfigSection) Validate(name string) (out []string, err error) {
 	out = append(out, errs...)
 
 	errs = fmtErrors(s.Store.Validate())
+	out = append(out, errs...)
+
+	errs = fmtErrors(s.Dashboard.Validate())
 	out = append(out, errs...)
 
 	_, aErr := s.Availabilities.Parse()
