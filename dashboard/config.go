@@ -3,8 +3,9 @@ package dashboard
 import "errors"
 
 type Config struct {
-	Listener string `yaml:"listener"`
-	Static   string `yaml:"static"`
+	Listener   string   `yaml:"listener"`
+	Static     string   `yaml:"static"`
+	GrantWrite []string `yaml:"grant_write"`
 }
 
 func Defaults() Config {

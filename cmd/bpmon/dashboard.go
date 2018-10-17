@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon/config"
@@ -70,14 +69,8 @@ var dashboardCmd = &cobra.Command{
 			s.Dashboard.Static = dashboardStatic
 		}
 
-		router, err := dashboard.Setup(s.Dashboard, bp, pp, authPepper, recipientHashes, authHeader, recipientsHeaderName)
-		if err != nil {
-			msg := fmt.Sprintf("Could not build router for server: %s", err.Error())
-			log.Fatal(msg)
-		}
-
-		fmt.Printf("Serving Dashboard at http://%s\nPress CTRL-c to stop...\n", s.Dashboard.Listener)
-		log.Fatal(http.ListenAndServe(s.Dashboard.Listener, router))
+		d := dashboard.New(s.Dashboard, bp, pp, authPepper, recipientHashes, authHeader, recipientsHeaderName)
+		d.Run()
 	},
 }
 

@@ -12,15 +12,15 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 )
 
-func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
+func (d Dashboard) ListBPsHandler(res http.ResponseWriter, req *http.Request) {
 	list := make(map[string]string)
 
 	if recipients := req.Context().Value(KeyRecipients); recipients != nil {
-		for _, bp := range bps.GetByRecipients(recipients.([]string)) {
+		for _, bp := range d.bp.GetByRecipients(recipients.([]string)) {
 			list[bp.ID] = bp.Name
 		}
 	} else {
-		for _, bp := range bps {
+		for _, bp := range d.bp {
 			list[bp.ID] = bp.Name
 		}
 	}
@@ -28,13 +28,13 @@ func ListBPsHandler(res http.ResponseWriter, req *http.Request) {
 	Respond(res, req, http.StatusOK, list)
 }
 
-func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
+func (d Dashboard) GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bpid := vars["bp"]
 
 	// name := ""
 	found := false
-	for _, bp := range bps {
+	for _, bp := range d.bp {
 		if bp.ID == bpid {
 			found = true
 			//name = bp.Name
@@ -53,7 +53,7 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 		Tags: map[store.Kind]string{store.KindBusinessProcess: bpid},
 	}
 	interval, _ := time.ParseDuration("300s")
-	points, err := pp.GetSpans(re, start, end, interval, []status.Status{})
+	points, err := d.store.GetSpans(re, start, end, interval, []status.Status{})
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		Respond(res, req, http.StatusInternalServerError, msg)
@@ -63,13 +63,13 @@ func GetBPTimelineHandler(res http.ResponseWriter, req *http.Request) {
 	Respond(res, req, http.StatusOK, points)
 }
 
-func ListKPIsHandler(res http.ResponseWriter, req *http.Request) {
+func (d Dashboard) ListKPIsHandler(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bpid := vars["bp"]
 
 	list := make(map[string]string)
 	found := false
-	for _, bp := range bps {
+	for _, bp := range d.bp {
 		if bp.ID == bpid {
 			found = true
 			for _, kpi := range bp.Kpis {
@@ -86,14 +86,14 @@ func ListKPIsHandler(res http.ResponseWriter, req *http.Request) {
 	Respond(res, req, http.StatusOK, list)
 }
 
-func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
+func (d Dashboard) GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	bpid := vars["bp"]
 	kpiid := vars["kpi"]
 
 	bp := bpmon.BP{}
 	found := false
-	for _, currentBP := range bps {
+	for _, currentBP := range d.bp {
 		if currentBP.ID == bpid {
 			found = true
 			bp = currentBP
@@ -126,7 +126,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	}
 
 	interval, _ := time.ParseDuration("300s")
-	points, err := pp.GetSpans(re, start, end, interval, []status.Status{})
+	points, err := d.store.GetSpans(re, start, end, interval, []status.Status{})
 	if err != nil {
 		msg := fmt.Sprintf("An error occured: %s", err.Error())
 		Respond(res, req, http.StatusInternalServerError, msg)
@@ -136,7 +136,7 @@ func GetKPITimelineHandler(res http.ResponseWriter, req *http.Request) {
 	Respond(res, req, http.StatusOK, points)
 }
 
-func AnnotateHandler(res http.ResponseWriter, req *http.Request) {
+func (d Dashboard) AnnotateHandler(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 
 	id := store.ID(vars["id"])
@@ -148,7 +148,7 @@ func AnnotateHandler(res http.ResponseWriter, req *http.Request) {
 	}
 	message := string(b)
 
-	out, err := pp.Annotate(id, message)
+	out, err := d.store.Annotate(id, message)
 	if err != nil {
 		Respond(res, req, http.StatusInternalServerError, err.Error())
 		return
