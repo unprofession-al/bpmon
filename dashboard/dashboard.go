@@ -53,7 +53,7 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 			HeaderName: authHeader,
 			ContextKey: KeyRecipients,
 		}
-		r.Handle("/api/{_:.*}", m.Inject(apiRouter))
+		r.Handle("/api/{_:.*}", m.Wrap(apiRouter))
 	} else if authPepper != "" {
 		d.auth = true
 		var recipientHashes map[string]string
@@ -65,9 +65,10 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 		}
 		m := TokenAuth{
 			Tokens:     recipientHashes,
+			Param:      "authtoken",
 			ContextKey: KeyRecipients,
 		}
-		r.Handle("/api/{_:.*}", m.Inject(apiRouter))
+		r.Handle("/api/{_:.*}", m.Wrap(apiRouter))
 	}
 
 	if c.Static != "" {
