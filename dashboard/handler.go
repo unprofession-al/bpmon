@@ -136,6 +136,8 @@ func (d Dashboard) GetKPITimelineHandler(res http.ResponseWriter, req *http.Requ
 	Respond(res, req, http.StatusOK, points)
 }
 
+// TODO: The Handler should allow to validate/sanitize the post body against certain formats
+// such as HTML.
 func (d Dashboard) AnnotateHandler(res http.ResponseWriter, req *http.Request) {
 	if recipients := req.Context().Value(KeyRecipients); recipients != nil {
 		allow := false

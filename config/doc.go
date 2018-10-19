@@ -29,9 +29,16 @@ its documentation for more details:
 connection with an invalid certificate you have to set this to true.
 `
 	doc[section+".dashboard"] = ``
-	doc[section+".dashboard.grant_write"] = ``
-	doc[section+".dashboard.listener"] = ``
-	doc[section+".dashboard.static"] = ``
+	doc[section+".dashboard.grant_write"] = `grant_write is a list of recipients which are allowed to access the annotate
+endpoint via POST request.
+`
+	doc[section+".dashboard.listener"] = `listener tells the dashboard where to bind. This string
+should match the pattern [ip]:[port].
+`
+	doc[section+".dashboard.static"] = `static is the path to the directory that sould be served
+at the root of the server. This should contain the UI of the
+Dashboard
+`
 	doc[section+".global_recipients"] = `global_recipients will be added to the repicients list af all BP
 `
 	doc[section+".health"] = `health ... TODO
