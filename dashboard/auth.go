@@ -3,7 +3,10 @@ package dashboard
 import (
 	"context"
 	"net/http"
+	"regexp"
 	"strings"
+
+	"github.com/unprofession-al/bpmon"
 )
 
 type key int
@@ -83,6 +86,47 @@ func (m HeaderAuth) Wrap(next http.Handler) http.Handler {
 		}
 		ctx := context.WithValue(r.Context(), m.ContextKey, groups)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+
+	return http.HandlerFunc(fn)
+}
+
+// Authorization provides a middleware that reads the user/recipient name from
+// the request context and decides based on the '{bp}' URL param if the
+// recipient is allowed to access the ressource.
+type Authorization struct {
+	// Context key of the user/recipient value, eg. where to find the
+	// user/recipient in the context of the request.
+	RecipientContextKey interface{}
+
+	// ProtectPattern that matches all paths to be protected.
+	ProtectPattern *regexp.Regexp
+
+	// HTTP Stus Code that will be returned in case of unauthorized requests.
+	OnAuthErrorReturn int
+
+	// BP holds the BP definitions including the allowed recipients per BP.
+	BP bpmon.BusinessProcesses
+}
+
+// Wrap returns the the middleware as http.Handler.
+// TODO: This should be improved...
+func (m Authorization) Wrap(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if !m.ProtectPattern.MatchString(path) {
+			next.ServeHTTP(w, r)
+			return
+		}
+		if recipients := r.Context().Value(m.RecipientContextKey); recipients != nil {
+			for _, bp := range m.BP.GetByRecipients(recipients.([]string)) {
+				if strings.Contains(path, bp.ID) {
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+		}
+		http.Error(w, "", m.OnAuthErrorReturn)
 	}
 
 	return http.HandlerFunc(fn)

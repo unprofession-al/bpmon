@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
@@ -40,6 +41,13 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 	api := apiRouter.PathPrefix("/api/").Subrouter()
 	PopulateRouter(api, d.getRoutes())
 
+	authorization := Authorization{
+		RecipientContextKey: KeyRecipients,
+		OnAuthErrorReturn:   http.StatusNotFound,
+		BP:                  bp,
+		ProtectPattern:      regexp.MustCompile("^/api/v1/bps/.+"),
+	}
+
 	if authPepper != "" && authHeader != "" {
 		return d, msg, fmt.Errorf("ERROR: pepper and recipients-header are set, only one is allowed.")
 	} else if authPepper == "" && authHeader == "" {
@@ -53,7 +61,7 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 			HeaderName: authHeader,
 			ContextKey: KeyRecipients,
 		}
-		r.Handle("/api/{_:.*}", m.Wrap(apiRouter))
+		r.Handle("/api/{_:.*}", alice.New(m.Wrap, authorization.Wrap).Then(apiRouter))
 	} else if authPepper != "" {
 		d.auth = true
 		var recipientHashes map[string]string
@@ -68,7 +76,7 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 			Param:      "authtoken",
 			ContextKey: KeyRecipients,
 		}
-		r.Handle("/api/{_:.*}", m.Wrap(apiRouter))
+		r.Handle("/api/{_:.*}", alice.New(m.Wrap, authorization.Wrap).Then(apiRouter))
 	}
 
 	if c.Static != "" {
