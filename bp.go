@@ -16,7 +16,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-func LoadBP(bpPath string, bpPattern string, a availabilities.Availabilities, gr string) (BusinessProcesses, error) {
+func LoadBP(bpPath string, bpPattern string, a availabilities.Availabilities, gr []string) (BusinessProcesses, error) {
 	var bps BusinessProcesses
 	if bpPath == "" {
 		return bps, nil
@@ -47,7 +47,7 @@ func LoadBP(bpPath string, bpPattern string, a availabilities.Availabilities, gr
 	return bps, nil
 }
 
-func parseBP(bpconf []byte, a availabilities.Availabilities, gr string) (BP, error) {
+func parseBP(bpconf []byte, a availabilities.Availabilities, gr []string) (BP, error) {
 	bp := BP{}
 	err := yaml.Unmarshal(bpconf, &bp)
 	if err != nil {
@@ -64,8 +64,8 @@ func parseBP(bpconf []byte, a availabilities.Availabilities, gr string) (BP, err
 	}
 	bp.Availability = availability
 
-	if gr != "" {
-		bp.Recipients = append(bp.Recipients, gr)
+	if len(gr) > 0 {
+		bp.Recipients = append(bp.Recipients, gr...)
 	}
 
 	return bp, nil

@@ -7,9 +7,6 @@ func configDoc(section string) map[string]string {
 	doc[section] = `The default section is - as the name suggests - read by default. Note the '&default'
 notation; this is known an an 'anchor' and allows you to reuse the settings
 in other sections...`
-	doc[section+".annotate"] = ``
-	doc[section+".annotate.listener"] = ``
-	doc[section+".annotate.static"] = ``
 	doc[section+".availabilities"] = `Define your office hours et al. according to your service level
 agreements (SLA). You can later reference them in your BP definitions.
 `
@@ -32,9 +29,10 @@ its documentation for more details:
 connection with an invalid certificate you have to set this to true.
 `
 	doc[section+".dashboard"] = ``
+	doc[section+".dashboard.grant_write"] = ``
 	doc[section+".dashboard.listener"] = ``
 	doc[section+".dashboard.static"] = ``
-	doc[section+".global_recipient"] = `global_recipient will be added to the repicient list af all BP
+	doc[section+".global_recipients"] = `global_recipients will be added to the repicients list af all BP
 `
 	doc[section+".health"] = `health ... TODO
 `

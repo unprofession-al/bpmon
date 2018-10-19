@@ -69,8 +69,8 @@ func ExampleYAML(inject bool) []byte {
 }
 
 type ConfigSection struct {
-	// global_recipient will be added to the repicient list af all BP
-	GlobalRecipient string `yaml:"global_recipient"`
+	// global_recipients will be added to the repicients list af all BP
+	GlobalRecipients []string `yaml:"global_recipients"`
 
 	// health ... TODO
 	Health health.Config `yaml:"health"`

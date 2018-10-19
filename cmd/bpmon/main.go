@@ -62,7 +62,7 @@ func fromSection(cnf config.Config, sectionName string) (s config.ConfigSection,
 		return
 	}
 
-	b, err = bpmon.LoadBP(bpPath, bpPattern, a, s.GlobalRecipient)
+	b, err = bpmon.LoadBP(bpPath, bpPattern, a, s.GlobalRecipients)
 	if err != nil {
 		return
 	}
