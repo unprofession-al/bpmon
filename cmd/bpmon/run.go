@@ -1,25 +1,28 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
+	"text/template"
 
 	"github.com/spf13/cobra"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
 	"github.com/unprofession-al/bpmon/config"
+	"github.com/unprofession-al/bpmon/store"
 	_ "github.com/unprofession-al/bpmon/store/influx"
-)
-
-var (
-	printTimestamps  bool
-	printValues      bool
-	printResponsible bool
 )
 
 var runCmd = &cobra.Command{
 	Use:   "run",
-	Short: "Run all business process checks and print to stdout",
+	Short: "Run all business process checks and render the results using a given template",
+	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		templateName := "default"
+		if len(args) > 0 {
+			templateName = args[0]
+		}
+
 		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
@@ -39,20 +42,28 @@ var runCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
+		t := template.Must(template.New("t1").Parse(s.Templates[templateName]))
+
+		var sets []store.ResultSet
 		for _, bp := range b {
-			rs := bp.Status(i, p, r)
+			rs := bp.Status(i, nil, r)
 			if s.Store.GetLastStatus {
 				rs.AddPreviousStatus(p, s.Store.SaveOK)
 			}
-			fmt.Println(rs.PrettyPrint(0, printTimestamps, printValues, printResponsible))
+			sets = append(sets, rs)
+		}
+		var command bytes.Buffer
+		err = t.Execute(&command, sets)
+		if err != nil {
+			log.Fatal(err)
 		}
 
+		if len(sets) > 0 {
+			fmt.Println(command.String())
+		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().BoolVarP(&printTimestamps, "ts", "t", false, "print timestamps of measurement")
-	runCmd.PersistentFlags().BoolVarP(&printValues, "measurements", "m", false, "print raw measurement results if available")
-	runCmd.PersistentFlags().BoolVarP(&printResponsible, "resp", "r", false, "print responsible of measurement")
 }

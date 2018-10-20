@@ -12,7 +12,6 @@ import (
 	"github.com/unprofession-al/bpmon/health"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/store"
-	"github.com/unprofession-al/bpmon/trigger"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -75,11 +74,6 @@ type ConfigSection struct {
 	// health ... TODO
 	Health health.Config `yaml:"health"`
 
-	// If a service is failed, this command (rendered as a golang template) is
-	// printed to the stdout. This allows to easily wrap BPMON into an eval
-	// statement in your shell script.
-	Trigger trigger.Config `yaml:"trigger"`
-
 	// First BPMON needs to have access to your Icinga2 API. Learn more on by reading
 	// https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
 	Checker checker.Config `yaml:"checker"`
@@ -96,13 +90,17 @@ type ConfigSection struct {
 	// if a critical service is aready aknowledged to avoid alarm spamming.
 	Rules rules.Rules `yaml:"rules"`
 
+	// dashboard configures the dashboard subcommand.
 	Dashboard dashboard.Config `yaml:"dashboard"`
+
+	// templates is a map of templates which can be used with the run
+	// subcommand
+	Templates map[string]string `yaml:"templates"`
 }
 
 func defaultConfigSection() ConfigSection {
 	return ConfigSection{
 		Health:    health.Defaults(),
-		Trigger:   trigger.Defaults(),
 		Checker:   checker.Defaults(),
 		Store:     store.Defaults(),
 		Dashboard: dashboard.Defaults(),
@@ -113,9 +111,6 @@ func (s ConfigSection) Validate(name string) (out []string, err error) {
 	var errs []string
 
 	errs = fmtErrors(s.Health.Validate())
-	out = append(out, errs...)
-
-	errs = fmtErrors(s.Trigger.Validate())
 	out = append(out, errs...)
 
 	errs = fmtErrors(s.Checker.Validate())

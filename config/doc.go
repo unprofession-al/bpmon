@@ -28,7 +28,8 @@ its documentation for more details:
 	doc[section+".checker.tls_skip_verify"] = `BPMON verifies if a https connection is trusted. If you wont to trust a
 connection with an invalid certificate you have to set this to true.
 `
-	doc[section+".dashboard"] = ``
+	doc[section+".dashboard"] = `dashboard configures the dashboard subcommand.
+`
 	doc[section+".dashboard.grant_write"] = `grant_write is a list of recipients which are allowed to access the annotate
 endpoint via POST request.
 `
@@ -64,10 +65,8 @@ state for reporting and such
 	doc[section+".store.tls_skip_verify"] = `BPMON verifies if a https connection is trusted. If you wont to trust a
 connection with an invalid certificate you have to set this to true
 `
-	doc[section+".trigger"] = `If a service is failed, this command (rendered as a golang template) is
-printed to the stdout. This allows to easily wrap BPMON into an eval
-statement in your shell script.
+	doc[section+".templates"] = `templates is a map of templates which can be used with the run
+subcommand
 `
-	doc[section+".trigger.template"] = ``
 	return doc
 }
