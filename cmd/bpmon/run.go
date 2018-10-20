@@ -1,9 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"text/template"
 
 	"github.com/spf13/cobra"
@@ -12,6 +16,8 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
+
+var runJSONParams string
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -25,7 +31,7 @@ var runCmd = &cobra.Command{
 
 		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
 		if err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 		}
 
 		errs, err := c.Validate()
@@ -42,7 +48,39 @@ var runCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		t := template.Must(template.New("t1").Parse(s.Templates[templateName].Template))
+		templateData, ok := s.Templates[templateName]
+		if !ok {
+			msg := fmt.Sprintf("Template '%s' not found in section '%s'", templateName, cfgSection)
+			log.Fatal(msg)
+		}
+
+		t, err := template.New(templateName).Parse(templateData.Template)
+		if err != nil {
+			msg := fmt.Sprintf("Could not parse template '%s' from section '%s':  %s", templateName, cfgSection, err.Error())
+			log.Fatal(msg)
+		}
+
+		params := map[string]string{}
+
+		err = json.Unmarshal([]byte(runJSONParams), &params)
+		if err != nil {
+			msg := fmt.Sprintf("Could not parse params passed as JSON: %s", err.Error())
+			log.Fatal(msg)
+		}
+
+		for k, v := range templateData.Parameters {
+			if _, ok := params[k]; ok {
+				continue
+			}
+			fmt.Fprintf(os.Stderr, "Enter '%s' (%s): ", k, v)
+			reader := bufio.NewReader(os.Stdin)
+			params[k], err = reader.ReadString('\n')
+			params[k] = strings.TrimSuffix(params[k], "\n")
+			if err != nil {
+				msg := fmt.Sprintf("Could not read input for parameter '%s':  %s", k, err.Error())
+				log.Fatal(msg)
+			}
+		}
 
 		var sets []store.ResultSet
 		for _, bp := range b {
@@ -52,8 +90,19 @@ var runCmd = &cobra.Command{
 			}
 			sets = append(sets, rs)
 		}
+
+		data := struct {
+			BP         []store.ResultSet
+			Config     config.ConfigSection
+			Parameters map[string]string
+		}{
+			BP:         sets,
+			Config:     s,
+			Parameters: params,
+		}
+
 		var command bytes.Buffer
-		err = t.Execute(&command, sets)
+		err = t.Execute(&command, data)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -66,4 +115,5 @@ var runCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(runCmd)
+	runCmd.PersistentFlags().StringVarP(&runJSONParams, "params", "", "{}", "Provide template parameters as JSON object")
 }

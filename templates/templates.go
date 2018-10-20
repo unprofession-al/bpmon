@@ -5,7 +5,7 @@ type Config map[string]Template
 type Template struct {
 	Template    string            `yaml:"template"`
 	Description string            `yaml:"description"`
-	Prompts     map[string]string `yaml:"prompts"`
+	Parameters  map[string]string `yaml:"parameters"`
 }
 
 /*
