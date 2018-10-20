@@ -1,7 +1,6 @@
 package health
 
 import (
-	"text/template"
 	"time"
 
 	"github.com/unprofession-al/bpmon/checker"
@@ -11,7 +10,6 @@ import (
 )
 
 type Health struct {
-	Template        *template.Template
 	StoreRequired   bool
 	CheckerRequired bool
 	Responsible     string
@@ -19,17 +17,15 @@ type Health struct {
 	ID              string
 }
 
-func New(c Config) (Health, error) {
-	t, err := template.New("t1").Parse(c.Template)
+func New(c Config) Health {
 	h := Health{
-		Template:        t,
 		StoreRequired:   c.StoreRequired,
 		CheckerRequired: c.CheckerRequired,
 		Responsible:     c.Responsible,
 		Name:            c.Name,
 		ID:              c.ID,
 	}
-	return h, err
+	return h
 }
 
 func (h Health) Check(c checker.Checker, s store.Accessor) *store.ResultSet {

@@ -3,7 +3,6 @@ package health
 import "errors"
 
 type Config struct {
-	Template        string `yaml:"template"`
 	StoreRequired   bool   `yaml:"store_required"`
 	CheckerRequired bool   `yaml:"checker_required"`
 	Responsible     string `yaml:"responsible"`
@@ -13,7 +12,6 @@ type Config struct {
 
 func Defaults() Config {
 	return Config{
-		Template:        "{{.}}",
 		StoreRequired:   false,
 		CheckerRequired: true,
 		Responsible:     "",
@@ -24,8 +22,11 @@ func Defaults() Config {
 
 func (c Config) Validate() ([]string, error) {
 	errs := []string{}
-	if c.Template == "" {
-		errs = append(errs, "Field 'template' cannot be empty.")
+	if c.Name == "" {
+		errs = append(errs, "Field 'name' cannot be empty.")
+	}
+	if c.ID == "" {
+		errs = append(errs, "Field 'id' cannot be empty.")
 	}
 	if len(errs) > 0 {
 		err := errors.New("Config of 'health' has errors")

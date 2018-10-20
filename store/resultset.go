@@ -1,12 +1,9 @@
 package store
 
 import (
-	"fmt"
-	"sort"
 	"strings"
 	"time"
 
-	"github.com/mgutz/ansi"
 	"github.com/unprofession-al/bpmon/status"
 )
 
@@ -43,77 +40,6 @@ func (rs ResultSet) Kind() Kind {
 		kind = KindService
 	}
 	return kind
-}
-
-// PrettyPrint returns a string representation of its 'ResultSet', proper formated
-// to be printed to STDOUT in a human readable form.
-func (rs ResultSet) PrettyPrint(level int, ts bool, vals bool, resp bool) string {
-	ident := strings.Repeat("   ", level)
-	out := rs.Status.Colorize(fmt.Sprintf("%s%s %s is %v", ident, rs.Kind(), rs.Name, rs.Status))
-	if rs.WasChecked {
-		out += rs.Status.Colorize(fmt.Sprintf(" (was %v)", rs.Was))
-	}
-
-	ident = strings.Repeat("   ", level+1)
-	if ts {
-		timestamp := rs.Start.Format("2006-01-02 15:04:05")
-		out += fmt.Sprintf(" (%s)", timestamp)
-	}
-	if resp && rs.Responsible != "" {
-		out += fmt.Sprintf(" (Responsible: %s)", rs.Responsible)
-	}
-	if rs.Err != nil {
-		out += fmt.Sprintf("\n%sError occured: %s", ident, rs.Err.Error())
-	}
-	if rs.Status == status.StatusNOK && rs.Output != "" {
-		out += fmt.Sprintf("\n%sMessage from Monitoring: %s", ident, rs.Output)
-	}
-	if vals && len(rs.Vals) > 0 {
-		out += fmt.Sprintf("\n%sValues:", ident)
-		var keys []string
-		for k := range rs.Vals {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-		for _, key := range keys {
-			value := rs.Vals[key]
-			out += " "
-			if !value {
-				out += ansi.Color(key, "magenta+s")
-			} else {
-				out += ansi.Color(key, "green")
-			}
-		}
-	}
-	out += "\n"
-	for _, childRs := range rs.Children {
-		out += childRs.PrettyPrint(level+1, ts, vals, resp)
-	}
-	return out
-}
-
-// FilterByStatus returns a ResultSet that only contains element with one of the
-// status passed as argument.
-func (rs ResultSet) FilterByStatus(s []status.Status) (ResultSet, bool) {
-	setOut := rs
-	keep := false
-	for _, status := range s {
-		if rs.Status == status {
-			keep = true
-			break
-		}
-	}
-	if keep {
-		var children []*ResultSet
-		for _, child := range rs.Children {
-			set, stripped := child.FilterByStatus(s)
-			if !stripped {
-				children = append(children, &set)
-			}
-		}
-		setOut.Children = children
-	}
-	return setOut, !keep
 }
 
 // AddPreviousStatus looks up the last status of a 'ResultSet' which was
