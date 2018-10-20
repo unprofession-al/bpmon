@@ -42,7 +42,7 @@ var runCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		t := template.Must(template.New("t1").Parse(s.Templates[templateName]))
+		t := template.Must(template.New("t1").Parse(s.Templates[templateName].Template))
 
 		var sets []store.ResultSet
 		for _, bp := range b {

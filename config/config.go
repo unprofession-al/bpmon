@@ -12,6 +12,7 @@ import (
 	"github.com/unprofession-al/bpmon/health"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/templates"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -95,7 +96,7 @@ type ConfigSection struct {
 
 	// templates is a map of templates which can be used with the run
 	// subcommand
-	Templates map[string]string `yaml:"templates"`
+	Templates templates.Config `yaml:"templates"`
 }
 
 func defaultConfigSection() ConfigSection {
@@ -104,6 +105,7 @@ func defaultConfigSection() ConfigSection {
 		Checker:   checker.Defaults(),
 		Store:     store.Defaults(),
 		Dashboard: dashboard.Defaults(),
+		Templates: templates.Defaults(),
 	}
 }
 
