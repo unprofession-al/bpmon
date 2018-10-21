@@ -4,6 +4,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -73,5 +74,7 @@ func main() {
 
 	chain := alice.New().Then(r)
 
-	log.Fatal(http.ListenAndServe(cfg.Listener.Address+":"+cfg.Listener.Port, chain))
+	listener := fmt.Sprintf("%s:%s", cfg.Listener.Address, cfg.Listener.Port)
+	fmt.Printf("Serving IcingaMock at http://%s\nPress CTRL-c to stop...\n", listener)
+	log.Fatal(http.ListenAndServe(listener, chain))
 }
