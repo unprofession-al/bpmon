@@ -13,17 +13,16 @@ import (
 )
 
 var (
-	configFile string
-	envDir     string
-	bpDir      string
-	staticDir  string
-	hub        *Hub
-	cfg        Configuration
-	envs       *Environments
+	listener  string
+	envDir    string
+	bpDir     string
+	staticDir string
+	hub       *Hub
+	envs      *Environments
 )
 
 func init() {
-	flag.StringVar(&configFile, "conf", "./config/icingamock.yaml", "path to config file")
+	flag.StringVar(&listener, "listener", "0.0.0.0:8765", "ip/port to listen on")
 	flag.StringVar(&envDir, "env", "", "environment setup files")
 	flag.StringVar(&bpDir, "bp", "", "bpmon bp files")
 	flag.StringVar(&staticDir, "static", "", "static html served at http root")
@@ -32,10 +31,6 @@ func init() {
 func main() {
 	flag.Parse()
 	var err error
-	cfg, err = Configure(configFile)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	envs, err = LoadEnvs(envDir, "*.yaml")
 	if err != nil {
@@ -74,7 +69,6 @@ func main() {
 
 	chain := alice.New().Then(r)
 
-	listener := fmt.Sprintf("%s:%s", cfg.Listener.Address, cfg.Listener.Port)
 	fmt.Printf("Serving IcingaMock at http://%s\nPress CTRL-c to stop...\n", listener)
 	log.Fatal(http.ListenAndServe(listener, chain))
 }
