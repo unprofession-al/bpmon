@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -17,7 +16,7 @@ import (
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
-var runJSONParams string
+var runParams []string
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -62,7 +61,15 @@ var runCmd = &cobra.Command{
 
 		params := map[string]string{}
 
-		err = json.Unmarshal([]byte(runJSONParams), &params)
+		for _, param := range runParams {
+			tokens := strings.SplitN(param, "=", 2)
+			if len(tokens) == 2 {
+				params[tokens[0]] = tokens[1]
+			} else {
+				fmt.Fprintf(os.Stderr, "Param '%s' is invalid, must match pattern [key]=[value] ", param)
+			}
+		}
+
 		if err != nil {
 			msg := fmt.Sprintf("Could not parse params passed as JSON: %s", err.Error())
 			log.Fatal(msg)
@@ -115,5 +122,5 @@ var runCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().StringVarP(&runJSONParams, "params", "", "{}", "Provide template parameters as JSON object")
+	runCmd.PersistentFlags().StringSliceVar(&runParams, "params", []string{}, "Provide template parameters")
 }
