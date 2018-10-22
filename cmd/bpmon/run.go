@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -95,26 +94,39 @@ var runCmd = &cobra.Command{
 				rs.AddPreviousStatus(p, s.Store.SaveOK)
 			}
 			sets = append(sets, rs)
+			if runner.ForEach {
+				data := struct {
+					BP         []store.ResultSet
+					Config     config.ConfigSection
+					Parameters map[string]string
+				}{
+					BP:         []store.ResultSet{rs},
+					Config:     s,
+					Parameters: params,
+				}
+				err = runner.Exec(data)
+				if err != nil {
+					break
+				}
+			}
 		}
 
-		data := struct {
-			BP         []store.ResultSet
-			Config     config.ConfigSection
-			Parameters map[string]string
-		}{
-			BP:         sets,
-			Config:     s,
-			Parameters: params,
+		if !runner.ForEach {
+			data := struct {
+				BP         []store.ResultSet
+				Config     config.ConfigSection
+				Parameters map[string]string
+			}{
+				BP:         sets,
+				Config:     s,
+				Parameters: params,
+			}
+			err = runner.Exec(data)
 		}
 
-		var command bytes.Buffer
-		err = runner.Template.Execute(&command, data)
 		if err != nil {
-			log.Fatal(err)
-		}
-
-		if len(sets) > 0 {
-			fmt.Println(command.String())
+			msg := fmt.Sprintf("Error while Executing runner: %s", err.Error())
+			log.Fatal(msg)
 		}
 	},
 }

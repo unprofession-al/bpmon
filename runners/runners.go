@@ -1,6 +1,7 @@
 package runners
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"text/template"
@@ -57,4 +58,12 @@ type Runner struct {
 	Template    *template.Template `yaml:"template"`
 	Description string             `yaml:"description"`
 	Parameters  map[string]string  `yaml:"parameters"`
+	ForEach     bool               `yaml:"for_each"`
+}
+
+func (r Runner) Exec(data interface{}) error {
+	var command bytes.Buffer
+	err := r.Template.Execute(&command, data)
+	fmt.Print(command.String())
+	return err
 }
