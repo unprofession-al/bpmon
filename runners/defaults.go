@@ -1,10 +1,12 @@
-package templates
+package runners
 
-func Defaults() Config {
-	return Config{
-		"default": Template{
+import "text/template"
+
+func Defaults() Runners {
+	return Runners{
+		"default": Runner{
 			Description: `Print all check results in a short format and human readable`,
-			Template: `{{- range $index, $bp := .BP }}
+			Template: template.Must(template.New("default").Parse(`{{- range $index, $bp := .BP }}
   {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
   {{- range $index, $kpi := .Children }}
     {{ $kpi.Status.Colorize $kpi.Name }} {{ $kpi.Status.Colorize "is" }} {{ $kpi.Status.Colorize $kpi.Status.String }}
@@ -12,13 +14,13 @@ func Defaults() Config {
       {{ $svc.Status.Colorize $svc.Name }} {{ $svc.Status.Colorize "is" }} {{ $svc.Status.Colorize $svc.Status.String }}
     {{- end -}}
   {{ end }}
-{{ end -}}`,
+{{ end -}}`)),
 		},
-		"verbose": Template{
+		"verbose": Runner{
 			Description: `Print all check results in a long format and human readable`,
-			Template: `
+			Template: template.Must(template.New("verbose").Parse(`
 {{- range $index, $bp := .BP }}
-  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }} 
+  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
             since: {{ $bp.Start.Format "2006-01-02 15:04:05" }}
       responsible: {{ $bp.Responsible }}
            values: {{ range $key, $val := $bp.Vals }}{{$key}}={{$val}} {{ end }}
@@ -33,14 +35,14 @@ func Defaults() Config {
                values: {{ range $key, $val := $svc.Vals }}{{$key}}={{$val}} {{ end }}
     {{- end -}}
   {{ end }}
-{{ end -}}`,
+{{ end -}}`)),
 		},
-		"issues": Template{
+		"issues": Runner{
 			Description: `Print failed check results in a short format and human readable`,
-			Template: `
+			Template: template.Must(template.New("issues").Parse(`
 {{- range $index, $bp := .BP -}}
   {{- if and (index $bp.Vals "in_availability") (ne $bp.Status 0) }}
-  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }} 
+  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
     {{- range $index, $kpi := .Children -}}
       {{- if ne $kpi.Status 0 }}
     {{ $kpi.Status.Colorize $kpi.Name }} {{ $kpi.Status.Colorize "is" }} {{ $kpi.Status.Colorize $kpi.Status.String }}
@@ -52,14 +54,14 @@ func Defaults() Config {
       {{- end -}}
     {{ end }}
   {{ end }}
-{{- end -}}`,
+{{- end -}}`)),
 		},
-		"issues_verbose": Template{
+		"issues_verbose": Runner{
 			Description: `Print failed check results in a long format and human readable`,
-			Template: `
+			Template: template.Must(template.New("issues_verbose").Parse(`
 {{- range $index, $bp := .BP -}}
   {{- if and (index $bp.Vals "in_availability") (ne $bp.Status 0) }}
-  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }} 
+  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
             since: {{ $bp.Start.Format "2006-01-02 15:04:05" }}
       responsible: {{ $bp.Responsible }}
            values: {{ range $key, $val := $bp.Vals }}{{$key}}={{$val}} {{ end }}
@@ -81,7 +83,7 @@ func Defaults() Config {
       {{- end -}}
     {{ end }}
   {{ end }}
-{{- end -}}`,
+{{- end -}}`)),
 		},
 	}
 }

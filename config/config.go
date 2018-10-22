@@ -12,7 +12,6 @@ import (
 	"github.com/unprofession-al/bpmon/health"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/store"
-	"github.com/unprofession-al/bpmon/templates"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -94,9 +93,7 @@ type ConfigSection struct {
 	// dashboard configures the dashboard subcommand.
 	Dashboard dashboard.Config `yaml:"dashboard"`
 
-	// templates is a map of templates which can be used with the run
-	// subcommand
-	Templates templates.Config `yaml:"templates"`
+	Env EnvConfig `yaml:"env"`
 }
 
 func defaultConfigSection() ConfigSection {
@@ -105,7 +102,7 @@ func defaultConfigSection() ConfigSection {
 		Checker:   checker.Defaults(),
 		Store:     store.Defaults(),
 		Dashboard: dashboard.Defaults(),
-		Templates: templates.Defaults(),
+		Env:       EnvDefaults(),
 	}
 }
 
@@ -122,6 +119,9 @@ func (s ConfigSection) Validate(name string) (out []string, err error) {
 	out = append(out, errs...)
 
 	errs = fmtErrors(s.Dashboard.Validate())
+	out = append(out, errs...)
+
+	errs = fmtErrors(s.Env.Validate())
 	out = append(out, errs...)
 
 	_, aErr := s.Availabilities.Parse()

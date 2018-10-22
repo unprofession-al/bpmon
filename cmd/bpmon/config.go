@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"log"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/spf13/cobra"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
 	"github.com/unprofession-al/bpmon/config"
+	"gopkg.in/yaml.v2"
 )
 
 var configCmd = &cobra.Command{
@@ -20,7 +19,8 @@ var configPrintCmd = &cobra.Command{
 	Use:   "print",
 	Short: "Print the given configurantion section as interpreted by BPMON to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
+		cfg := fmt.Sprintf("%s/%s", cfgBase, cfgFile)
+		c, _, err := config.NewFromFile(cfg, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -64,7 +64,8 @@ var configRawCmd = &cobra.Command{
 	Use:   "raw",
 	Short: "Print the configuration with its injected defaults to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		_, raw, err := config.NewFromFile(cfgFile, injectDefaults)
+		cfg := fmt.Sprintf("%s/%s", cfgBase, cfgFile)
+		_, raw, err := config.NewFromFile(cfg, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}

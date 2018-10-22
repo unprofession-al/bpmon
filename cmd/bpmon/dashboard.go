@@ -20,7 +20,8 @@ var dashboardCmd = &cobra.Command{
 	Use:   "dashboard",
 	Short: "Run Dashboard Web UI",
 	Run: func(cmd *cobra.Command, args []string) {
-		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
+		cfg := fmt.Sprintf("%s/%s", cfgBase, cfgFile)
+		c, _, err := config.NewFromFile(cfg, injectDefaults)
 		if err != nil {
 			fmt.Println(err)
 		}

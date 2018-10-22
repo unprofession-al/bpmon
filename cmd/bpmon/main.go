@@ -14,8 +14,8 @@ import (
 
 var (
 	cfgFile        string
+	cfgBase        string
 	cfgSection     string
-	bpPath         string
 	bpPattern      string
 	verbose        bool
 	injectDefaults bool
@@ -32,9 +32,9 @@ var betaCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.PersistentFlags().StringVarP(&cfgFile, "cfg", "c", "/etc/bpmon/cfg.yaml", "path to the configuration file")
+	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "config.yaml", "name the configuration file")
+	RootCmd.PersistentFlags().StringVarP(&cfgBase, "base", "b", ".", "path of the directory where the configuration is located")
 	RootCmd.PersistentFlags().StringVarP(&cfgSection, "section", "s", "default", "name of the section to be read")
-	RootCmd.PersistentFlags().StringVarP(&bpPath, "bp", "b", "/etc/bpmon/bp.d", "path to business process configuration files")
 	RootCmd.PersistentFlags().StringVarP(&bpPattern, "pattern", "p", "*.yaml", "pattern of business process configuration files to process")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", true, "print log output")
 	RootCmd.PersistentFlags().BoolVarP(&injectDefaults, "defaults", "d", true, "inject defaults in main config file")
@@ -62,6 +62,7 @@ func fromSection(cnf config.Config, sectionName string) (s config.ConfigSection,
 		return
 	}
 
+	bpPath := fmt.Sprintf("%s/%s", cfgBase, s.Env.BP)
 	b, err = bpmon.LoadBP(bpPath, bpPattern, a, s.GlobalRecipients)
 	if err != nil {
 		return

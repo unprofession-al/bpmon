@@ -7,11 +7,11 @@ import (
 	"log"
 	"os"
 	"strings"
-	"text/template"
 
 	"github.com/spf13/cobra"
 	_ "github.com/unprofession-al/bpmon/checker/icinga"
 	"github.com/unprofession-al/bpmon/config"
+	"github.com/unprofession-al/bpmon/runners"
 	"github.com/unprofession-al/bpmon/store"
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
@@ -23,13 +23,15 @@ var runCmd = &cobra.Command{
 	Short: "Run all business process checks and render the results using a given template",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		templateName := "default"
+		runnerName := "default"
 		if len(args) > 0 {
-			templateName = args[0]
+			runnerName = args[0]
 		}
 
-		c, _, err := config.NewFromFile(cfgFile, injectDefaults)
+		cfg := fmt.Sprintf("%s/%s", cfgBase, cfgFile)
+		c, _, err := config.NewFromFile(cfg, injectDefaults)
 		if err != nil {
+			fmt.Println(cfgFile)
 			log.Fatal(err)
 		}
 
@@ -47,15 +49,12 @@ var runCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		templateData, ok := s.Templates[templateName]
-		if !ok {
-			msg := fmt.Sprintf("Template '%s' not found in section '%s'", templateName, cfgSection)
-			log.Fatal(msg)
-		}
+		runnerDir := fmt.Sprintf("%s/%s", cfgBase, s.Env.Runners)
+		run, err := runners.New(runnerDir)
 
-		t, err := template.New(templateName).Parse(templateData.Template)
-		if err != nil {
-			msg := fmt.Sprintf("Could not parse template '%s' from section '%s':  %s", templateName, cfgSection, err.Error())
+		runner, ok := run[runnerName]
+		if !ok {
+			msg := fmt.Sprintf("Template '%s' not found in section '%s'", runnerName, cfgSection)
 			log.Fatal(msg)
 		}
 
@@ -75,7 +74,7 @@ var runCmd = &cobra.Command{
 			log.Fatal(msg)
 		}
 
-		for k, v := range templateData.Parameters {
+		for k, v := range runner.Parameters {
 			if _, ok := params[k]; ok {
 				continue
 			}
@@ -109,7 +108,7 @@ var runCmd = &cobra.Command{
 		}
 
 		var command bytes.Buffer
-		err = t.Execute(&command, data)
+		err = runner.Template.Execute(&command, data)
 		if err != nil {
 			log.Fatal(err)
 		}
