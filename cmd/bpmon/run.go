@@ -30,7 +30,6 @@ var runCmd = &cobra.Command{
 		cfg := fmt.Sprintf("%s/%s", cfgBase, cfgFile)
 		c, _, err := config.NewFromFile(cfg, injectDefaults)
 		if err != nil {
-			fmt.Println(cfgFile)
 			log.Fatal(err)
 		}
 
@@ -50,6 +49,9 @@ var runCmd = &cobra.Command{
 
 		runnerDir := fmt.Sprintf("%s/%s", cfgBase, s.Env.Runners)
 		run, err := runners.New(runnerDir)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		runner, ok := run[runnerName]
 		if !ok {
