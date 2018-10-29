@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/docs/2_basic/</loc>
+    <lastmod>2018-10-29T11:07:36+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/docs/</loc>
+    <lastmod>2018-10-29T11:07:36+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/communtiy/</loc>
+    <lastmod>2018-10-29T11:07:36+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/docs/1_gettingstarted/</loc>
+    <lastmod>2018-10-29T11:07:36+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/</loc>
+    <lastmod>2018-10-29T11:07:36+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/docs/3_runners/</loc>
+    <lastmod>2018-10-29T11:07:36+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/categories/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/docs/</loc>
+    <lastmod>2018-10-29T11:07:36+01:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://bpmon.unprofession.al/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+</urlset>

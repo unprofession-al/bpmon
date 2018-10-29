@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+	<meta name="generator" content="Hugo 0.49" />
+        <meta charset="UTF-8">
+        <title>BPMON - 
+    Home
+</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        
+        
+        
+
+        <base href="https://bpmon.unprofession.al/">
+        <link rel="stylesheet" href="https://bpmon.unprofession.al/css/main.css" />
+        <link rel="icon" type="image/png" href="favicon.png" />
+    </head>
+    <body>
+        <div class="grid">
+            <div class="header">
+                <div class="navigation">
+                    <nav>
+    
+    
+        <span class="navlink">
+            <a
+                href="/docs/"
+                class=""
+                >Community</a>
+        </span>
+    
+        <span class="navlink">
+            <a
+                href="/communtiy/"
+                class=""
+                >Docs</a>
+        </span>
+    
+        <span class="navlink">
+            <a
+                href="/"
+                class="active"
+                >Home</a>
+        </span>
+    
+</nav>
+
+
+                </div>
+            </div>
+            <div class="content">
+                
+<div class="single">
+    
+    <div class="header">Home</div>
+    <div class="text markdown-body">
+
+<p>Business Process Monitor that uses Icinga as service health source. BPMON allows
+you to compose <em>Business Processes</em> (BPs) and their <em>Key Performance Indicators</em>
+(KPIs) using the services you already have in Icinga! BPMON &hellip;</p>
+
+<ul>
+<li>&hellip; <em>reads</em> the states of services defined, &hellip;</li>
+<li>&hellip; <em>evaluates</em> those states, &hellip;</li>
+<li>&hellip; feeds the results results to an InfluxDB in order to <em>keep track of the history</em> &hellip;</li>
+<li>&hellip; and/or triggers a command to perform actions such as <em>alarming</em>.</li>
+</ul>
+
+<p>BPMON does not need to be run as a server. Run BPMON via Jenkins, Cron or
+manually as needed.</p>
+
+<h2 id="installation">Installation</h2>
+
+<p>To install BPMON, you need Go 1.7. Please refer to <a href="https://golang.org/doc/install">https://golang.org/doc/install</a>
+to do so&hellip;</p>
+
+<p>Simply run the following command (don&rsquo;t forget the three dots at the end!):</p>
+
+<pre><code># go get -u github.com/unprofession-al/bpmon/...
+</code></pre>
+
+<h2 id="configure-bpmon">Configure BPMON</h2>
+
+<p>BPMONs global settings are configured via a simple config file written in YAML.
+The config file can hold multiple <em>sections</em> (separat configurations) that enables
+a decent amount of flexibility in combination with YAMLs <em>anchors</em>. Let&rsquo;s have
+a look at an example:</p>
+
+<pre><code class="language-yaml">---
+# The default section is - as suggested - read by default. Note the '&amp;default'
+# notation; this is known an an 'anchor' and allows you to reuse the settings
+# in other sections...
+default: &amp;default
+  # First BPMON needs to have access to your Icinga2 API. Learn more on by reading 
+  # https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
+  checker:
+    kind: icinga
+    connection: https://user:pass@icinga.example.com:5665
+  # Also the connection to the InfluxDB is required in order to persist the
+  # state for reporting and such. 
+  store:
+    kind: influx
+    connection: http://user:pass@influx.example.com:8086/bpmon
+    # the timeout is read as a go (golang) duration, please refer to 
+    # https://golang.org/pkg/time/#Duration for a detailed explanation.
+    timeout: 2s
+    # If a state is 'OK' only save it to InfluxDB if its an BP measurement 
+    # (e.g. do not persist 'OK' states for KPIs and services for the sake of
+    # a small amount of data). In that case BP 'OK' states are saved as 
+    # 'heart beat' of BPMON.
+    save_ok: [ BP ]
+    # This will tell BPMON to compare the current status against the last 
+    # status saved in InfluxDB and adds some values to the measurement 
+    # accordingly. This then allows to generate reports such as 'Tell me
+    # only when a status is changed from good to bad'. This only runs against
+    # types listed in 'save_ok' since only these are persisted 'correctly'.
+    get_last_status: true
+  # global_recipient will be added to the repicient list af all BP
+  global_recipient: admin
+  # Define your office hours et al. according to your service level 
+  # agreements (SLA). You can later reference them in your BP definitions.
+  availabilities:
+    7x24:
+      monday:    [ &quot;allday&quot; ]
+      tuesday:   [ &quot;allday&quot; ]
+      wednesday: [ &quot;allday&quot; ]
+      thursday:  [ &quot;allday&quot; ]
+      friday:    [ &quot;allday&quot; ]
+      saturday:  [ &quot;allday&quot; ]
+      sunday:    [ &quot;allday&quot; ]
+    9to5:
+      monday:    [ &quot;09:00:00-17:00:00&quot; ]
+      tuesday:   [ &quot;09:00:00-17:00:00&quot; ]
+      wednesday: [ &quot;09:00:00-17:00:00&quot; ]
+      thursday:  [ &quot;09:00:00-17:00:00&quot; ]
+      friday:    [ &quot;09:00:00-17:00:00&quot; ]
+      saturday:  [ &quot;09:00:00-17:00:00&quot; ]
+      sunday:    [ &quot;09:00:00-17:00:00&quot; ]
+test:
+  # Inherit all settings fron the default anchor and extend/overwrite
+  &lt;&lt;: *default
+  availabilities:
+    officeHours:
+      monday:    [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+      tuesday:   [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+      wednesday: [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+      thursday:  [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+      friday:    [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+alarming:
+  &lt;&lt;: *default
+  # Extend the default rules; in that case: Do not run the alarming command
+  # if a critical service is aready aknowledged to avoid alarm spamming.
+  rules:
+    25:
+      must: [ critical, acknowledged ]
+      then: ok
+  influx:
+    get_last_status: false
+  # If a service is failed, this command (rendered as a golang template) is 
+  # printed to the stdout. This allows to easily wrap BPMON into an eval
+  # statement in your shell script.
+  trigger:
+    template: |
+        curl -X POST https://alarming.example.com/trigger -d '[{{- range $index, $elem := . -}}
+          {{- if $index }},{{ end -}}
+            {{- &quot;{&quot; }} &quot;name&quot;: &quot;{{ .Name }}&quot;, &quot;services&quot;: [&quot;
+              {{- range $index, $elem := .Children -}}
+                {{- if $index}},&quot;{{ end -}}
+                {{- range $index, $elem := .Children -}}
+                  {{- if $index }}&quot;,&quot;{{ end -}}
+                  {{- $elem.Name -}}
+                {{- end -}}&quot;
+              {{- end -}}]
+            {{- &quot;}&quot; -}}
+          {{- end -}}]'
+</code></pre>
+
+<p>Run the following command to check your configuration and see how it comes
+together with the defaults set by BPMON:</p>
+
+<pre><code># bpmon -c [path_to_the_config] -s [name_of_the_section_to_check] config
+</code></pre>
+
+<p>For example:</p>
+
+<pre><code># bpmon -c ./cfg.yaml -s default config
+</code></pre>
+
+<h2 id="define-business-processes">Define <em>Business Processes</em></h2>
+
+<p>Now that BPMON is set up, lets define a <em>business process</em>. Again, we do that
+via YAML, a file per <em>business process</em>:</p>
+
+<pre><code class="language-yaml">---
+# Give it a name. Names can be changed anytime...
+name: Application X
+# Also give it an ID. This is used to store results in the database and
+# therefore should not be changed.
+id: app_x
+# Tell BPMON during what time the process needs to be avalable. Remember
+# the availabilities section from the global configuration...? This links 
+# there.
+availability: 9to5
+# You can also specify a 'responsible' string. This string can then be used in
+# the trigger template. This could be for example trigger a specific http
+# end point, pass some uri parameters, send an email to a specific address etc.
+# The 'responsible' string is inherited by its KPIs if not overwritten...
+responsible: app.team@example.com
+# By providing a list of 'recipients' subcommands such as 'beta dashboard' can
+# use that information in order do provide some sort of authorization.
+recipients: [ UsersAppX ]
+# Now the KPIs...
+kpis:
+  - 
+    # We already know the name and ID part...
+    name: Load Balancer Availability
+    id: lb_availability
+    # The 'operatinon' defines how the services must be evaluated. Possible
+    # options are:
+    # * AND:          All services need to be 'OK' for the KPI to be 'OK'.
+    # * OR:           At least one sf its services needs to fo 'OK'.
+    # * MIN x:        Where x is an integer. A minimum number of x services
+    #                 need to be 'OK'
+    # * MINPERCENT x:  As 'MIN', but in percent.
+    operation: OR
+    # Again, a 'responsible' string can be specified in order not to inherit
+    # from the parent BP.
+    responsible: infra.team@example.com
+    # And now the processes. Host and service relate to how you named those
+    # things in your Icinga2 setup.
+    services:
+      - { host: haproxy1.example.com, service: ping } 
+      - { host: haproxy2.example.com, service: ping }
+  - name: App Nodes Availability
+    id: app_availability
+    operation: MINPERCENT 50
+    services:
+      - { host: app1.example.com, service: api_health, responsible: engineering.team@example.com }
+      - { host: app2.example.com, service: api_health }
+      - { host: app3.example.com, service: api_health }
+      - { host: app4.example.com, service: api_health }
+</code></pre>
+
+<p>Place your business processes in a directory and point BPMON there to execute:</p>
+
+<pre><code># bpmon -c ./cfg.yaml -s default -b ./bp.d/ run
+</code></pre>
+
+<h2 id="run">Run</h2>
+
+<pre><code># bpmon -h
+Montior business processes composed of Icinga checks
+
+Usage:
+  bpmon [command]
+
+Available Commands:
+  beta        Access beta features of BPMON
+  config      Print the configurantion used to stdout
+  run         Run all business process checks and print to stdout
+  trigger     Run all business process checks and trigger a custom command if issue occure
+  write       Insert data into InfluxDB
+
+Flags:
+  -b, --bp string        path to business process configuration files (default &quot;/etc/bpmon/bp.d&quot;)
+  -c, --cfg string       path to the configuration file (default &quot;/etc/bpmon/cfg.yaml&quot;)
+  -p, --pattern string   pattern of business process configuration files to process (default &quot;*.yaml&quot;)
+  -s, --section string   name of the section to be read (default &quot;default&quot;)
+  -v, --verbose          print log output (default true)
+
+Use &quot;bpmon [command] --help&quot; for more information about a command.
+</code></pre>
+</div>
+</div>
+
+            </div>
+            <div class="footer">unprofessional
+</div>
+        </div>
+    </body>
+</html>
+
