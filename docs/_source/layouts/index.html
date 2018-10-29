@@ -6,10 +6,7 @@
 <div class="single">
     {{ $baseurl := .URL}}
     <div class="header">{{ .Title }}</div>
-    <div class="text">{{ .Content }}</div>
-    {{ range where .Data.Pages "Section" "docs" }}
-    <div class="text">{{ . }}</div>
-    {{ end }}
+    <div class="text markdown-body">{{ .Content }}</div>
 </div>
 {{ end }}
 
