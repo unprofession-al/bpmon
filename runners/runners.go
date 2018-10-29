@@ -43,7 +43,7 @@ func New(path string) (Runners, error) {
 		if err != nil {
 			return r, fmt.Errorf("Error while reading runner template (%s) for runner %s: %s", templpath, rdir.Name(), err.Error())
 		}
-		runner.Template, err = template.New(rdir.Name()).Parse(string(templfile))
+		runner.Template, err = template.New(rdir.Name()).Funcs(getFuncs()).Parse(string(templfile))
 		if err != nil {
 			return r, fmt.Errorf("Error while parsing runner template (%s) for runner %s: %s", templpath, rdir.Name(), err.Error())
 		}

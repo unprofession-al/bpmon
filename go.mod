@@ -1,6 +1,7 @@
 module github.com/unprofession-al/bpmon
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/gorilla/context v1.1.1 // indirect
 	github.com/gorilla/mux v1.6.2
 	github.com/gorilla/websocket v1.4.0

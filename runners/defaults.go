@@ -7,7 +7,7 @@ func Defaults() Runners {
 		"default": Runner{
 			Description: `Print all check results in a short format and human readable`,
 			ForEach:     true,
-			Template: template.Must(template.New("default").Parse(`{{- range $index, $bp := .BP }}  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
+			Template: template.Must(template.New("default").Funcs(getFuncs()).Parse(`{{- range $index, $bp := .BP }}  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
   {{- range $index, $kpi := .Children }}
     {{ $kpi.Status.Colorize $kpi.Name }} {{ $kpi.Status.Colorize "is" }} {{ $kpi.Status.Colorize $kpi.Status.String }}
     {{- range $index, $svc := .Children }}
@@ -17,10 +17,15 @@ func Defaults() Runners {
 {{ end }}
 `)),
 		},
+		"dump": Runner{
+			Description: `Print all check results in a short format and human readable`,
+			ForEach:     false,
+			Template:    template.Must(template.New("dump").Funcs(getFuncs()).Parse(`{{ describe .}}`)),
+		},
 		"verbose": Runner{
 			Description: `Print all check results in a long format and human readable`,
 			ForEach:     true,
-			Template: template.Must(template.New("verbose").Parse(`{{- range $index, $bp := .BP }}  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
+			Template: template.Must(template.New("verbose").Funcs(getFuncs()).Parse(`{{- range $index, $bp := .BP }}  {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
             since: {{ $bp.Start.Format "2006-01-02 15:04:05" }}
       responsible: {{ $bp.Responsible }}
            values: {{ range $key, $val := $bp.Vals }}{{$key}}={{$val}} {{ end }}
@@ -40,7 +45,7 @@ func Defaults() Runners {
 		},
 		"issues": Runner{
 			Description: `Print failed check results in a short format and human readable`,
-			Template: template.Must(template.New("issues").Parse(`
+			Template: template.Must(template.New("issues").Funcs(getFuncs()).Parse(`
 {{- range $index, $bp := .BP -}}
   {{- if and (index $bp.Vals "in_availability") (ne $bp.Status 0) }}
   {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
@@ -59,7 +64,7 @@ func Defaults() Runners {
 		},
 		"issues_verbose": Runner{
 			Description: `Print failed check results in a long format and human readable`,
-			Template: template.Must(template.New("issues_verbose").Parse(`
+			Template: template.Must(template.New("issues_verbose").Funcs(getFuncs()).Parse(`
 {{- range $index, $bp := .BP -}}
   {{- if and (index $bp.Vals "in_availability") (ne $bp.Status 0) }}
   {{ $bp.Status.Colorize $bp.Name }} {{ $bp.Status.Colorize "is" }} {{ $bp.Status.Colorize $bp.Status.String }}
