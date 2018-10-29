@@ -17,11 +17,6 @@ func Defaults() Runners {
 {{ end }}
 `)),
 		},
-		"dump": Runner{
-			Description: `Print all check results in a short format and human readable`,
-			ForEach:     false,
-			Template:    template.Must(template.New("dump").Funcs(getFuncs()).Parse(`{{ describe .}}`)),
-		},
 		"verbose": Runner{
 			Description: `Print all check results in a long format and human readable`,
 			ForEach:     true,
