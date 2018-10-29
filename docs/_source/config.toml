@@ -1,0 +1,4 @@
+baseURL = "https://bpmon.unprofession.al/"
+languageCode = "en-us"
+title = "BPMON"
+theme = "bpmon"

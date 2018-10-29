@@ -1,0 +1,18 @@
+{{ define "title" }}
+    {{ .Title }}
+{{ end }}
+
+{{ define "content" }}
+    <div class="projects">
+        {{ range .Pages }}
+            <div class="project">
+                <a href="{{ .URL }}"><div class="cover">
+                        <div class="title">
+                            <b>{{ .Title }}</b><br>
+                            {{ .Date.Format "2006-04" }}</div>
+                </div></a>
+            </div>
+        {{ end }}
+    </div>
+{{ end }}
+
