@@ -16,16 +16,39 @@ p, ul, pre, h1, h2, h3, h4, h5 {
     margin-bottom: 15px;
 }
 
-h2 {
+h1 {
+    text-transform: uppercase;
+    color: var(--main-color);
+}
+
+h2, h1 {
     font-size: var(--font-size-large);
     font-weight: bold;
 }
 
-pre {
+h3 {
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+blockquote {
+    border-left: 4px solid var(--main-color);
+    padding-left: 15px;
+	font-style: italic;
+}
+
+i {
+	font-style: italic;
+}
+
+code, pre{
     font-family: 'IBM Plex Mono', monospace;
+}
+
+pre {
+    background-color: var(--light-color);
     font-size: var(--font-size-code);
     padding: 20px;
-    background-color: #DDD;
     margin-bottom: 10px;
     overflow-x: auto;
 }
@@ -35,7 +58,31 @@ pre {
     color: var(--main-color);
 }
 
-.navlink>a, .navlink>a:hover {
+a {
     color: var(--main-color);
     text-decoration: none;
+}
+
+a:hover {
+    color: var(--alternative-color);
+    text-decoration: none;
+}
+
+svg:hover .unprofessional-element {
+    fill: var(--main-color);
+}
+
+svg:hover .bpmon-element {
+    fill: url(#gradient-horizontal) #447799;
+}
+
+path { transition: fill .4s ease; }
+
+#gradient-horizontal {
+    --color-stop-2: #cf8bf3;
+    --color-stop-1: #a770ef;
+    --color-stop-3: #fdb99b;
+    --color-stop-4: #ffff1c;
+    --color-stop-5: #77e190;
+    --color-stop-6: #00c3ff;
 }

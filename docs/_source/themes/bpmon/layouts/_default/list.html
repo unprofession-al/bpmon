@@ -3,14 +3,15 @@
 {{ end }}
 
 {{ define "content" }}
-    <div class="projects">
-        {{ range .Pages }}
-            <div class="project">
-                <a href="{{ .URL }}"><div class="cover">
-                        <div class="title">
-                            <b>{{ .Title }}</b><br>
-                            {{ .Date.Format "2006-04" }}</div>
-                </div></a>
+
+{{ .Content }}
+
+<h1>Chapters</h1>
+    <div class="chapters">
+        {{ range $i, $a := .Pages }}
+            <div class="capter">
+                <a href="{{ $a.URL }}"><b>{{add $i 1}}. {{ .Title }}</b></a>&nbsp;&mdash;&nbsp;<i>({{ $a.Params.duration }}{{ if $a.Params.optional }},&nbsp;optional step{{ end }})</i>
+				{{ .Summary }}
             </div>
         {{ end }}
     </div>

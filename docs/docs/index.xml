@@ -12,30 +12,58 @@
     
     
     <item>
-      <title>Basic Configuration</title>
-      <link>https://bpmon.unprofession.al/docs/2_basic/</link>
-      <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
-      
-      <guid>https://bpmon.unprofession.al/docs/2_basic/</guid>
-      <description> Basic Configuration </description>
-    </item>
-    
-    <item>
       <title>Getting Started with BPMON</title>
       <link>https://bpmon.unprofession.al/docs/1_gettingstarted/</link>
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
       <guid>https://bpmon.unprofession.al/docs/1_gettingstarted/</guid>
-      <description> Basic Configuration </description>
+      <description>&lt;p&gt;There are a few things you need to prepare&amp;hellip; Getting everything ready.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
     <item>
-      <title>Write your own runners</title>
-      <link>https://bpmon.unprofession.al/docs/3_runners/</link>
+      <title>The Main Configuration</title>
+      <link>https://bpmon.unprofession.al/docs/2_mainconfiguration/</link>
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
-      <guid>https://bpmon.unprofession.al/docs/3_runners/</guid>
-      <description> Basic Configuration </description>
+      <guid>https://bpmon.unprofession.al/docs/2_mainconfiguration/</guid>
+      <description>&lt;p&gt;Now let&amp;rsquo;s move forward; here comes the fun part.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Create Business Processes</title>
+      <link>https://bpmon.unprofession.al/docs/3_businessprocesses/</link>
+      <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
+      
+      <guid>https://bpmon.unprofession.al/docs/3_businessprocesses/</guid>
+      <description>&lt;p&gt;Learn how do create a Business Process composed from existing Icinga2 Checks.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Persist Historical Data</title>
+      <link>https://bpmon.unprofession.al/docs/4_persistence/</link>
+      <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
+      
+      <guid>https://bpmon.unprofession.al/docs/4_persistence/</guid>
+      <description>&lt;p&gt;See how you can track the history of your incidents.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Write your own Runners</title>
+      <link>https://bpmon.unprofession.al/docs/5_writerunners/</link>
+      <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
+      
+      <guid>https://bpmon.unprofession.al/docs/5_writerunners/</guid>
+      <description>&lt;p&gt;Not quite what you need yet? Let&amp;rsquo;s customize the output!&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
     </item>
     
   </channel>

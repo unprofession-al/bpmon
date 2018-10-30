@@ -17,7 +17,7 @@
         <div class="grid">
             <div class="header">
                 <div class="logo">
-                    {{ partial "logo.svg" . }}
+                    <a href="{{ .Site.BaseURL }}">{{ partial "logo.svg" . }}</a>
                 </div>
                 <div class="navigation">
                     {{ partial "nav.html" . }}
@@ -28,6 +28,18 @@
             </div>
             <div class="footer">{{ partial "footer.html" . }}</div>
         </div>
+
+        <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+            <linearGradient id="gradient-horizontal" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--color-stop-1)" />
+            <stop offset="20%" stop-color="var(--color-stop-2)" />
+            <stop offset="40%" stop-color="var(--color-stop-3)" />
+            <stop offset="60%" stop-color="var(--color-stop-4)" />
+            <stop offset="80%" stop-color="var(--color-stop-5)" />
+            <stop offset="100%" stop-color="var(--color-stop-6)" />
+            </linearGradient>       
+        </svg>
+
     </body>
 </html>
 

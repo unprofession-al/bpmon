@@ -1,5 +1,6 @@
 :root {
     --main-color: rgb(229,0,133);
+    --light-color: rgb(255, 234, 246);
     --alternative-color: rgb(38, 183, 181);
     --grid-gap: 20px;
 
