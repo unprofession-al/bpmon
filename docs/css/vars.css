@@ -1,9 +1,10 @@
 :root {
-    --main-color: rgb(48, 27, 5);
-
+    --main-color: rgb(229,0,133);
+    --alternative-color: rgb(38, 183, 181);
     --grid-gap: 20px;
 
     --font-size-small: 14px;
-    --font-size-regular: 20px;
-    --font-size-large: 30px;
+    --font-size-code: 13px;
+    --font-size-regular: 16px;
+    --font-size-large: 24px;
 }

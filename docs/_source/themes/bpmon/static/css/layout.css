@@ -6,6 +6,21 @@
 
 .header {
     grid-area: header;
+    border-bottom: 1px solid var(--main-color);
+}
+
+.navlink {
+    padding-left: 20px;
+}
+
+.logo {
+    width: 130px;
+    float: left;
+    position: sticky;
+}
+
+.navigation {
+    float: right;
 }
 
 .content {
@@ -13,13 +28,32 @@
 }
 
 .footer {
+    text-align: right;
     grid-area: footer;
+    padding-top: 30px;
+    margin-top: 30px;
+    color: var(--alternative-color);
+    border-top: 1px solid var(--alternative-color);
+}
+
+.unprofessional {
+    padding-top: 10px;
+    width: 200px;
+    float: right;
+}
+
+.bpmon-element {
+    fill: var(--main-color);
+}
+
+.unprofessional-element {
+    fill: var(--alternative-color);
 }
 
 @media only screen and (max-width: 750px) {
     .grid {
         grid-template-columns: 1fr;
-        grid-template-rows: 40px min-content 120px;
+        grid-template-rows: 80px min-content 120px;
         grid-template-areas:
             "header  "
             "content "
@@ -32,7 +66,7 @@
 @media only screen and (min-width: 750px) and (max-width: 1000px){
     .grid {
         grid-template-columns: 1fr 4fr 1fr;
-        grid-template-rows: 40px min-content 120px;
+        grid-template-rows: 80px min-content 120px;
         grid-template-areas:
             "left header  right"
             "left content right"
@@ -42,10 +76,10 @@
     }
 }
 
-@media only screen and (min-width: 1000px) {
+@media only screen and (min-width: 1040px) {
     .grid {
-        grid-template-columns: 1fr 1040px 1fr;
-        grid-template-rows: 40px min-content 120px;
+        grid-template-columns: 1fr 1000px 1fr;
+        grid-template-rows: 80px min-content 120px;
         grid-template-areas:
             "left header  right"
             "left content right"

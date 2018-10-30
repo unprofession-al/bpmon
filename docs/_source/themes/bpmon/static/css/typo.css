@@ -1,4 +1,41 @@
 body {
     font-family: 'IBM Plex Serif', serif;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    line-height: 1.5;
+    color: #24292e;
+    font-size: var(--font-size-regular);
+    line-height: 1.5;
 }
 
+li {
+    padding-left: 15px;
+}
+
+p, ul, pre, h1, h2, h3, h4, h5 {
+    margin-bottom: 15px;
+}
+
+h2 {
+    font-size: var(--font-size-large);
+    font-weight: bold;
+}
+
+pre {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: var(--font-size-code);
+    padding: 20px;
+    background-color: #DDD;
+    margin-bottom: 10px;
+    overflow-x: auto;
+}
+
+.footer {
+    font-size: var(--font-size-small);
+    color: var(--main-color);
+}
+
+.navlink>a, .navlink>a:hover {
+    color: var(--main-color);
+    text-decoration: none;
+}

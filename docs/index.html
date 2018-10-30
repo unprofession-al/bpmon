@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-	<meta name="generator" content="Hugo 0.49" />
+	<meta name="generator" content="Hugo 0.49.2" />
         <meta charset="UTF-8">
         <title>BPMON - 
     Home
@@ -19,29 +19,41 @@
     <body>
         <div class="grid">
             <div class="header">
+                <div class="logo">
+                    <svg viewBox="0 0 125.66393 57.284695">
+  <g transform="translate(-14.326616,-9.1155807)">
+    <path class="bpmon-element" d="m 21.417969,9.1152344 -5.179688,3.3710936 -1.912109,50.470703 5.628906,3.44336 26.285156,-14.720703 -0.0039,-6.601563 L 26.308594,33.947266 41.806641,23.615234 41.107422,16.953125 Z m 2.177734,9.0097656 8.019531,3.193359 -8.351562,5.56836 z m -0.851562,22.496094 13.90039,7.763672 -14.501953,8.11914 z" />
+    <path class="bpmon-element" d="m 46.910156,10.53125 -5.726562,3.201172 -0.572266,49.611328 7.564453,0.08594 0.296875,-25.808594 15.148438,-10.931641 -0.269532,-6.3125 z m 1.761719,9.873047 5.865234,3.511719 -5.955078,4.296875 z"/>
+    <path class="bpmon-element" d="m 64.101562,14.587891 -6.189453,2.908203 -0.0957,38.521484 7.564453,0.01758 0.07617,-30.521484 7.498047,6.1875 5.070313,-0.230469 4.86914,-4.826172 1.115235,30.191407 7.560546,-0.279297 -1.435546,-38.808594 -6.441407,-2.546875 -8.5625,8.486328 z"/>
+    <path class="bpmon-element" d="m 104.32031,12.248047 -5.826169,0.357422 -14.435547,19.882812 -0.121094,4.265625 16.44141,25.617188 6.58398,-0.388672 13.85938,-28.484375 -0.63477,-4.234375 z m -2.40234,8.517578 10.9668,11.757813 -9.77735,20.09375 -11.408201,-17.775391 z"/>
+    <path class="bpmon-element" d="m 123.54883,14.914062 -7.56445,0.01953 0.0957,37.08789 7.03711,1.916016 9.30859,-15.732422 v 27.38086 h 7.56445 V 24.386719 l -7.03711,-1.925781 -9.34374,15.791015 z"/>
+  </g>
+</svg>
+
+                </div>
                 <div class="navigation">
                     <nav>
     
     
         <span class="navlink">
             <a
-                href="/docs/"
-                class=""
-                >Community</a>
+                href="/"
+                class="active"
+                >Home</a>
         </span>
     
         <span class="navlink">
             <a
-                href="/communtiy/"
+                href="/docs/"
                 class=""
                 >Docs</a>
         </span>
     
         <span class="navlink">
             <a
-                href="/"
-                class="active"
-                >Home</a>
+                href="/communtiy/"
+                class=""
+                >Community</a>
         </span>
     
 </nav>
@@ -52,8 +64,6 @@
             <div class="content">
                 
 <div class="single">
-    
-    <div class="header">Home</div>
     <div class="text markdown-body">
 
 <p>Business Process Monitor that uses Icinga as service health source. BPMON allows
@@ -87,95 +97,6 @@ The config file can hold multiple <em>sections</em> (separat configurations) tha
 a decent amount of flexibility in combination with YAMLs <em>anchors</em>. Let&rsquo;s have
 a look at an example:</p>
 
-<pre><code class="language-yaml">---
-# The default section is - as suggested - read by default. Note the '&amp;default'
-# notation; this is known an an 'anchor' and allows you to reuse the settings
-# in other sections...
-default: &amp;default
-  # First BPMON needs to have access to your Icinga2 API. Learn more on by reading 
-  # https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
-  checker:
-    kind: icinga
-    connection: https://user:pass@icinga.example.com:5665
-  # Also the connection to the InfluxDB is required in order to persist the
-  # state for reporting and such. 
-  store:
-    kind: influx
-    connection: http://user:pass@influx.example.com:8086/bpmon
-    # the timeout is read as a go (golang) duration, please refer to 
-    # https://golang.org/pkg/time/#Duration for a detailed explanation.
-    timeout: 2s
-    # If a state is 'OK' only save it to InfluxDB if its an BP measurement 
-    # (e.g. do not persist 'OK' states for KPIs and services for the sake of
-    # a small amount of data). In that case BP 'OK' states are saved as 
-    # 'heart beat' of BPMON.
-    save_ok: [ BP ]
-    # This will tell BPMON to compare the current status against the last 
-    # status saved in InfluxDB and adds some values to the measurement 
-    # accordingly. This then allows to generate reports such as 'Tell me
-    # only when a status is changed from good to bad'. This only runs against
-    # types listed in 'save_ok' since only these are persisted 'correctly'.
-    get_last_status: true
-  # global_recipient will be added to the repicient list af all BP
-  global_recipient: admin
-  # Define your office hours et al. according to your service level 
-  # agreements (SLA). You can later reference them in your BP definitions.
-  availabilities:
-    7x24:
-      monday:    [ &quot;allday&quot; ]
-      tuesday:   [ &quot;allday&quot; ]
-      wednesday: [ &quot;allday&quot; ]
-      thursday:  [ &quot;allday&quot; ]
-      friday:    [ &quot;allday&quot; ]
-      saturday:  [ &quot;allday&quot; ]
-      sunday:    [ &quot;allday&quot; ]
-    9to5:
-      monday:    [ &quot;09:00:00-17:00:00&quot; ]
-      tuesday:   [ &quot;09:00:00-17:00:00&quot; ]
-      wednesday: [ &quot;09:00:00-17:00:00&quot; ]
-      thursday:  [ &quot;09:00:00-17:00:00&quot; ]
-      friday:    [ &quot;09:00:00-17:00:00&quot; ]
-      saturday:  [ &quot;09:00:00-17:00:00&quot; ]
-      sunday:    [ &quot;09:00:00-17:00:00&quot; ]
-test:
-  # Inherit all settings fron the default anchor and extend/overwrite
-  &lt;&lt;: *default
-  availabilities:
-    officeHours:
-      monday:    [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
-      tuesday:   [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
-      wednesday: [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
-      thursday:  [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
-      friday:    [ &quot;09:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
-alarming:
-  &lt;&lt;: *default
-  # Extend the default rules; in that case: Do not run the alarming command
-  # if a critical service is aready aknowledged to avoid alarm spamming.
-  rules:
-    25:
-      must: [ critical, acknowledged ]
-      then: ok
-  influx:
-    get_last_status: false
-  # If a service is failed, this command (rendered as a golang template) is 
-  # printed to the stdout. This allows to easily wrap BPMON into an eval
-  # statement in your shell script.
-  trigger:
-    template: |
-        curl -X POST https://alarming.example.com/trigger -d '[{{- range $index, $elem := . -}}
-          {{- if $index }},{{ end -}}
-            {{- &quot;{&quot; }} &quot;name&quot;: &quot;{{ .Name }}&quot;, &quot;services&quot;: [&quot;
-              {{- range $index, $elem := .Children -}}
-                {{- if $index}},&quot;{{ end -}}
-                {{- range $index, $elem := .Children -}}
-                  {{- if $index }}&quot;,&quot;{{ end -}}
-                  {{- $elem.Name -}}
-                {{- end -}}&quot;
-              {{- end -}}]
-            {{- &quot;}&quot; -}}
-          {{- end -}}]'
-</code></pre>
-
 <p>Run the following command to check your configuration and see how it comes
 together with the defaults set by BPMON:</p>
 
@@ -184,98 +105,42 @@ together with the defaults set by BPMON:</p>
 
 <p>For example:</p>
 
-<pre><code># bpmon -c ./cfg.yaml -s default config
-</code></pre>
-
 <h2 id="define-business-processes">Define <em>Business Processes</em></h2>
 
 <p>Now that BPMON is set up, lets define a <em>business process</em>. Again, we do that
-via YAML, a file per <em>business process</em>:</p>
-
-<pre><code class="language-yaml">---
-# Give it a name. Names can be changed anytime...
-name: Application X
-# Also give it an ID. This is used to store results in the database and
-# therefore should not be changed.
-id: app_x
-# Tell BPMON during what time the process needs to be avalable. Remember
-# the availabilities section from the global configuration...? This links 
-# there.
-availability: 9to5
-# You can also specify a 'responsible' string. This string can then be used in
-# the trigger template. This could be for example trigger a specific http
-# end point, pass some uri parameters, send an email to a specific address etc.
-# The 'responsible' string is inherited by its KPIs if not overwritten...
-responsible: app.team@example.com
-# By providing a list of 'recipients' subcommands such as 'beta dashboard' can
-# use that information in order do provide some sort of authorization.
-recipients: [ UsersAppX ]
-# Now the KPIs...
-kpis:
-  - 
-    # We already know the name and ID part...
-    name: Load Balancer Availability
-    id: lb_availability
-    # The 'operatinon' defines how the services must be evaluated. Possible
-    # options are:
-    # * AND:          All services need to be 'OK' for the KPI to be 'OK'.
-    # * OR:           At least one sf its services needs to fo 'OK'.
-    # * MIN x:        Where x is an integer. A minimum number of x services
-    #                 need to be 'OK'
-    # * MINPERCENT x:  As 'MIN', but in percent.
-    operation: OR
-    # Again, a 'responsible' string can be specified in order not to inherit
-    # from the parent BP.
-    responsible: infra.team@example.com
-    # And now the processes. Host and service relate to how you named those
-    # things in your Icinga2 setup.
-    services:
-      - { host: haproxy1.example.com, service: ping } 
-      - { host: haproxy2.example.com, service: ping }
-  - name: App Nodes Availability
-    id: app_availability
-    operation: MINPERCENT 50
-    services:
-      - { host: app1.example.com, service: api_health, responsible: engineering.team@example.com }
-      - { host: app2.example.com, service: api_health }
-      - { host: app3.example.com, service: api_health }
-      - { host: app4.example.com, service: api_health }
-</code></pre>
-
-<p>Place your business processes in a directory and point BPMON there to execute:</p>
+via YAML, a file per <em>business process</em>:
+Place your business processes in a directory and point BPMON there to execute:</p>
 
 <pre><code># bpmon -c ./cfg.yaml -s default -b ./bp.d/ run
 </code></pre>
 
 <h2 id="run">Run</h2>
-
-<pre><code># bpmon -h
-Montior business processes composed of Icinga checks
-
-Usage:
-  bpmon [command]
-
-Available Commands:
-  beta        Access beta features of BPMON
-  config      Print the configurantion used to stdout
-  run         Run all business process checks and print to stdout
-  trigger     Run all business process checks and trigger a custom command if issue occure
-  write       Insert data into InfluxDB
-
-Flags:
-  -b, --bp string        path to business process configuration files (default &quot;/etc/bpmon/bp.d&quot;)
-  -c, --cfg string       path to the configuration file (default &quot;/etc/bpmon/cfg.yaml&quot;)
-  -p, --pattern string   pattern of business process configuration files to process (default &quot;*.yaml&quot;)
-  -s, --section string   name of the section to be read (default &quot;default&quot;)
-  -v, --verbose          print log output (default true)
-
-Use &quot;bpmon [command] --help&quot; for more information about a command.
-</code></pre>
 </div>
 </div>
 
             </div>
-            <div class="footer">unprofessional
+            <div class="footer"><div>this thing is made by</div>
+<div class="unprofessional"><a href="//very.unprofession.al"><svg viewBox="0 0 122.97585 13.641916">
+              <g transform="translate(-48.881122,-143.52428)">
+                <g id="text4749" aria-label="Unprofessional">
+                  <path class="unprofessional-element" d="m 56.405871,144.90011 -3.026833,8.29733 -1.778,-2.2225 2.201333,-6.06425 -2.074333,-1.38641 -2.846916,7.83166 2.603499,3.29142 1.905,-1.28058 h 4.572 l -1.42875,-1.72509 2.455334,-6.74158 z"></path>
+                  <path class="unprofessional-element" d="m 65.39509,146.46644 -2.4765,3.19617 0.6985,-1.93675 h -4.6355 l 1.42875,1.72508 -1.42875,3.91584 h 4.6355 l -1.418166,-1.72509 0.666749,-1.83091 h 2.561167 l -1.280583,3.51366 2.06375,1.37584 1.788583,-4.8895 z"></path>
+                  <path class="unprofessional-element" d="m 75.810908,146.29711 -2.169583,1.42875 h -4.614333 l 1.42875,1.73567 -2.307167,6.31825 2.074334,1.38641 2.074333,-5.69383 2.54,3.25967 2.76225,-3.54542 z m -3.481916,5.09058 1.30175,-3.57716 1.36525,3.57716 z"></path>
+                  <path class="unprofessional-element" d="m 85.062892,146.47703 -2.455334,3.14325 0.687917,-1.89442 h -4.6355 l 1.42875,1.73567 -1.42875,3.90525 h 4.6355 l -1.418167,-1.72509 0.656167,-1.83091 h 2.54 l -0.338667,0.92075 2.084917,1.38641 0.836083,-2.30716 z"></path>
+                  <path class="unprofessional-element" d="m 94.473788,146.47703 -2.561167,3.31258 0.751417,-2.06375 h -2.57175 l -1.386416,3.76767 2.529416,3.24908 2.561167,-3.28083 -0.6985,1.905 h 2.561166 l 1.3335,-3.65125 z m -0.656167,4.92125 h -2.487083 l 0.5715,-1.5875 h 2.497667 z"></path>
+                  <path class="unprofessional-element" d="m 102.97022,143.65128 -4.32858,4.07458 v 1.83092 h 1.195916 l -1.36525,3.75708 2.084914,1.38642 1.88384,-5.1435 h 1.86266 v -1.83092 h -2.4765 l 2.48709,-2.3495 z"></path>
+                  <path class="unprofessional-element" d="m 111.14982,146.47703 -2.56117,3.29141 0.74083,-2.04258 h -2.57175 l -1.59808,4.37092 4.953,2.62466 2.39183,-1.5875 -1.97908,-1.05833 3.21733,-2.26483 z m -2.95275,4.36033 0.381,-1.02658 h 1.87325 v 2.2225 z"></path>
+                  <path class="unprofessional-element" d="m 118.60709,146.69928 -3.16441,2.46591 3.31258,3.16442 -3.33375,-1.19592 -1.25942,1.8415 4.1275,1.50284 3.2385,-2.51884 -3.18558,-3.048 2.94217,1.09009 1.27,-1.88384 z"></path>
+                  <path class="unprofessional-element" d="m 126.79264,146.69928 -3.16442,2.46591 3.31259,3.16442 -3.33375,-1.19592 -1.25942,1.8415 4.1275,1.50284 3.2385,-2.51884 -3.18558,-3.048 2.94216,1.09009 1.27,-1.88384 z"></path>
+                  <path class="unprofessional-element" d="m 136.23281,144.90011 h -3.1115 v 1.8415 h 3.1115 z m -1.41816,6.74158 1.41816,-3.91583 h -4.6355 l 1.42875,1.73567 -1.42875,3.90525 h 4.6355 z"></path>
+                  <path class="unprofessional-element" d="m 143.04963,146.47703 -2.56116,3.31258 0.75141,-2.06375 h -2.57175 l -1.38641,3.76767 2.52941,3.24908 2.56117,-3.28083 -0.6985,1.905 h 2.56117 l 1.3335,-3.65125 z m -0.65616,4.92125 h -2.48709 l 0.5715,-1.5875 h 2.49767 z"></path>
+                  <path class="unprofessional-element" d="m 153.03832,146.46644 -2.4765,3.19617 0.6985,-1.93675 h -4.6355 l 1.42875,1.72508 -1.42875,3.91584 h 4.6355 l -1.41817,-1.72509 0.66675,-1.83091 h 2.56117 l -1.28059,3.51366 2.06375,1.37584 1.78859,-4.8895 z"></path>
+                  <path class="unprofessional-element" d="m 163.9198,151.64169 1.42875,-3.91583 h -2.58233 l -0.73025,2.01083 -2.54,-3.25966 -2.59292,3.33375 1.61925,5.00591 2.19075,-1.44991 h 4.6355 z m -3.20675,1.72509 -1.143,-3.556 h 2.43417 z"></path>
+                  <path class="unprofessional-element" d="m 169.78264,143.52428 -3.58775,9.8425 h 4.64608 l -1.43933,-1.73567 2.45533,-6.72042 z"></path>
+                </g>
+              </g>
+            </svg>
+</a></div>
 </div>
         </div>
     </body>

@@ -12,16 +12,7 @@
     
     
     <item>
-      <title>Basic Configuration</title>
-      <link>https://bpmon.unprofession.al/docs/2_basic/</link>
-      <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
-      
-      <guid>https://bpmon.unprofession.al/docs/2_basic/</guid>
-      <description> Basic Configuration </description>
-    </item>
-    
-    <item>
-      <title>Community</title>
+      <title>Docs</title>
       <link>https://bpmon.unprofession.al/docs/</link>
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
@@ -30,12 +21,21 @@
     </item>
     
     <item>
-      <title>Docs</title>
+      <title>Community</title>
       <link>https://bpmon.unprofession.al/communtiy/</link>
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
       <guid>https://bpmon.unprofession.al/communtiy/</guid>
       <description></description>
+    </item>
+    
+    <item>
+      <title>Basic Configuration</title>
+      <link>https://bpmon.unprofession.al/docs/2_basic/</link>
+      <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
+      
+      <guid>https://bpmon.unprofession.al/docs/2_basic/</guid>
+      <description> Basic Configuration </description>
     </item>
     
     <item>
