@@ -15,7 +15,10 @@ import (
 	_ "github.com/unprofession-al/bpmon/store/influx"
 )
 
-var runParams []string
+var (
+	runParams []string
+	runList   bool
+)
 
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -51,6 +54,17 @@ var runCmd = &cobra.Command{
 		run, err := runners.New(runnerDir)
 		if err != nil {
 			log.Fatal(err)
+		}
+
+		if runList {
+			for name, runner := range run {
+				p := ""
+				for key, desc := range runner.Parameters {
+					p += fmt.Sprintf("\t%s: %s\n", key, desc)
+				}
+				fmt.Printf("%s\n\t%s\n%s", name, runner.Description, p)
+			}
+			os.Exit(0)
 		}
 
 		runner, ok := run[runnerName]
@@ -136,4 +150,5 @@ var runCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(runCmd)
 	runCmd.PersistentFlags().StringSliceVar(&runParams, "params", []string{}, "Provide template parameters")
+	runCmd.PersistentFlags().BoolVar(&runList, "list", false, "print a list of available runners")
 }
