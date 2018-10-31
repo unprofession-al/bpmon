@@ -23,7 +23,7 @@ a decent amount of database replicas etc. an outage of a single webserver does n
 BPMON allows you to group checks into __Key Performance Indicators__ (KPI's). A KPI for our web service
 could be *60% of our frontend webservers must be healthy for the KPI to be healthy*. Neat!
 
-A __Busisess Process__ (BP's) is a set of KPI's. Each KPI must be healty for the BP to be healthy as well. 
+A __Busisess Process__ (BP's) is a set of KPI's. Each KPI must be healthy for the BP to be healthy as well. 
 
 ## Features
 

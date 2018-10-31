@@ -13,7 +13,8 @@ There are a few things you need to prepare... Getting everything ready.
 
 ## Installation
 
-BPMON itself consists of a single binary with no dependencies. There are a couple of options to get a BPMON binary on your system:
+BPMON itself consists of a single binary with no dependencies. There are a couple of options to get a BPMON binary
+on your system:
 
 ### From Source
 
@@ -27,3 +28,39 @@ As soon as your Go environment is setup simply run the following command (don't 
 ```
 
 This will fetch the source and its compile time dependencies and install it under `$GOPATH/bin/bpmon`
+
+### Get a Binary Release
+
+*(coming soon)*
+
+### Via Docker Hub
+
+*(coming soon)*
+
+## Preparing ICINGA 2 API Access
+
+<div class="info">
+    <div class="headline">No ICINCA 2 Server available? No time or permission to setup the API?</div>
+    <p>
+        No problem. BPMON comes with a tiny <a href="https://github.com/unprofession-al/bpmon/tree/master/cmd/icingamock/README.md">Icinga Mock Server</a> to get your hands dirty without having ICINGA
+        ready... 
+    </p>
+</div>
+
+BPMON fetches the status of the required services via the ICINGA 2 API. Therefore we have to enable the API as well as 
+create a user for BPMON. Refer to the [official documentation](https://icinga.com/docs/icinga2/latest/) to do so... 
+
+1. [Setting up the API](https://icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#setting-up-the-api)
+2. [Creating an ApiUser](https://icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#authentication)
+
+Make sure you apply the correct permissions:
+
+```
+object ApiUser "bpmon" {
+  password = "..."
+  permissions = ["objects/query/Host","objects/query/Service","status/*"]
+}
+```
+
+
+## Setting up an Influx Database (optional)
