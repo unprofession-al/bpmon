@@ -18,12 +18,12 @@ works we certainly have our monitoring system (eg. [ICINGA 2](https://icinga.com
 and all required checks in place.
 
 __But not every failed check is an incident!__ Given we have a tidy setup with a bunch of webservers,
-a decent amount of database replicas etc. an outage of a single webserver does not affect aur service.
+a decent amount of database replicas etc. an outage of a single webserver does not affect our service.
 
 BPMON allows you to group checks into __Key Performance Indicators__ (KPI's). A KPI for our web service
 could be *60% of our frontend webservers must be healthy for the KPI to be healthy*. Neat!
 
-A __Busisess Process__ (BP's) is a set of KPI's. Each KPI must be healthy for the BP to be healthy as well. 
+A __Business Process__ (BP's) is a set of KPI's. Each KPI must be healthy for the BP to be healthy as well. 
 
 ## Features
 
