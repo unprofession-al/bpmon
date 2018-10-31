@@ -40,7 +40,7 @@ manually as needed.
 
 ## BPMON vs. ICINGA Web 2 Business Processes Module
 
-You might be a bit confuned since ICINGA already has a [Business Process Module](https://github.com/Icinga/icingaweb2-module-businessprocess).
+You might be a bit confused since ICINGA already has a [Business Process Module](https://github.com/Icinga/icingaweb2-module-businessprocess).
 So why even bother?!
 
 Here's why:
