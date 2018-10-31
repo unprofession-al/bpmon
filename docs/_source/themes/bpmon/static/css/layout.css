@@ -15,9 +15,11 @@
 }
 
 .logo {
-    width: 130px;
+    max-width: 130px;
+    width: 20%;
     float: left;
     position: sticky;
+    padding-bottom: 20px;
 }
 
 .navigation {
@@ -55,7 +57,7 @@
 @media only screen and (max-width: 750px) {
     .grid {
         grid-template-columns: 1fr;
-        grid-template-rows: 80px 1fr auto;
+        grid-template-rows: min-content 1fr auto;
         grid-template-areas:
             "header  "
             "content "
@@ -68,7 +70,7 @@
 @media only screen and (min-width: 750px) and (max-width: 1000px){
     .grid {
         grid-template-columns: 1fr 4fr 1fr;
-        grid-template-rows: 80px 1fr auto;
+        grid-template-rows: min-content 1fr auto;
         grid-template-areas:
             "left header  right"
             "left content right"
@@ -81,7 +83,7 @@
 @media only screen and (min-width: 1040px) {
     .grid {
         grid-template-columns: 1fr 1000px 1fr;
-        grid-template-rows: 80px 1fr auto;
+        grid-template-rows: min-content 1fr auto;
         grid-template-areas:
             "left header  right"
             "left content right"
