@@ -1,0 +1,821 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_BPMON",
+      "label": "bpmon",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "influxdb",
+      "pluginName": "InfluxDB"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "5.1.3"
+    },
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": "5.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "influxdb",
+      "name": "InfluxDB",
+      "version": "5.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": "5.0.0"
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "datasource": "${DS_BPMON}",
+        "enable": false,
+        "iconColor": "rgb(96, 100, 255)",
+        "name": "KPI Errors",
+        "query": "select err from KPI where  \"BP\" =~ /^$bp$/ AND $timeFilter AND \"BP\" =~ /^$bp$/",
+        "showIn": 0,
+        "titleColumn": ""
+      },
+      {
+        "datasource": "${DS_BPMON}",
+        "enable": true,
+        "iconColor": "rgba(255, 96, 96, 1)",
+        "name": "SVC Errors",
+        "query": "select err from SVC where  \"BP\" =~ /^$bp$/ AND $timeFilter AND \"BP\" =~ /^$bp$/",
+        "showIn": 0,
+        "titleColumn": "SVC Errors"
+      },
+      {
+        "datasource": "${DS_BPMON}",
+        "enable": false,
+        "iconColor": "rgb(103, 199, 27)",
+        "name": "SVC Output",
+        "query": "select BP, output from SVC where  \"BP\" =~ /^$bp$/ AND $timeFilter AND \"BP\" =~ /^$bp$/",
+        "showIn": 0,
+        "textColumn": "output",
+        "titleColumn": "BP"
+      },
+      {
+        "datasource": "${DS_BPMON}",
+        "enable": true,
+        "hide": false,
+        "iconColor": "rgb(240, 255, 96)",
+        "limit": 100,
+        "name": "Annotated Interruptions",
+        "query": "SELECT BP, annotation FROM \"BP\" WHERE \"changed\" = true AND \"status\" = 1 AND \"in_availability\" = true AND annotated = true AND $timeFilter  AND \"BP\" =~ /^$bp$/",
+        "showIn": 0,
+        "tagsColumn": "",
+        "textColumn": "annotation",
+        "titleColumn": "BP",
+        "type": "alert"
+      },
+      {
+        "datasource": "${DS_BPMON}",
+        "enable": false,
+        "hide": false,
+        "iconColor": "rgb(179, 96, 255)",
+        "limit": 100,
+        "name": "Unannotated Interruptions",
+        "query": "SELECT * FROM \"BP\" WHERE \"changed\" = true AND \"status\" = 1 AND \"in_availability\" = true AND annotated = false AND $timeFilter  AND \"BP\" =~ /^$bp$/",
+        "showIn": 0,
+        "type": "alert"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "iteration": 1540997289052,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 5,
+      "panels": [],
+      "repeat": null,
+      "title": "Overview",
+      "type": "row"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_BPMON}",
+      "editable": true,
+      "error": false,
+      "fill": 1,
+      "grid": {},
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "height": "300px",
+      "id": 1,
+      "legend": {
+        "alignAsTable": false,
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "hideZero": true,
+        "max": false,
+        "min": false,
+        "rightSide": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "connected",
+      "percentage": false,
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_BP",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "$interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "BP"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "BP",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT max(\"status\") FROM \"BP\" WHERE \"BP\" =~ /^$bp$/ AND $timeFilter GROUP BY time($interval), \"BP\" fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "status"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "max"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "BP",
+              "operator": "=~",
+              "value": "/^$bp$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "custom",
+          "fill": true,
+          "fillColor": "rgba(216, 27, 27, 0.27)",
+          "op": "gt",
+          "value": 0.5
+        },
+        {
+          "colorMode": "custom",
+          "fill": true,
+          "fillColor": "rgba(127, 45, 190, 0.22)",
+          "op": "gt",
+          "value": 1.5
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "BP Overview",
+      "tooltip": {
+        "msResolution": true,
+        "shared": true,
+        "sort": 0,
+        "value_type": "cumulative"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": "",
+          "logBase": 1,
+          "max": "1",
+          "min": "0",
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_BPMON}",
+      "editable": true,
+      "error": false,
+      "fill": 1,
+      "grid": {},
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "height": "300px",
+      "id": 2,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "hideEmpty": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "null as zero",
+      "percentage": false,
+      "pointradius": 1,
+      "points": true,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_KPI",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "KPI"
+              ],
+              "type": "tag"
+            }
+          ],
+          "hide": false,
+          "measurement": "KPI",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT max(\"value\") FROM \"BP\" WHERE \"BP\" =~ /^$bp$/ AND $timeFilter GROUP BY time($interval) fill(null)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "status"
+                ],
+                "type": "field"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "BP",
+              "operator": "=~",
+              "value": "/^$bp$/"
+            },
+            {
+              "condition": "AND",
+              "key": "KPI",
+              "operator": "=~",
+              "value": "/^$kpi$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "custom",
+          "fill": true,
+          "fillColor": "rgba(216, 27, 27, 0.27)",
+          "op": "gt",
+          "value": 0.5
+        },
+        {
+          "colorMode": "custom",
+          "fill": true,
+          "fillColor": "rgba(141, 67, 188, 0.22)",
+          "op": "gt",
+          "value": 1.5
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "KPI Overview",
+      "tooltip": {
+        "msResolution": false,
+        "shared": true,
+        "sort": 0,
+        "value_type": "cumulative"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": 2.2,
+          "min": 0,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": 2.2,
+          "min": 0,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "aliasColors": {},
+      "bars": true,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": "${DS_BPMON}",
+      "editable": true,
+      "error": false,
+      "fill": 1,
+      "grid": {},
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "height": "300px",
+      "id": 3,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": false,
+        "total": false,
+        "values": false
+      },
+      "lines": false,
+      "linewidth": 2,
+      "links": [],
+      "nullPointMode": "null",
+      "percentage": false,
+      "pointradius": 1,
+      "points": true,
+      "renderer": "flot",
+      "repeat": null,
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "alias": "$tag_SVC",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "auto"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "SVC"
+              ],
+              "type": "tag"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "measurement": "SVC",
+          "orderByTime": "ASC",
+          "policy": "autogen",
+          "query": "SELECT max(\"status\") FROM \"autogen\".\"SVC\" WHERE status != 2 AND \"BP\" =~ /^$bp$/ AND \"KPI\" =~ /^$kpi$/ AND \"SVC\" =~ /^$svc$/ AND $timeFilter GROUP BY time($__interval), \"SVC\" fill(null)",
+          "rawQuery": false,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "status"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "max"
+              }
+            ]
+          ],
+          "tags": [
+            {
+              "key": "BP",
+              "operator": "=~",
+              "value": "/^$bp$/"
+            },
+            {
+              "condition": "AND",
+              "key": "KPI",
+              "operator": "=~",
+              "value": "/^$kpi$/"
+            },
+            {
+              "condition": "AND",
+              "key": "SVC",
+              "operator": "=~",
+              "value": "/^$svc$/"
+            }
+          ]
+        }
+      ],
+      "thresholds": [
+        {
+          "colorMode": "custom",
+          "fill": true,
+          "fillColor": "rgba(216, 27, 27, 0.27)",
+          "op": "gt",
+          "value": 0.5
+        },
+        {
+          "colorMode": "custom",
+          "fill": true,
+          "fillColor": "rgba(151, 48, 231, 0.22)",
+          "op": "gt",
+          "value": 1.5
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "SVC Overview",
+      "tooltip": {
+        "msResolution": true,
+        "shared": false,
+        "sort": 0,
+        "value_type": "cumulative"
+      },
+      "type": "graph",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": 2.2,
+          "min": 0,
+          "show": true
+        },
+        {
+          "format": "short",
+          "label": null,
+          "logBase": 1,
+          "max": 2.2,
+          "min": 0,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 25
+      },
+      "id": 6,
+      "panels": [],
+      "repeat": null,
+      "title": "Availability",
+      "type": "row"
+    },
+    {
+      "columns": [
+        {
+          "text": "Avg",
+          "value": "avg"
+        }
+      ],
+      "datasource": "${DS_BPMON}",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 26
+      },
+      "id": 4,
+      "links": [],
+      "pageSize": null,
+      "scroll": false,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": false
+      },
+      "styles": [
+        {
+          "alias": "Verfügbarkeit",
+          "colorMode": "value",
+          "colors": {
+            "0": "rgb(221, 61, 61)",
+            "1": "rgb(248, 248, 1)",
+            "2": "rgb(40, 218, 24)"
+          },
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "pattern": "Avg",
+          "sanitize": false,
+          "thresholds": [
+            "0.99",
+            "1.00"
+          ],
+          "type": "number",
+          "unit": "percentunit"
+        },
+        {
+          "alias": "Business Processes",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "decimals": 2,
+          "pattern": "Metric",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "alias": "$tag_BP",
+          "dsType": "influxdb",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": false,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT 1 - (sum(\"status\") / count(\"status\")) AS Availability FROM \"BP\" WHERE \"BP\" =~ /^$bp$/ AND $timeFilter AND \"status\" < 2 GROUP BY \"BP\"",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "title": "Availability (Time Range)",
+      "transform": "timeseries_aggregations",
+      "type": "table"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 16,
+  "style": "dark",
+  "tags": [
+    "Business Process"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BPMON}",
+        "hide": 0,
+        "includeAll": false,
+        "label": "BP",
+        "multi": true,
+        "name": "bp",
+        "options": [],
+        "query": "SHOW TAG VALUES WITH KEY = \"BP\"",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BPMON}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "KPI",
+        "multi": true,
+        "name": "kpi",
+        "options": [],
+        "query": "SHOW TAG VALUES WITH KEY = \"KPI\"",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "${DS_BPMON}",
+        "hide": 0,
+        "includeAll": true,
+        "label": "SVC",
+        "multi": true,
+        "name": "svc",
+        "options": [],
+        "query": "SHOW TAG VALUES WITH KEY = \"SVC\" WHERE \"BP\" =~ /^$bp$/",
+        "refresh": 1,
+        "regex": "",
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
+  },
+  "time": {
+    "from": "now-2d",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "time_options": [
+      "5m",
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ]
+  },
+  "timezone": "browser",
+  "title": "Business Processes",
+  "uid": "000000022",
+  "version": 40
+}
