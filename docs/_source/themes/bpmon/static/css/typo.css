@@ -12,8 +12,8 @@ li {
     padding-left: 15px;
 }
 
-p, ul, pre, h1, h2, h3, h4, h5 {
-    margin-bottom: 15px;
+p, ol, ul, pre, h1, h2, h3, h4, h5 {
+    margin-bottom: 18px;
 }
 
 h1 {
@@ -37,8 +37,21 @@ blockquote {
 	font-style: italic;
 }
 
-i {
+i, em {
 	font-style: italic;
+}
+
+b, strong {
+    font-weight: bold;
+}
+
+li, ol {
+    list-style-position: outside;
+    padding-left: 2em;
+}
+
+ol {
+    list-style-type: upper-roman;
 }
 
 code, pre{
