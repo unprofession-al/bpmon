@@ -71,7 +71,8 @@
 
 <h2 id="installation">Installation</h2>
 
-<p>BPMON itself consists of a single binary with no dependencies. There are a couple of options to get a BPMON binary on your system:</p>
+<p>BPMON itself consists of a single binary with no dependencies. There are a couple of options to get a BPMON binary
+on your system:</p>
 
 <h3 id="from-source">From Source</h3>
 
@@ -83,7 +84,51 @@ to do so&hellip;</p>
 <pre><code># go get -u github.com/unprofession-al/bpmon/...
 </code></pre>
 
-<p>This will fetch the source and its compile time dependencies and install it under <code>$GOPATH/bin/bpmon</code></p></div>
+<p>This will fetch the source and its compile time dependencies and install it under <code>$GOPATH/bin/bpmon</code></p>
+
+<h3 id="get-a-binary-release">Get a Binary Release</h3>
+
+<p><em>(coming soon)</em></p>
+
+<h3 id="via-docker-hub">Via Docker Hub</h3>
+
+<p><em>(coming soon)</em></p>
+
+<h2 id="preparing-icinga-2-api-access">Preparing ICINGA 2 API Access</h2>
+
+<div class="info">
+    <div class="headline">No ICINCA 2 Server available? No time or permission to setup the API?</div>
+    <p>
+        No problem. BPMON comes with a tiny <a href="https://github.com/unprofession-al/bpmon/tree/master/cmd/icingamock/README.md">Icinga Mock Server</a> to get your hands dirty without having ICINGA
+        ready... 
+    </p>
+</div>
+
+<p>BPMON fetches the status of the required services via the ICINGA 2 API. Therefore we have to enable the API as well as
+create a user for BPMON. Refer to the <a href="https://icinga.com/docs/icinga2/latest/">official documentation</a> to do so&hellip;</p>
+
+<ol>
+<li><a href="https://icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#setting-up-the-api">Setting up the API</a></li>
+<li><a href="https://icinga.com/docs/icinga2/latest/doc/12-icinga2-api/#authentication">Creating an ApiUser</a></li>
+</ol>
+
+<p>Make sure you apply the correct permissions:</p>
+
+<pre><code>object ApiUser &quot;bpmon&quot; {
+  password = &quot;...&quot;
+  permissions = [&quot;objects/query/Host&quot;,&quot;objects/query/Service&quot;,&quot;status/*&quot;]
+}
+</code></pre>
+
+<h2 id="setting-up-an-influx-database-optional">Setting up an Influx Database (optional)</h2>
+
+<p>A feature of bpmon is to write all measurements in an Influx database on order to have historical data of our up- and
+downtimes as well as the reasons for potential incidents. This is a neat feature for reporting etc.</p>
+
+<p>If you want to get your hands on this feature you need to have an Influx database as well as a username/password
+with read/write access at hand.</p>
+
+<p>Visit their <a href="https://docs.influxdata.com/influxdb/">documentaiton</a> to learn how to set things up.</p></div>
 </div>
 
             </div>
