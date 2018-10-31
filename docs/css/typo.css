@@ -114,20 +114,13 @@ a:hover {
 }
 
 svg:hover .unprofessional-element {
-    fill: var(--main-color);
+    fill: var(--alternative-color);
 }
 
 svg:hover .bpmon-element {
-    fill: url(#gradient-horizontal) #447799;
+    fill: var(--alternative-color);
 }
 
-path { transition: fill .4s ease; }
-
-#gradient-horizontal {
-    --color-stop-2: #cf8bf3;
-    --color-stop-1: #a770ef;
-    --color-stop-3: #fdb99b;
-    --color-stop-4: #ffff1c;
-    --color-stop-5: #77e190;
-    --color-stop-6: #00c3ff;
+path {
+    transition: fill .4s ease;
 }
