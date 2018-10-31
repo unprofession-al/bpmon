@@ -69,7 +69,146 @@
 
 <p></p>
 
-<h3 id="basic-configuration">Basic Configuration</h3></div>
+<h2 id="runners">Runners?</h2>
+
+<p>Whenever you type <code>bpmon run</code> you execute a <em>Runner</em>. This is nothing but a <a href="https://golang.org/pkg/text/template/">go text/template</a>
+and some meta data. There are default runner (such as the one named <code>default</code> which will run if no runner is specified) which you can list
+via the <code>--list</code> flag:</p>
+
+<pre><code>$ bpmon run --list
+verbose
+	Print all check results in a long format and human readable
+issues
+	Print failed check results in a short format and human readable
+issues_verbose
+	Print failed check results in a long format and human readable
+default
+	Print all check results in a short format and human readable
+</code></pre>
+
+<p>Try them out by specifying the Runner you want to execute. For example <code>bpmon run issues</code> will only print failed business processes,
+<code>bpmon run verbose</code> prints a ton of details.</p>
+
+<p>If you want to dig into the details of these predefined runners have a look at their
+<a href="https://github.com/unprofession-al/bpmon/blob/master/runners/defaults.go">source</a>.</p>
+
+<p>Since we are obviousely only rendering some templates we can easily build our own runners&hellip;</p>
+
+<h2 id="learning-by-example-generate-a-status-html-with-a-runner">Learning by Example: Generate a status.html with a Runner</h2>
+
+<p>Wouldn&rsquo;t it be nice to render some web page that shows the current business process status? Here we go&hellip;</p>
+
+<p>Create two files in the directory <code>$BPMON_BASE/runners/status/</code>. The first file <code>cmd.yaml</code> contains some meta data:</p>
+
+<pre><code class="language-yaml">---
+description: |
+  This renders a html file to stdout that represents the current status.
+</code></pre>
+
+<p>The second file <code>cmd.template</code> it the template:</p>
+
+<pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+    &lt;head&gt;
+        &lt;meta charset=&quot;UTF-8&quot;&gt;
+        &lt;title&gt;status.html&lt;/title&gt;
+        &lt;style&gt;
+.content { width: 70%; margin: 0 auto; }
+.bp { margin: 20px; padding: 20px; padding-right: 0; }
+.kpi { padding: 10px; padding-left: 30px; padding-right: 0; padding-bottom: 20px; margin-top: 10px; }
+.svc { padding: 10px; padding-left: 30px; padding-right: 0; margin-top: 10px; }
+.bp.ok { background-color: #8cd98c; }
+.kpi.ok { background-color: #66cc66; }
+.svc.ok { background-color: #40bf40; }
+.bp.nok { background-color: #ff6666; }
+.kpi.nok { background-color: #ff3333; }
+.svc.nok { background-color: #ff0000; }
+.bp.unknown { background-color: #d966ff; }
+.kpi.unknown { background-color: #cc33ff; }
+.svc.unknown { background-color: #bf00ff; }
+.bp&gt;.title, .kpi&gt;.title { font-weight: 700; }
+.kpi&gt;.title, .svc&gt;.title { font-size: 14px; }
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div class=&quot;content&quot;&gt;
+            {{ range $index, $bp := .BP }}
+            {{$status := &quot;unknown&quot;}}{{if eq $bp.Status 0}}{{$status = &quot;ok&quot;}}{{else if eq $bp.Status 1}}{{$status = &quot;nok&quot;}}{{end}}
+            &lt;div class=&quot;bp {{$status}}&quot; id=&quot;{{$bp.ID}}&quot;&gt;
+                &lt;div class=&quot;title&quot;&gt;BP {{$bp.Name}}&lt;/div&gt;
+                {{- range $index, $kpi := .Children }}
+                {{$status := &quot;unknown&quot;}}{{if eq $kpi.Status 0}}{{$status = &quot;ok&quot;}}{{else if eq $kpi.Status 1}}{{$status = &quot;nok&quot;}}{{end}}
+                &lt;div class=&quot;kpi {{$status}}&quot; id=&quot;{{$kpi.ID}}&quot;&gt;
+                    &lt;div class=&quot;title&quot;&gt;KPI {{$kpi.Name}}&lt;/div&gt;
+                    {{- range $index, $svc := .Children }}
+                    {{$status := &quot;unknown&quot;}}{{if eq $svc.Status 0}}{{$status = &quot;ok&quot;}}{{else if eq $svc.Status 1}}{{$status = &quot;nok&quot;}}{{end}}
+                    &lt;div class=&quot;svc {{$status}}&quot; id=&quot;{{$svc.ID}}&quot;&gt;
+                        &lt;div class=&quot;title&quot;&gt;SVC {{$svc.Name}}&lt;/div&gt;
+                        {{if ne $status &quot;ok&quot;}}&lt;div class=&quot;output&quot;&gt;{{$svc.Output}}&lt;/div&gt;{{end}}
+                    &lt;/div&gt;
+                    {{- end -}}
+                &lt;/div&gt;
+                {{ end -}}
+            &lt;/div&gt;
+            {{ end -}}
+        &lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+<p>Wanna see?</p>
+
+<pre><code>$ bpmon run status &gt; status.html &amp;&amp; firefox status.html; rm status.html
+</code></pre>
+
+<h2 id="meet-your-friends">Meet your friends</h2>
+
+<p>Now the biggest hassle when buildung templates is to know the data you have available. To give you a hand we have added some funcions to
+the templating engine to help you inspect the data:</p>
+
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+<th>Usage</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>pretty</td>
+<td>Print the data in a human readable format</td>
+<td><code>{{ pretty . }}</code></td>
+</tr>
+
+<tr>
+<td>json</td>
+<td>Print the data as JSON object</td>
+<td><code>{{ json . }}</code></td>
+</tr>
+
+<tr>
+<td>yaml</td>
+<td>Print as YAML object</td>
+<td><code>{{ yaml . }}</code></td>
+</tr>
+
+<tr>
+<td>spew</td>
+<td>Print with a lot of details regarding data type and such</td>
+<td><code>{{ spew . }}</code></td>
+</tr>
+
+<tr>
+<td>describe</td>
+<td>Print the data structure rather than the data itself</td>
+<td><code>{{ describe . }}</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>Remember those functions, they might get handy.</p></div>
 </div>
 
             </div>

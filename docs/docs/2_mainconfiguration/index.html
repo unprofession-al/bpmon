@@ -73,9 +73,16 @@
     <div class="headline">Keeping your system tidy</div>
     <p>
         Please make sure you place all your config files in a dedicated directory. We will refer to this configuration 
-        folder as <code>$BPMON_HOME</code>.
+        folder as <code>$BPMON_BASE</code>.
     </p>
 </div>
+
+<h2 id="prepare-the-directory-structure">Prepare the directory structure</h2>
+
+<p>In <code>$BPMON_BASE</code> run:</p>
+
+<pre><code>mkdir bp.d &amp;&amp; mkdir runners
+</code></pre>
 
 <h2 id="generate-the-main-configuration">Generate the Main Configuration</h2>
 
@@ -153,7 +160,7 @@ default:
 
 <p>Pipe this output in a file called <code>config.yaml</code>.</p>
 
-<pre><code>bpmon config init &gt; $BPMON_HOME/config.yaml
+<pre><code>bpmon config init &gt; $BPMON_BASE/config.yaml
 </code></pre>
 
 <h2 id="connect-to-icinga-and-influx-database">Connect to Icinga and Influx database</h2>
@@ -167,7 +174,8 @@ this generated file. For now we only need to setup the <code>checker</code> and 
 
 <ol>
 <li>If you have an Influx database ready paste the connection string at <code>default.store.connection</code>.</li>
-<li>If you don&rsquo;t want to persist historical data right now set <code>default.store.get_last_status</code> to false</li>
+<li>If you don&rsquo;t want to persist historical data right now set <code>default.store.get_last_status</code> to false. Add <code>http://in.existent</code>
+at <code>default.store.connection</code>.</li>
 </ol>
 
 <h2 id="define-an-availability">Define an availability</h2>
@@ -205,7 +213,7 @@ default:
 
 <p>In this case we have three availabilities defined: &lsquo;high&rsquo;, &lsquo;medium&rsquo;, &lsquo;low&rsquo;. Name yours however your want, just make sure the names make sense to you.</p>
 
-<p>Thats it for the main configuraiton! Let&rsquo;s move on&hellip;</p></div>
+<p>Thats it for the main configuration! Let&rsquo;s move on&hellip;</p></div>
 </div>
 
             </div>

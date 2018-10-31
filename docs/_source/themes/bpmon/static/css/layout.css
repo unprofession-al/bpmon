@@ -30,6 +30,12 @@
     grid-area: content;
 }
 
+img, table {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
 .footer {
     text-align: right;
     grid-area: footer;
@@ -59,9 +65,9 @@
         grid-template-columns: 1fr;
         grid-template-rows: min-content 1fr auto;
         grid-template-areas:
-            "header  "
-            "content "
-            "footer  ";
+        "header  "
+        "content "
+        "footer  ";
         margin-right: var(--grid-gap);
         margin-left: var(--grid-gap);
     }
@@ -72,9 +78,9 @@
         grid-template-columns: 1fr 4fr 1fr;
         grid-template-rows: min-content 1fr auto;
         grid-template-areas:
-            "left header  right"
-            "left content right"
-            "lefh footer  right";
+        "left header  right"
+        "left content right"
+        "lefh footer  right";
         margin-right: var(--grid-gap);
         margin-left: var(--grid-gap);
     }
@@ -85,9 +91,9 @@
         grid-template-columns: 1fr 1000px 1fr;
         grid-template-rows: min-content 1fr auto;
         grid-template-areas:
-            "left header  right"
-            "left content right"
-            "lefh footer  right";
+        "left header  right"
+        "left content right"
+        "lefh footer  right";
         margin-right: var(--grid-gap);
         margin-left: var(--grid-gap);
     }

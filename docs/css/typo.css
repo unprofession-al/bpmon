@@ -12,7 +12,7 @@ li {
     padding-left: 15px;
 }
 
-p, ol, ul, pre, h1, h2, h3, h4, h5, .info {
+table, p, ol, ul, pre, h1, h2, h3, h4, h5, .info {
     margin-bottom: 18px;
 }
 
@@ -54,8 +54,22 @@ ol {
     list-style-type: upper-roman;
 }
 
-code, pre{
+code, pre {
     font-family: 'IBM Plex Mono', monospace;
+}
+
+th, td {
+    font-family: 'IBM Plex Sans', sans-serif;
+    margin: 10px;
+    padding: 10px;
+}
+
+th {
+    font-weight: bold;
+}
+
+tr {
+    border-bottom: 1px solid #24292e;
 }
 
 pre {
@@ -64,6 +78,9 @@ pre {
     padding: 20px;
     margin-bottom: 10px;
     overflow-x: auto;
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
 
 .info {

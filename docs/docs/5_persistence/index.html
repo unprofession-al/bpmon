@@ -69,7 +69,36 @@
 
 <p></p>
 
-<h3 id="basic-configuration">Basic Configuration</h3></div>
+<h2 id="write-data-to-your-influx-database">Write data to your Influx Database</h2>
+
+<p>Since sometimes we need to keep track of our uptimes and incidents in order to report to customers etc. For that
+matter BPMON provides the <code>write</code>. Given that the <code>default.store.connection</code> string is properly set, we can simply
+write the data into the database by running:</p>
+
+<pre><code>bpmon write
+</code></pre>
+
+<p>BPMON does not come with a daemon mode or similar. In order to have a decent history of your business processes
+simply run <code>bpmon write</code> with a scheduler such as <a href="http://man7.org/linux/man-pages/man8/cron.8.html">cron job</a>,
+<a href="https://www.freedesktop.org/software/systemd/man/systemd.timer.html">systemd.timer</a>, <a href="https://jenkins.io/">Jenkins</a>,
+via <a href="https://about.gitlab.com/">GitLab</a> or whatever you at your disposal.</p>
+
+<h2 id="explore-your-data">Explore your data</h2>
+
+<p>Since Influx provides very simple interfaces to access your data such as its HTTP API you have a ton of possibilities
+to explore your data. Two very simple approches are the <code>dashboard</code> subcommand as well a <a href="https://grafana.com/">Grafana</a>
+dashboard</p>
+
+<h3 id="the-dashboard-subcommand">The <code>dashboard</code> Subcommand</h3>
+
+<p><em>(coming soon)</em></p>
+
+<h3 id="the-grafana-dashboard">The Grafana Dashboard</h3>
+
+<p>A easy and comfortable to explore BPMON data (or in fact any data stored in an Influx database et al.) is Grafana. You&rsquo;ll
+find a example dashboard in our <a href="https://github.com/unprofession-al/bpmon/blob/master/hacking/grafana/BusinessProcessesDashboard.json">GitHub repositoy</a></p>
+
+<p><img src="images/grafana_dashboard.png" alt="Grafana Dashboard" title="Grafana Dashboard" /></p></div>
 </div>
 
             </div>

@@ -72,7 +72,7 @@
 <h2 id="adding-our-first-business-process-definition">Adding our first Business Process Definition</h2>
 
 <p>Now that BPMON is set up, lets define a <em>business process</em>. Again, we do that
-via YAML, a file per <em>business process</em>. Put the following content into <code>$BPMON_HOME/bp.d/web_service_x.yaml</code></p>
+via YAML, a file per <em>business process</em>. Put the following content into <code>$BPMON_BASE/bp.d/web_service_x.yaml</code></p>
 
 <pre><code class="language-yaml">---
 # Give it a name. Names can be changed anytime...
@@ -132,7 +132,7 @@ kpis:
 <a href="//github.com/unprofession-al/bpmon/blob/master/cmd/icingamock/README.md">icingamock</a> to use our Business Process
 Definition:</p>
 
-<pre><code>icingamock -bp $BPMON_HOME/bp.d
+<pre><code>icingamock -bp $BPMON_BASE/bp.d
 </code></pre>
 
 <p>Configuration done, lets check&hellip;!</p></div>

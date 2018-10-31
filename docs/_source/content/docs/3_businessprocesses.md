@@ -14,7 +14,7 @@ Learn how do create a Business Process composed from existing Icinga2 Checks.
 ## Adding our first Business Process Definition
 
 Now that BPMON is set up, lets define a *business process*. Again, we do that 
-via YAML, a file per *business process*. Put the following content into `$BPMON_HOME/bp.d/web_service_x.yaml`
+via YAML, a file per *business process*. Put the following content into `$BPMON_BASE/bp.d/web_service_x.yaml`
 
 ```yaml
 ---
@@ -76,7 +76,7 @@ Certainly you have to adopt the configuration to match systems monitored via you
 Definition:
 
 ```
-icingamock -bp $BPMON_HOME/bp.d
+icingamock -bp $BPMON_BASE/bp.d
 ```
 
 Configuration done, lets check...!

@@ -15,9 +15,17 @@ Now let's move forward; here comes the fun part.
     <div class="headline">Keeping your system tidy</div>
     <p>
         Please make sure you place all your config files in a dedicated directory. We will refer to this configuration 
-        folder as <code>$BPMON_HOME</code>.
+        folder as <code>$BPMON_BASE</code>.
     </p>
 </div>
+
+## Prepare the directory structure
+
+In `$BPMON_BASE` run:
+
+```
+mkdir bp.d && mkdir runners
+```
 
 ## Generate the Main Configuration
 
@@ -97,7 +105,7 @@ default:
 Pipe this output in a file called `config.yaml`. 
 
 ```
-bpmon config init > $BPMON_HOME/config.yaml
+bpmon config init > $BPMON_BASE/config.yaml
 ```
 
 ## Connect to Icinga and Influx database
@@ -110,7 +118,8 @@ In `default.checker.connection` add the connection string to access your icinga 
 In `default.store` we have two options:
 
 1. If you have an Influx database ready paste the connection string at `default.store.connection`.
-2. If you don't want to persist historical data right now set `default.store.get_last_status` to false
+2. If you don't want to persist historical data right now set `default.store.get_last_status` to false. Add `http://in.existent` 
+   at `default.store.connection`.
 
 ## Define an availability
 
@@ -148,4 +157,4 @@ default:
 
 In this case we have three availabilities defined: 'high', 'medium', 'low'. Name yours however your want, just make sure the names make sense to you.
 
-Thats it for the main configuraiton! Let's move on...
+Thats it for the main configuration! Let's move on...
