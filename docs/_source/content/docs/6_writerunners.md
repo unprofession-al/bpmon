@@ -107,6 +107,9 @@ Wanna see?
 $ bpmon run status > status.html && firefox status.html; rm status.html
 ```
 
+Now you can imagine the possibilities. Do you want to trigger pagerduty via API if a business process is failed? Create a runner that renders a bash 
+script and schedule via `bpmon run myrunner | bash`. 
+
 ## Meet your friends
 
 Now the biggest hassle when buildung templates is to know the data you have available. To give you a hand we have added some funcions to
