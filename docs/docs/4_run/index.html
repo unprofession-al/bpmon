@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>BPMON - 
-    Create Business Processes
+    Run BPMON
 </title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -64,78 +64,12 @@
                 
 <div class="single">
     
-    <h1>Create Business Processes</h1>
-    <div class="text"><p>Learn how do create a Business Process composed from existing Icinga2 Checks.</p>
+    <h1>Run BPMON</h1>
+    <div class="text"><p>All set and configured&hellip; Let&rsquo;s see the results!</p>
 
 <p></p>
 
-<h2 id="adding-our-first-business-process-definition">Adding our first Business Process Definition</h2>
-
-<p>Now that BPMON is set up, lets define a <em>business process</em>. Again, we do that
-via YAML, a file per <em>business process</em>. Put the following content into <code>$BPMON_HOME/bp.d/web_service_x.yaml</code></p>
-
-<pre><code class="language-yaml">---
-# Give it a name. Names can be changed anytime...
-name: Web Service X
-# Also give it an ID. This is used to store results in the database and
-# therefore should not be changed.
-id: ws_x
-# Tell BPMON during what time the process needs to be avalable. Remember
-# the availabilities section from the global configuration...? This links 
-# there.
-availability: medium
-# You can also specify a 'responsible' string. This string can then be used in
-# the trigger template. This could be for example trigger a specific http
-# end point, pass some uri parameters, send an email to a specific address etc.
-# The 'responsible' string is inherited by its KPIs if not overwritten...
-responsible: app.team@example.com
-# By providing a list of 'recipients' subcommands such as 'dashboard' can
-# use that information in order do provide some sort of authorization.
-recipients: [ UsersAppX ]
-# Now the KPIs...
-kpis:
-  - 
-    # We already know the name and ID part...
-    name: Database Availability
-    id: db_availability
-    # The 'operatinon' defines how the services must be evaluated. Possible
-    # options are:
-    # * AND:          All services need to be 'OK' for the KPI to be 'OK'.
-    # * OR:           At least one sf its services needs to fo 'OK'.
-    # * MIN x:        Where x is an integer. A minimum number of x services
-    #                 need to be 'OK'
-    # * MINPERCENT x:  As 'MIN', but in percent.
-    operation: OR
-    # Again, a 'responsible' string can be specified in order not to inherit
-    # from the parent BP.
-    responsible: infra.team@example.com
-    # And now the processes. Host and service relate to how you named those
-    # things in your Icinga2 setup.
-    services:
-      - { host: database1.example.com, service: ping } 
-      - { host: database2.example.com, service: ping }
-  - name: Frontend Nodes Availability
-    id: frontend_availability
-    operation: MINPERCENT 60
-    services:
-      - host: frontend1.example.com
-        service: api_health
-        responsible: engineering.team@example.com
-      - { host: frontend2.example.com, service: api_health }
-      - { host: frontend3.example.com, service: api_health }
-      - { host: frontend4.example.com, service: api_health }
-      - { host: frontend5.example.com, service: api_health }
-      - { host: frontend6.example.com, service: api_health }
-</code></pre>
-
-<p>Certainly you have to adopt the configuration to match systems monitored via your icinga instance or use
-<a href="//github.com/unprofession-al/bpmon/blob/master/cmd/icingamock/README.md">icingamock</a> to use our Business Process
-Definition:</p>
-
-<pre><code>icingamock -bp $BPMON_HOME/bp.d
-</code></pre>
-
-<p>Configuration done, lets check&hellip;!</p></div>
+<h3 id="basic-configuration">Basic Configuration</h3></div>
 </div>
 
             </div>

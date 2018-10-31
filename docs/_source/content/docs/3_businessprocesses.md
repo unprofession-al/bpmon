@@ -11,36 +11,36 @@ Learn how do create a Business Process composed from existing Icinga2 Checks.
 
 <!--more-->
 
-## Adding our first Business Process
+## Adding our first Business Process Definition
 
 Now that BPMON is set up, lets define a *business process*. Again, we do that 
-via YAML, a file per *business process*:
+via YAML, a file per *business process*. Put the following content into `$BPMON_HOME/bp.d/web_service_x.yaml`
 
 ```yaml
 ---
 # Give it a name. Names can be changed anytime...
-name: Application X
+name: Web Service X
 # Also give it an ID. This is used to store results in the database and
 # therefore should not be changed.
-id: app_x
+id: ws_x
 # Tell BPMON during what time the process needs to be avalable. Remember
 # the availabilities section from the global configuration...? This links 
 # there.
-availability: 9to5
+availability: medium
 # You can also specify a 'responsible' string. This string can then be used in
 # the trigger template. This could be for example trigger a specific http
 # end point, pass some uri parameters, send an email to a specific address etc.
 # The 'responsible' string is inherited by its KPIs if not overwritten...
 responsible: app.team@example.com
-# By providing a list of 'recipients' subcommands such as 'beta dashboard' can
+# By providing a list of 'recipients' subcommands such as 'dashboard' can
 # use that information in order do provide some sort of authorization.
 recipients: [ UsersAppX ]
 # Now the KPIs...
 kpis:
   - 
     # We already know the name and ID part...
-    name: Load Balancer Availability
-    id: lb_availability
+    name: Database Availability
+    id: db_availability
     # The 'operatinon' defines how the services must be evaluated. Possible
     # options are:
     # * AND:          All services need to be 'OK' for the KPI to be 'OK'.
@@ -55,14 +55,28 @@ kpis:
     # And now the processes. Host and service relate to how you named those
     # things in your Icinga2 setup.
     services:
-      - { host: haproxy1.example.com, service: ping } 
-      - { host: haproxy2.example.com, service: ping }
-  - name: App Nodes Availability
-    id: app_availability
-    operation: MINPERCENT 50
+      - { host: database1.example.com, service: ping } 
+      - { host: database2.example.com, service: ping }
+  - name: Frontend Nodes Availability
+    id: frontend_availability
+    operation: MINPERCENT 60
     services:
-      - { host: app1.example.com, service: api_health, responsible: engineering.team@example.com }
-      - { host: app2.example.com, service: api_health }
-      - { host: app3.example.com, service: api_health }
-      - { host: app4.example.com, service: api_health }
+      - host: frontend1.example.com
+        service: api_health
+        responsible: engineering.team@example.com
+      - { host: frontend2.example.com, service: api_health }
+      - { host: frontend3.example.com, service: api_health }
+      - { host: frontend4.example.com, service: api_health }
+      - { host: frontend5.example.com, service: api_health }
+      - { host: frontend6.example.com, service: api_health }
 ```
+
+Certainly you have to adopt the configuration to match systems monitored via your icinga instance or use
+[icingamock](//github.com/unprofession-al/bpmon/blob/master/cmd/icingamock/README.md) to use our Business Process
+Definition:
+
+```
+icingamock -bp $BPMON_HOME/bp.d
+```
+
+Configuration done, lets check...!

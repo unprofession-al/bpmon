@@ -45,11 +45,22 @@
     </item>
     
     <item>
-      <title>Persist Historical Data</title>
-      <link>https://bpmon.unprofession.al/docs/4_persistence/</link>
+      <title>Run BPMON</title>
+      <link>https://bpmon.unprofession.al/docs/4_run/</link>
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
-      <guid>https://bpmon.unprofession.al/docs/4_persistence/</guid>
+      <guid>https://bpmon.unprofession.al/docs/4_run/</guid>
+      <description>&lt;p&gt;All set and configured&amp;hellip; Let&amp;rsquo;s see the results!&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Persist Historical Data</title>
+      <link>https://bpmon.unprofession.al/docs/5_persistence/</link>
+      <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
+      
+      <guid>https://bpmon.unprofession.al/docs/5_persistence/</guid>
       <description>&lt;p&gt;See how you can track the history of your incidents.&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;</description>
@@ -57,10 +68,10 @@
     
     <item>
       <title>Write your own Runners</title>
-      <link>https://bpmon.unprofession.al/docs/5_writerunners/</link>
+      <link>https://bpmon.unprofession.al/docs/6_writerunners/</link>
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
-      <guid>https://bpmon.unprofession.al/docs/5_writerunners/</guid>
+      <guid>https://bpmon.unprofession.al/docs/6_writerunners/</guid>
       <description>&lt;p&gt;Not quite what you need yet? Let&amp;rsquo;s customize the output!&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;</description>

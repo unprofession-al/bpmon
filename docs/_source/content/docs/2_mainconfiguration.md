@@ -11,7 +11,15 @@ Now let's move forward; here comes the fun part.
 
 <!--more-->
 
-### Generate the Main Configuration
+<div class="info">
+    <div class="headline">Keeping your system tidy</div>
+    <p>
+        Please make sure you place all your config files in a dedicated directory. We will refer to this configuration 
+        folder as <code>$BPMON_HOME</code>.
+    </p>
+</div>
+
+## Generate the Main Configuration
 
 BPMON provides a couple of subcommands that allow you to manage your main configuration file.
 When starting a new setup from scratch `bpmon config init` comes handy. This will print an annotated 
@@ -85,3 +93,59 @@ default:
     runner: runners/
     bp: bp.d/
 ```
+
+Pipe this output in a file called `config.yaml`. 
+
+```
+bpmon config init > $BPMON_HOME/config.yaml
+```
+
+## Connect to Icinga and Influx database
+
+To get some insights on what can be configured please read the comment in 
+this generated file. For now we only need to setup the `checker` and `store` parts of the configuration to get things started.
+
+In `default.checker.connection` add the connection string to access your icinga API...
+
+In `default.store` we have two options:
+
+1. If you have an Influx database ready paste the connection string at `default.store.connection`.
+2. If you don't want to persist historical data right now set `default.store.get_last_status` to false
+
+## Define an availability
+
+Often we have some time slots in which the availability of a system is guaranteed. Add those time slots to your main config in `default.availabilities`:
+
+```
+---
+default:
+  ...
+  availabilities:
+    high:
+      monday:    [ "allday" ]
+      tuesday:   [ "allday" ]
+      wednesday: [ "allday" ]
+      thursday:  [ "allday" ]
+      friday:    [ "allday" ]
+      saturday:  [ "allday" ]
+      sunday:    [ "allday" ]
+    medium:
+      monday:    [ "06:00:00-20:00:00" ]
+      tuesday:   [ "06:00:00-20:00:00" ]
+      wednesday: [ "06:00:00-20:00:00" ]
+      thursday:  [ "06:00:00-20:00:00" ]
+      friday:    [ "06:00:00-20:00:00" ]
+      saturday:  [ "06:00:00-20:00:00" ]
+      sunday:    [ "06:00:00-20:00:00" ]
+    low:
+      monday:    [ "08:00:00-12:00:00", "13:30:00-17:00:00" ]
+      tuesday:   [ "08:00:00-12:00:00", "13:30:00-17:00:00" ]
+      wednesday: [ "08:00:00-12:00:00", "13:30:00-17:00:00" ]
+      thursday:  [ "08:00:00-12:00:00", "13:30:00-17:00:00" ]
+      friday:    [ "08:00:00-12:00:00", "13:30:00-17:00:00" ]
+  ...
+```
+
+In this case we have three availabilities defined: 'high', 'medium', 'low'. Name yours however your want, just make sure the names make sense to you.
+
+Thats it for the main configuraiton! Let's move on...

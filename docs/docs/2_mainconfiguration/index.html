@@ -69,7 +69,15 @@
 
 <p></p>
 
-<h3 id="generate-the-main-configuration">Generate the Main Configuration</h3>
+<div class="info">
+    <div class="headline">Keeping your system tidy</div>
+    <p>
+        Please make sure you place all your config files in a dedicated directory. We will refer to this configuration 
+        folder as <code>$BPMON_HOME</code>.
+    </p>
+</div>
+
+<h2 id="generate-the-main-configuration">Generate the Main Configuration</h2>
 
 <p>BPMON provides a couple of subcommands that allow you to manage your main configuration file.
 When starting a new setup from scratch <code>bpmon config init</code> comes handy. This will print an annotated
@@ -141,7 +149,63 @@ default:
   env:
     runner: runners/
     bp: bp.d/
-</code></pre></div>
+</code></pre>
+
+<p>Pipe this output in a file called <code>config.yaml</code>.</p>
+
+<pre><code>bpmon config init &gt; $BPMON_HOME/config.yaml
+</code></pre>
+
+<h2 id="connect-to-icinga-and-influx-database">Connect to Icinga and Influx database</h2>
+
+<p>To get some insights on what can be configured please read the comment in
+this generated file. For now we only need to setup the <code>checker</code> and <code>store</code> parts of the configuration to get things started.</p>
+
+<p>In <code>default.checker.connection</code> add the connection string to access your icinga API&hellip;</p>
+
+<p>In <code>default.store</code> we have two options:</p>
+
+<ol>
+<li>If you have an Influx database ready paste the connection string at <code>default.store.connection</code>.</li>
+<li>If you don&rsquo;t want to persist historical data right now set <code>default.store.get_last_status</code> to false</li>
+</ol>
+
+<h2 id="define-an-availability">Define an availability</h2>
+
+<p>Often we have some time slots in which the availability of a system is guaranteed. Add those time slots to your main config in <code>default.availabilities</code>:</p>
+
+<pre><code>---
+default:
+  ...
+  availabilities:
+    high:
+      monday:    [ &quot;allday&quot; ]
+      tuesday:   [ &quot;allday&quot; ]
+      wednesday: [ &quot;allday&quot; ]
+      thursday:  [ &quot;allday&quot; ]
+      friday:    [ &quot;allday&quot; ]
+      saturday:  [ &quot;allday&quot; ]
+      sunday:    [ &quot;allday&quot; ]
+    medium:
+      monday:    [ &quot;06:00:00-20:00:00&quot; ]
+      tuesday:   [ &quot;06:00:00-20:00:00&quot; ]
+      wednesday: [ &quot;06:00:00-20:00:00&quot; ]
+      thursday:  [ &quot;06:00:00-20:00:00&quot; ]
+      friday:    [ &quot;06:00:00-20:00:00&quot; ]
+      saturday:  [ &quot;06:00:00-20:00:00&quot; ]
+      sunday:    [ &quot;06:00:00-20:00:00&quot; ]
+    low:
+      monday:    [ &quot;08:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+      tuesday:   [ &quot;08:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+      wednesday: [ &quot;08:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+      thursday:  [ &quot;08:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+      friday:    [ &quot;08:00:00-12:00:00&quot;, &quot;13:30:00-17:00:00&quot; ]
+  ...
+</code></pre>
+
+<p>In this case we have three availabilities defined: &lsquo;high&rsquo;, &lsquo;medium&rsquo;, &lsquo;low&rsquo;. Name yours however your want, just make sure the names make sense to you.</p>
+
+<p>Thats it for the main configuraiton! Let&rsquo;s move on&hellip;</p></div>
 </div>
 
             </div>
