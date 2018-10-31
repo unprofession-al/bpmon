@@ -24,7 +24,7 @@ bpmon write
 BPMON does not come with a daemon mode or similar. In order to have a decent history of your business processes
 simply run `bpmon write` with a scheduler such as [cron job](http://man7.org/linux/man-pages/man8/cron.8.html), 
 [systemd.timer](https://www.freedesktop.org/software/systemd/man/systemd.timer.html), [Jenkins](https://jenkins.io/), 
-via [GitLab](https://about.gitlab.com/) or whatever you at your disposal.
+via [GitLab](https://about.gitlab.com/) or whatever you have at your disposal.
 
 ## Explore your data
 
