@@ -62,5 +62,13 @@ object ApiUser "bpmon" {
 }
 ```
 
-
 ## Setting up an Influx Database (optional)
+
+A feature of bpmon is to write all measurements in an Influx database on order to have historical data of our up- and
+downtimes as well as the reasons for potential incidents. This is a neat feature for reporting etc.
+
+If you want to get your hands on this feature you need to have an Influx database as well as a username/password 
+with read/write access at hand.
+
+Visit their [documentaiton](https://docs.influxdata.com/influxdb/) to learn how to set things up.
+
