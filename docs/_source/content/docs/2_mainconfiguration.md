@@ -11,13 +11,10 @@ Now let's move forward; here comes the fun part.
 
 <!--more-->
 
-<div class="info">
-    <div class="headline">Keeping your system tidy</div>
-    <p>
-        Please make sure you place all your config files in a dedicated directory. We will refer to this configuration 
-        folder as <code>$BPMON_BASE</code>.
-    </p>
-</div>
+{{% info headline="Keep your system tidy" %}}
+Please make sure you place all your config files in a dedicated directory. We will refer to this configuration 
+folder as `$BPMON_BASE`.
+{{% /info %}}
 
 ## Prepare the directory structure
 
