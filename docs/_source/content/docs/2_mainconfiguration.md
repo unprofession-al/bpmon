@@ -26,7 +26,7 @@ mkdir bp.d && mkdir runners
 
 ## Generate the Main Configuration
 
-BPMON provides a couple of subcommands that allow you to manage your main configuration file.
+BPMON provides a couple of sub commands that allow you to manage your main configuration file.
 When starting a new setup from scratch `bpmon config init` comes handy. This will print an annotated 
 configuration file prefilled with defaults to the standard output:
 
@@ -120,7 +120,7 @@ In `default.store` we have two options:
 
 ## Define an availability
 
-Often we have some time slots in which the availability of a system is guaranteed. Add those time slots to your main config in `default.availabilities`:
+Often we have some time slots in which the availability of a system is guaranteed. Add those time slots to your main configuration in `default.availabilities`:
 
 ```
 ---
@@ -154,4 +154,4 @@ default:
 
 In this case we have three availabilities defined: 'high', 'medium', 'low'. Name yours however your want, just make sure the names make sense to you.
 
-Thats it for the main configuration! Let's move on...
+That's it for the main configuration! Let's move on...
