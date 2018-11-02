@@ -12,6 +12,8 @@ import (
 	"github.com/unprofession-al/bpmon/store"
 )
 
+const baseEnv = "BPMON_BASE"
+
 var (
 	cfgFile        string
 	cfgBase        string
@@ -32,8 +34,13 @@ var betaCmd = &cobra.Command{
 }
 
 func init() {
+	base := os.Getenv(baseEnv)
+	if base == "" {
+		base = "."
+	}
+
 	RootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "config.yaml", "name the configuration file")
-	RootCmd.PersistentFlags().StringVarP(&cfgBase, "base", "b", ".", "path of the directory where the configuration is located")
+	RootCmd.PersistentFlags().StringVarP(&cfgBase, "base", "b", base, fmt.Sprintf("path of the directory where the configuration is located (default can be set via $%s)", baseEnv))
 	RootCmd.PersistentFlags().StringVarP(&cfgSection, "section", "s", "default", "name of the section to be read")
 	RootCmd.PersistentFlags().StringVarP(&bpPattern, "pattern", "p", "*.yaml", "pattern of business process configuration files to process")
 	RootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", true, "print log output")
