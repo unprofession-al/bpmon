@@ -12,8 +12,12 @@ Now let's move forward; here comes the fun part.
 <!--more-->
 
 {{% info headline="Keep your system tidy" %}}
-Please make sure you place all your config files in a dedicated directory. We will refer to this configuration 
-folder as `$BPMON_BASE`.
+Please make sure you place all your config files in a dedicated directory. We will refer to this 
+configuration folder as `$BPMON_BASE`. 
+
+Note that you can export the `BPMON_BASE` environment variable or use the `-b/--base` flag to point 
+`BPMON` to your own configuration directory (by default `BPMON` expects to find its configuration in
+the current directory).
 {{% /info %}}
 
 ## Prepare the directory structure
