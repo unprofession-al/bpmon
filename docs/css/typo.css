@@ -8,6 +8,11 @@ body {
     line-height: 1.5;
 }
 
+::selection {
+    color: #24292e;
+    background-color: var(--light-color);
+}
+
 li {
     padding-left: 15px;
 }

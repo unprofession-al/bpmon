@@ -4,9 +4,19 @@ package config
 
 func configDoc(section string) map[string]string {
 	doc := make(map[string]string)
-	doc[section] = `The default section is - as the name suggests - read by default.`
+	doc[section] = `The default section is - as the name suggests - read by default. Note that you can
+define as many sections as your want. You can for examlpe define a 'test' section
+that refers to a test connection string for icinga and/or influx. To reduce
+boilerplate consider anchors (http://yaml.org/spec/1.2/spec.html#id2765878)
+ 
+    default: &anchor_to_default
+      ...
+    test:
+      << *anchor_to_default
+ 
+Sections other than 'default' can be used via the -s/--section flag.`
 	doc[section+".availabilities"] = `Define your office hours et al. according to your service level
-agreements (SLA). You can later reference them in your BP definitions.
+agreements (SLA). You will reference themlater in your BP definitions.
 `
 	doc[section+".checker"] = `First BPMON needs to have access to your Icinga2 API. Learn more on by reading
 https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
@@ -38,30 +48,47 @@ should match the pattern [ip]:[port].
 at the root of the server. This should contain the UI of the
 Dashboard
 `
-	doc[section+".env"] = ``
-	doc[section+".env.bp"] = ``
-	doc[section+".env.runner"] = ``
-	doc[section+".global_recipients"] = `global_recipients will be added to the repicients list af all BP
+	doc[section+".env"] = `env allows you to setup your configuration file structure according to your
+requirements.
 `
-	doc[section+".health"] = `health ... TODO
+	doc[section+".env.bp"] = `bp is the directory where your buisness process definitions are stored. The path must be
+relative to your base directory (-b/--base). The path must exist.
 `
-	doc[section+".health.checker_required"] = ``
-	doc[section+".health.id"] = ``
-	doc[section+".health.name"] = ``
-	doc[section+".health.responsible"] = ``
-	doc[section+".health.store_required"] = ``
-	doc[section+".rules"] = `Extend the default rules; in that case: Do not run the alarming command
-if a critical service is aready aknowledged to avoid alarm spamming.
+	doc[section+".env.runner"] = `runners is the directory where your custom runners are stored. The path must be
+relative to your base directory (-b/--base). The path must exist.
 `
-	doc[section+".store"] = `Also the connection to the InfluxDB is required in order to persist the
-state for reporting and such
+	doc[section+".global_recipients"] = `global_recipients will be added to the repicients list of all BP
 `
-	doc[section+".store.connection"] = ``
-	doc[section+".store.debug"] = ``
-	doc[section+".store.get_last_status"] = ``
-	doc[section+".store.kind"] = ``
-	doc[section+".store.save_ok"] = ``
-	doc[section+".store.timeout"] = ``
+	doc[section+".rules"] = `Extend the default rules. The default rules are provided by the checker implementation
+and can be reviewed via bpmon config print.
+`
+	doc[section+".store"] = `The connection to the InfluxDB is required in order to persist the the state, eg.
+the write subcommand.
+`
+	doc[section+".store.connection"] = `The connection string describes how to connect to your Influx Database.
+The string needs to follow the pattern:
+  [protocol]://[user]:[passwd]@[hostname]:[port]
+`
+	doc[section+".store.debug"] = `if debug is set to true all queries generated and executed by bpmon will
+be logged to stdout.
+`
+	doc[section+".store.get_last_status"] = `This will tell BPMON to compare the current status against the last
+status saved in InfluxDB and adds some values to the measurement
+accordingly. This then allows to generate reports such as 'Tell me
+only when a status is changed from good to bad'. This only runs against
+types listed in 'save_ok' since only these are persisted 'correctly'.
+`
+	doc[section+".store.kind"] = `kind defines the store implementation to be used by BPMON. Currently
+only influx is implemented.
+`
+	doc[section+".store.save_ok"] = `save_ok tells BPMON which data points should be persisted if the state is 'ok'.
+By default 'OK' states aro only saved to InfluxDB if its an BP measurement.
+That means that 'OK' states for KPIs and SVCs will not be saved for the sake of
+of storage required. 'OK' states of BPs are saved as 'heart beat' of BPMON.
+`
+	doc[section+".store.timeout"] = `timeout is read as a go (golang) duration, please refer to
+https://golang.org/pkg/time/#Duration for a detailed explanation.
+`
 	doc[section+".store.tls_skip_verify"] = `BPMON verifies if a https connection is trusted. If you wont to trust a
 connection with an invalid certificate you have to set this to true
 `

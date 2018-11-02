@@ -109,7 +109,17 @@ package {{ .Pkg }}
 
 func configDoc(section string) map[string]string {
 	doc := make(map[string]string)
-	doc[section] = ` + "`" + `The default section is - as the name suggests - read by default.` + "`" + `
+	doc[section] = ` + "`" + `The default section is - as the name suggests - read by default. Note that you can
+define as many sections as your want. You can for examlpe define a 'test' section
+that refers to a test connection string for icinga and/or influx. To reduce
+boilerplate consider anchors (http://yaml.org/spec/1.2/spec.html#id2765878)
+ 
+    default: &anchor_to_default
+      ...
+    test:
+      << *anchor_to_default
+ 
+Sections other than 'default' can be used via the -s/--section flag.` + "`" + `
 	{{- range $key, $doc := .Docs}}
 	doc[section+".{{$key}}"] = ` + "`{{ $doc }}`" + `
 	{{- end}}
