@@ -18,6 +18,7 @@ import (
 var (
 	runParams []string
 	runList   bool
+	runAdHoc  string
 )
 
 var runCmd = &cobra.Command{
@@ -65,6 +66,13 @@ var runCmd = &cobra.Command{
 				fmt.Printf("%s\n\t%s\n%s", name, runner.Description, p)
 			}
 			os.Exit(0)
+		}
+
+		if runAdHoc != "" {
+			runnerName, err = run.AdHoc(runAdHoc)
+			if err != nil {
+				log.Fatal(err)
+			}
 		}
 
 		runner, ok := run[runnerName]
@@ -151,4 +159,5 @@ func init() {
 	RootCmd.AddCommand(runCmd)
 	runCmd.PersistentFlags().StringSliceVar(&runParams, "params", []string{}, "Provide template parameters")
 	runCmd.PersistentFlags().BoolVar(&runList, "list", false, "print a list of available runners")
+	runCmd.PersistentFlags().StringVar(&runAdHoc, "adhoc", "", "pass a runner template as param")
 }

@@ -109,9 +109,7 @@ package {{ .Pkg }}
 
 func configDoc(section string) map[string]string {
 	doc := make(map[string]string)
-	doc[section] = ` + "`" + `The default section is - as the name suggests - read by default. Note the '&default'
-notation; this is known an an 'anchor' and allows you to reuse the settings
-in other sections...` + "`" + `
+	doc[section] = ` + "`" + `The default section is - as the name suggests - read by default.` + "`" + `
 	{{- range $key, $doc := .Docs}}
 	doc[section+".{{$key}}"] = ` + "`{{ $doc }}`" + `
 	{{- end}}

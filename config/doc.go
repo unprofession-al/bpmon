@@ -4,9 +4,7 @@ package config
 
 func configDoc(section string) map[string]string {
 	doc := make(map[string]string)
-	doc[section] = `The default section is - as the name suggests - read by default. Note the '&default'
-notation; this is known an an 'anchor' and allows you to reuse the settings
-in other sections...`
+	doc[section] = `The default section is - as the name suggests - read by default.`
 	doc[section+".availabilities"] = `Define your office hours et al. according to your service level
 agreements (SLA). You can later reference them in your BP definitions.
 `
@@ -40,6 +38,9 @@ should match the pattern [ip]:[port].
 at the root of the server. This should contain the UI of the
 Dashboard
 `
+	doc[section+".env"] = ``
+	doc[section+".env.bp"] = ``
+	doc[section+".env.runner"] = ``
 	doc[section+".global_recipients"] = `global_recipients will be added to the repicients list af all BP
 `
 	doc[section+".health"] = `health ... TODO
@@ -49,7 +50,6 @@ Dashboard
 	doc[section+".health.name"] = ``
 	doc[section+".health.responsible"] = ``
 	doc[section+".health.store_required"] = ``
-	doc[section+".health.template"] = ``
 	doc[section+".rules"] = `Extend the default rules; in that case: Do not run the alarming command
 if a critical service is aready aknowledged to avoid alarm spamming.
 `
@@ -64,9 +64,6 @@ state for reporting and such
 	doc[section+".store.timeout"] = ``
 	doc[section+".store.tls_skip_verify"] = `BPMON verifies if a https connection is trusted. If you wont to trust a
 connection with an invalid certificate you have to set this to true
-`
-	doc[section+".templates"] = `templates is a map of templates which can be used with the run
-subcommand
 `
 	return doc
 }

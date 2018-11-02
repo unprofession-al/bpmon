@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"strconv"
 	"text/template"
+	"time"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -52,6 +54,18 @@ func New(path string) (Runners, error) {
 	}
 
 	return r, nil
+}
+
+// AdHoc appends a new runner from a template string and returns its (generated) name/key
+func (r *Runners) AdHoc(t string) (name string, err error) {
+	name = fmt.Sprintf("adhoc-%s", strconv.FormatInt(time.Now().UTC().UnixNano(), 10))
+	runner := Runner{}
+	runner.Template, err = template.New(name).Funcs(getFuncs()).Parse(t)
+	if err != nil {
+		return name, fmt.Errorf("Error while parsing runner template for: %s", err.Error())
+	}
+	(*r)[name] = runner
+	return name, nil
 }
 
 type Runner struct {
