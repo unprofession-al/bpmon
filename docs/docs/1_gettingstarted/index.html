@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>BPMON - 
-    Getting Started with BPMON
+Getting Started with BPMON
 </title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -65,7 +65,7 @@
 <div class="single">
     
     <h1>Getting Started with BPMON</h1>
-    <div class="text"><p>There are a few things you need to prepare&hellip; Getting everything ready.</p>
+    <div class="text"><p>There are a few things you need to prepare before we can start&hellip; Let&rsquo;s get everything ready.</p>
 
 <p></p>
 
@@ -77,9 +77,9 @@ on your system:</p>
 <h3 id="from-source">From Source</h3>
 
 <p>To install BPMON, you need Go 1.11.x. Please refer to <a href="https://golang.org/doc/install">the official documentation</a>
-to do so&hellip;</p>
+to do so.</p>
 
-<p>As soon as your Go environment is setup simply run the following command (don&rsquo;t forget the three dots at the end!):</p>
+<p>As soon as your Go environment is set up simply run the following command (don&rsquo;t forget the three dots at the end!):</p>
 
 <pre><code># go get -u github.com/unprofession-al/bpmon/...
 </code></pre>
@@ -98,11 +98,12 @@ to do so&hellip;</p>
 
 <div class="info">
     <div class="headline">No ICINCA 2 Server available? No time or permission to setup the API?</div>
-    <p>
-        No problem. BPMON comes with a tiny <a href="https://github.com/unprofession-al/bpmon/tree/master/cmd/icingamock/README.md">Icinga Mock Server</a> to get your hands dirty without having ICINGA
-        ready... 
-    </p>
+    <p><p>No problem. BPMON comes with a tiny <a href="https://github.com/unprofession-al/bpmon/tree/master/cmd/icingamock/README.md">Icinga Mock Server</a>
+to get your hands dirty without having ICINGA ready&hellip;</p>
+</p>
 </div>
+
+
 
 <p>BPMON fetches the status of the required services via the ICINGA 2 API. Therefore we have to enable the API as well as
 create a user for BPMON. Refer to the <a href="https://icinga.com/docs/icinga2/latest/">official documentation</a> to do so&hellip;</p>
@@ -129,6 +130,11 @@ downtimes as well as the reasons for potential incidents. This is a neat feature
 with read/write access at hand.</p>
 
 <p>Visit their <a href="https://docs.influxdata.com/influxdb/">documentaiton</a> to learn how to set things up.</p></div>
+
+    
+    <em>Next up: <a href="https://bpmon.unprofession.al/docs/2_mainconfiguration/">The Main Configuration</a></em>
+    
+
 </div>
 
             </div>
@@ -161,18 +167,6 @@ with read/write access at hand.</p>
 </div>
 </div>
         </div>
-
-        <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
-            <linearGradient id="gradient-horizontal" x2="0" y2="1">
-            <stop offset="0%" stop-color="var(--color-stop-1)" />
-            <stop offset="20%" stop-color="var(--color-stop-2)" />
-            <stop offset="40%" stop-color="var(--color-stop-3)" />
-            <stop offset="60%" stop-color="var(--color-stop-4)" />
-            <stop offset="80%" stop-color="var(--color-stop-5)" />
-            <stop offset="100%" stop-color="var(--color-stop-6)" />
-            </linearGradient>       
-        </svg>
-
     </body>
 </html>
 

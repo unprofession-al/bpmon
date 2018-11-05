@@ -13,8 +13,8 @@ See how you can track the history of your incidents.
 
 ## Write data to your Influx Database
 
-Since sometimes we need to keep track of our uptimes and incidents in order to report to customers etc. For that
-matter BPMON provides the `write`. Given that the `default.store.connection` string is properly set, we can simply
+Sometimes we need to keep track of our uptimes and incidents in order to report to customers etc. For that
+matter BPMON provides the `write` subcommand. Given that the `default.store.connection` string is properly set, we can simply
 write the data into the database by running:
 
 ```
@@ -28,7 +28,7 @@ via [GitLab](https://about.gitlab.com/) or whatever you have at your disposal.
 
 ## Explore your data
 
-Since Influx provides very simple interfaces to access your data such as its HTTP API you have a ton of possibilities
+Since Influx provides very simple interfaces to access your data such as its HTTP API you have a range of possibilities
 to explore your data. Two very simple approches are the `dashboard` subcommand as well a [Grafana](https://grafana.com/)
 dashboard
 
@@ -38,7 +38,7 @@ _(coming soon)_
 
 ### The Grafana Dashboard
 
-A easy and comfortable to explore BPMON data (or in fact any data stored in an Influx database et al.) is Grafana. You'll
+An other easy way to explore data written by BPMON (or in fact any data stored in an Influx database et al.) is Grafana. You'll
 find a example dashboard in our [GitHub repositoy](https://github.com/unprofession-al/bpmon/blob/master/hacking/grafana/BusinessProcessesDashboard.json)
 
 ![Grafana Dashboard](images/grafana_dashboard.png "Grafana Dashboard")

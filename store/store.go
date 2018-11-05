@@ -16,12 +16,35 @@ import (
 // function. The field 'Kind' is used to determine which provider is
 // requested.
 type Config struct {
-	Kind          string        `yaml:"kind"`
-	Connection    string        `yaml:"connection"`
-	Timeout       time.Duration `yaml:"timeout"`
-	SaveOK        []string      `yaml:"save_ok"`
-	GetLastStatus bool          `yaml:"get_last_status"`
-	Debug         bool          `yaml:"debug"`
+	// kind defines the store implementation to be used by BPMON. Currently
+	// only influx is implemented.
+	Kind string `yaml:"kind"`
+
+	// The connection string describes how to connect to your Influx Database.
+	// The string needs to follow the pattern:
+	//   [protocol]://[user]:[passwd]@[hostname]:[port]
+	Connection string `yaml:"connection"`
+
+	// timeout is read as a go (golang) duration, please refer to
+	// https://golang.org/pkg/time/#Duration for a detailed explanation.
+	Timeout time.Duration `yaml:"timeout"`
+
+	// save_ok tells BPMON which data points should be persisted if the state is 'ok'.
+	// By default 'OK' states aro only saved to InfluxDB if its an BP measurement.
+	// That means that 'OK' states for KPIs and SVCs will not be saved for the sake of
+	// of storage required. 'OK' states of BPs are saved as 'heart beat' of BPMON.
+	SaveOK []string `yaml:"save_ok"`
+
+	// This will tell BPMON to compare the current status against the last
+	// status saved in InfluxDB and adds some values to the measurement
+	// accordingly. This then allows to generate reports such as 'Tell me
+	// only when a status is changed from good to bad'. This only runs against
+	// types listed in 'save_ok' since only these are persisted 'correctly'.
+	GetLastStatus bool `yaml:"get_last_status"`
+
+	// if debug is set to true all queries generated and executed by bpmon will
+	// be logged to stdout.
+	Debug bool `yaml:"debug"`
 
 	// BPMON verifies if a https connection is trusted. If you wont to trust a
 	// connection with an invalid certificate you have to set this to true

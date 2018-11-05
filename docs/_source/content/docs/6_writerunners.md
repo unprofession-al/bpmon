@@ -123,4 +123,8 @@ the templating engine to help you inspect the data:
 | spew | Print with a lot of details regarding data type and such | `{{ spew . }}` |
 | describe | Print the data structure rather than the data itself | `{{ describe . }}` |
 
-Remember those functions, they might get handy.
+Remember those functions, they might get handy. You can try them out easily via an AdHoc Runner:
+
+```
+bpmon run --adhoc "{{ pretty . }}"
+```

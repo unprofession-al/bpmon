@@ -1,30 +1,25 @@
-FROM golang:alpine as builder
-MAINTAINER Daniel Menet
+# Base build image
+FROM golang:1.11-alpine AS build_base
 
-ENV PATH /go/bin:/usr/local/go/bin:$PATH
-ENV GOPATH /go
+RUN apk add bash ca-certificates git gcc g++ libc-dev
+WORKDIR /go/src/github.com/unprofession-al/bpmon
 
-RUN	apk add --no-cache \
-	ca-certificates
+ENV GO111MODULE=on
 
-COPY . /go/src/github.com/unprofession-al/bpmon
+COPY go.mod .
+COPY go.sum .
 
-RUN set -x \
-	&& apk add --no-cache --virtual .build-deps \
-		git \
-		gcc \
-		libc-dev \
-		libgcc \
-		make \
-	&& go get -u github.com/mjibson/esc \
-	&& cd /go/src/github.com/unprofession-al/bpmon \
-	&& make \
-	&& mv bpmon /usr/bin/bpmon \
-	&& apk del .build-deps \
-	&& rm -rf /go \
-	&& echo "Build complete."
+RUN go mod download
 
+# App build image
+FROM build_base AS app_builder
+
+COPY . .
+
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go install -a -tags netgo -ldflags '-w -extldflags "-static"' ./...
+
+# App image
 FROM scratch
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /usr/bin/bpmon /bpmon
+COPY --from=app_builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=app_builder /go/bin/bpmon /bpmon
 ENTRYPOINT ["./bpmon"]

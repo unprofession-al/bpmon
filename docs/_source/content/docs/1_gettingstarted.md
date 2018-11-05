@@ -7,7 +7,7 @@ menu: "doc"
 weight: 1
 ---
 
-There are a few things you need to prepare... Getting everything ready.
+There are a few things you need to prepare before we can start... Let's get everything ready.
 
 <!--more-->
 
@@ -19,9 +19,9 @@ on your system:
 ### From Source
 
 To install BPMON, you need Go 1.11.x. Please refer to [the official documentation](https://golang.org/doc/install) 
-to do so...
+to do so.
 
-As soon as your Go environment is setup simply run the following command (don't forget the three dots at the end!):
+As soon as your Go environment is set up simply run the following command (don't forget the three dots at the end!):
 
 ```
 # go get -u github.com/unprofession-al/bpmon/...
@@ -39,13 +39,10 @@ This will fetch the source and its compile time dependencies and install it unde
 
 ## Preparing ICINGA 2 API Access
 
-<div class="info">
-    <div class="headline">No ICINCA 2 Server available? No time or permission to setup the API?</div>
-    <p>
-        No problem. BPMON comes with a tiny <a href="https://github.com/unprofession-al/bpmon/tree/master/cmd/icingamock/README.md">Icinga Mock Server</a> to get your hands dirty without having ICINGA
-        ready... 
-    </p>
-</div>
+{{% info headline="No ICINCA 2 Server available? No time or permission to setup the API?" %}}
+No problem. BPMON comes with a tiny [Icinga Mock Server](https://github.com/unprofession-al/bpmon/tree/master/cmd/icingamock/README.md) 
+to get your hands dirty without having ICINGA ready... 
+{{% /info %}}
 
 BPMON fetches the status of the required services via the ICINGA 2 API. Therefore we have to enable the API as well as 
 create a user for BPMON. Refer to the [official documentation](https://icinga.com/docs/icinga2/latest/) to do so... 

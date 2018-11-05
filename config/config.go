@@ -9,7 +9,6 @@ import (
 	"github.com/unprofession-al/bpmon/availabilities"
 	"github.com/unprofession-al/bpmon/checker"
 	"github.com/unprofession-al/bpmon/dashboard"
-	"github.com/unprofession-al/bpmon/health"
 	"github.com/unprofession-al/bpmon/rules"
 	"github.com/unprofession-al/bpmon/store"
 	yaml "gopkg.in/yaml.v2"
@@ -68,37 +67,40 @@ func ExampleYAML(inject bool) []byte {
 }
 
 type ConfigSection struct {
-	// global_recipients will be added to the repicients list af all BP
+	// global_recipients will be added to the repicients list of all BP
 	GlobalRecipients []string `yaml:"global_recipients"`
 
 	// health ... TODO
-	Health health.Config `yaml:"health"`
+	// Health health.Config `yaml:"health"`
 
 	// First BPMON needs to have access to your Icinga2 API. Learn more on by reading
 	// https://docs.icinga.com/icinga2/latest/doc/module/icinga2/chapter/icinga2-api.
 	Checker checker.Config `yaml:"checker"`
 
-	// Also the connection to the InfluxDB is required in order to persist the
-	// state for reporting and such
+	// The connection to the InfluxDB is required in order to persist the the state, eg.
+	// the write subcommand.
 	Store store.Config `yaml:"store"`
 
 	// Define your office hours et al. according to your service level
-	// agreements (SLA). You can later reference them in your BP definitions.
+	// agreements (SLA). You will reference themlater in your BP definitions.
 	Availabilities availabilities.AvailabilitiesConfig `yaml:"availabilities"`
 
-	// Extend the default rules; in that case: Do not run the alarming command
-	// if a critical service is aready aknowledged to avoid alarm spamming.
+	// Extend the default rules. The default rules are provided by the checker implementation
+	// and can be reviewed via bpmon config print.
 	Rules rules.Rules `yaml:"rules"`
 
 	// dashboard configures the dashboard subcommand.
 	Dashboard dashboard.Config `yaml:"dashboard"`
 
+	// env allows you to setup your configuration file structure according to your
+	// requirements.
 	Env EnvConfig `yaml:"env"`
 }
 
 func defaultConfigSection() ConfigSection {
 	return ConfigSection{
-		Health:    health.Defaults(),
+		// TODO: ...
+		//Health:    health.Defaults(),
 		Checker:   checker.Defaults(),
 		Store:     store.Defaults(),
 		Dashboard: dashboard.Defaults(),
@@ -109,8 +111,9 @@ func defaultConfigSection() ConfigSection {
 func (s ConfigSection) Validate(name string) (out []string, err error) {
 	var errs []string
 
-	errs = fmtErrors(s.Health.Validate())
-	out = append(out, errs...)
+	// TODO: ...
+	// errs = fmtErrors(s.Health.Validate())
+	// out = append(out, errs...)
 
 	errs = fmtErrors(s.Checker.Validate())
 	out = append(out, errs...)
