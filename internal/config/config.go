@@ -25,7 +25,7 @@ func (c Config) Validate() (out []string, err error) {
 		out = append(out, errs...)
 	}
 	if len(errs) > 0 {
-		err = errors.New("Configuration has errors")
+		err = errors.New("configuration has errors")
 	}
 	return
 }
@@ -33,7 +33,7 @@ func (c Config) Validate() (out []string, err error) {
 func NewFromFile(path string, inject bool) (c Config, raw []byte, err error) {
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		return c, data, fmt.Errorf("Error while reading configuration file '%s': %s", path, err.Error())
+		return c, data, fmt.Errorf("error while reading configuration file '%s': %s", path, err.Error())
 	}
 	return New(data, inject)
 }
@@ -43,7 +43,7 @@ func New(data []byte, inject bool) (c Config, raw []byte, err error) {
 		key := "injected_defaults_" + time.Now().Format("20060102150405")
 		raw, err = injectDefaults(data, key)
 		if err != nil {
-			return c, raw, fmt.Errorf("Error while injection defaults: %s", err.Error())
+			return c, raw, fmt.Errorf("error while injection defaults: %s", err.Error())
 		}
 	} else {
 		raw = data
@@ -51,7 +51,7 @@ func New(data []byte, inject bool) (c Config, raw []byte, err error) {
 
 	err = yaml.Unmarshal(raw, &c)
 	if err != nil {
-		return c, raw, fmt.Errorf("Error while unmarshalling configuration from yaml: %s", err.Error())
+		return c, raw, fmt.Errorf("error while unmarshalling configuration from yaml: %s", err.Error())
 	}
 	return c, raw, nil
 }
@@ -129,11 +129,11 @@ func (s ConfigSection) Validate(name string) (out []string, err error) {
 
 	_, aErr := s.Availabilities.Parse()
 	if aErr != nil {
-		out = append(out, fmt.Sprintf("Error while parsing availabilities: %s", aErr.Error()))
+		out = append(out, fmt.Sprintf("error while parsing availabilities: %s", aErr.Error()))
 	}
 
 	if len(errs) > 0 {
-		err = fmt.Errorf("Configuration Section '%s' has errors", name)
+		err = fmt.Errorf("configuration Section '%s' has errors", name)
 	}
 	return
 }
@@ -152,5 +152,5 @@ func (c Config) Section(name string) (ConfigSection, error) {
 	if section, ok := c[name]; ok {
 		return section, nil
 	}
-	return ConfigSection{}, fmt.Errorf("Section '%s' not found", name)
+	return ConfigSection{}, fmt.Errorf("section '%s' not found", name)
 }

@@ -37,7 +37,7 @@ func (i Instruction) Apply() error {
 			ack := value.(bool)
 			svc.Acknowledgement = ack
 		default:
-			return fmt.Errorf("Unknown instruction %s", name)
+			return fmt.Errorf("unknown instruction %s", name)
 		}
 	}
 	return nil

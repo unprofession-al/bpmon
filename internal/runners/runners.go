@@ -21,7 +21,7 @@ func New(path string) (Runners, error) {
 
 	rdirs, err := ioutil.ReadDir(path)
 	if err != nil {
-		return r, fmt.Errorf("Error while reading runners from '%s': %s", path, err.Error())
+		return r, fmt.Errorf("error while reading runners from '%s': %s", path, err.Error())
 	}
 
 	for _, rdir := range rdirs {
@@ -32,22 +32,22 @@ func New(path string) (Runners, error) {
 		metadatapath := fmt.Sprintf("%s/%s/cmd.yaml", path, rdir.Name())
 		metadata, err := ioutil.ReadFile(metadatapath)
 		if err != nil {
-			return r, fmt.Errorf("Error while reading runner metadata (%s) for runner %s: %s", metadatapath, rdir.Name(), err.Error())
+			return r, fmt.Errorf("error while reading runner metadata (%s) for runner %s: %s", metadatapath, rdir.Name(), err.Error())
 		}
 		runner := Runner{}
 		err = yaml.Unmarshal(metadata, &runner)
 		if err != nil {
-			return r, fmt.Errorf("Error while parsing runner metadata (%s) for runner %s: %s", metadatapath, rdir.Name(), err.Error())
+			return r, fmt.Errorf("error while parsing runner metadata (%s) for runner %s: %s", metadatapath, rdir.Name(), err.Error())
 		}
 
 		templpath := fmt.Sprintf("%s/%s/cmd.template", path, rdir.Name())
 		templfile, err := ioutil.ReadFile(templpath)
 		if err != nil {
-			return r, fmt.Errorf("Error while reading runner template (%s) for runner %s: %s", templpath, rdir.Name(), err.Error())
+			return r, fmt.Errorf("error while reading runner template (%s) for runner %s: %s", templpath, rdir.Name(), err.Error())
 		}
 		runner.Template, err = template.New(rdir.Name()).Funcs(getFuncs()).Parse(string(templfile))
 		if err != nil {
-			return r, fmt.Errorf("Error while parsing runner template (%s) for runner %s: %s", templpath, rdir.Name(), err.Error())
+			return r, fmt.Errorf("error while parsing runner template (%s) for runner %s: %s", templpath, rdir.Name(), err.Error())
 		}
 
 		r[rdir.Name()] = runner
@@ -62,7 +62,7 @@ func (r *Runners) AdHoc(t string) (name string, err error) {
 	runner := Runner{}
 	runner.Template, err = template.New(name).Funcs(getFuncs()).Parse(t)
 	if err != nil {
-		return name, fmt.Errorf("Error while parsing runner template for: %s", err.Error())
+		return name, fmt.Errorf("error while parsing runner template for: %s", err.Error())
 	}
 	(*r)[name] = runner
 	return name, nil

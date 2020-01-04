@@ -49,7 +49,7 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 	}
 
 	if authPepper != "" && authHeader != "" {
-		return d, msg, fmt.Errorf("ERROR: pepper and recipients-header are set, only one is allowed.")
+		return d, msg, fmt.Errorf("pepper and recipients-header are set, only one is allowed.")
 	} else if authPepper == "" && authHeader == "" {
 		d.auth = false
 		msg = "WARNING: No pepper or recipients-header is provided, all information are accessible without auth..."

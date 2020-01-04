@@ -34,7 +34,7 @@ func (i Influx) asPoints(rs *store.ResultSet) []point {
 			fields["output"] = fmt.Sprintf("Output: %s", rs.Output)
 		}
 		if rs.Err != nil {
-			fields["err"] = fmt.Sprintf("Error: %s", rs.Err.Error())
+			fields["err"] = fmt.Sprintf("error: %s", rs.Err.Error())
 		}
 		if rs.WasChecked {
 			fields["was"] = rs.Was.Int()
@@ -94,12 +94,12 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 			case "annotated":
 				out.Annotated, ok = v.(bool)
 				if !ok {
-					return out, fmt.Errorf("Could not convert %v (type %s) to bool for 'annotated'", v, reflect.TypeOf(v))
+					return out, fmt.Errorf("could not convert %v (type %s) to bool for 'annotated'", v, reflect.TypeOf(v))
 				}
 			case "changed":
 				out.StatusChanged, ok = v.(bool)
 				if !ok {
-					return out, fmt.Errorf("Could not convert %v (type %s) to bool for 'changed'", v, reflect.TypeOf(v))
+					return out, fmt.Errorf("could not convert %v (type %s) to bool for 'changed'", v, reflect.TypeOf(v))
 				}
 			case "status":
 				raw, err := v.(json.Number).Int64()
@@ -127,7 +127,7 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 			default:
 				out.Vals[k], ok = v.(bool)
 				if !ok {
-					return out, fmt.Errorf("Could not convert %v (type %s) to bool for '%s'", v, reflect.TypeOf(v), k)
+					return out, fmt.Errorf("could not convert %v (type %s) to bool for '%s'", v, reflect.TypeOf(v), k)
 				}
 			}
 		}
@@ -138,7 +138,7 @@ func (i Influx) asResultSet(data map[string]interface{}) (store.ResultSet, error
 
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
-		if strings.ToUpper(b) == strings.ToUpper(a) {
+		if strings.EqualFold(a, b) {
 			return true
 		}
 	}

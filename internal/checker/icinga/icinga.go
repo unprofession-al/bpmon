@@ -115,7 +115,7 @@ func (r Response) status() (at time.Time, msg string, vals map[string]bool, err 
 	vals = flagDefaults.ToValues()
 
 	if len(r.Results) != 1 {
-		err = errors.New("Not exactly one Result found in Icinga API response for service")
+		err = errors.New("not exactly one Result found in Icinga API response for service")
 		return
 	}
 	attrs := r.Results[0].Attrs

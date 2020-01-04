@@ -23,23 +23,23 @@ func LoadBP(bpPath string, bpPattern string, a availabilities.Availabilities, gr
 	}
 	files, err := ioutil.ReadDir(bpPath)
 	if err != nil {
-		return bps, fmt.Errorf("Error while reading business configuration files from '%s': %s", bpPath, err.Error())
+		return bps, fmt.Errorf("error while reading business configuration files from '%s': %s", bpPath, err.Error())
 	}
 	for _, f := range files {
 		match, err := filepath.Match(bpPattern, f.Name())
 		if err != nil {
-			return bps, fmt.Errorf("Error while matching file pattern '%s' in '%s': %s", bpPattern, bpPath, err.Error())
+			return bps, fmt.Errorf("error while matching file pattern '%s' in '%s': %s", bpPattern, bpPath, err.Error())
 		}
 		if !match {
 			continue
 		}
 		file, err := ioutil.ReadFile(bpPath + "/" + f.Name())
 		if err != nil {
-			return bps, fmt.Errorf("Error while reading business process %s/%s: %s", bpPath, f.Name(), err.Error())
+			return bps, fmt.Errorf("error while reading business process %s/%s: %s", bpPath, f.Name(), err.Error())
 		}
 		bp, err := parseBP(file, a, gr)
 		if err != nil {
-			return bps, fmt.Errorf("Error while parsing business process%s/%s: %s", bpPath, f.Name(), err.Error())
+			return bps, fmt.Errorf("error while parsing business process%s/%s: %s", bpPath, f.Name(), err.Error())
 		}
 		bps = append(bps, bp)
 	}
@@ -51,16 +51,16 @@ func parseBP(bpconf []byte, a availabilities.Availabilities, gr []string) (BP, e
 	bp := BP{}
 	err := yaml.Unmarshal(bpconf, &bp)
 	if err != nil {
-		return bp, fmt.Errorf("Error while parsing: %s", err.Error())
+		return bp, fmt.Errorf("error while parsing: %s", err.Error())
 	}
 
 	if bp.AvailabilityName == "" {
-		return bp, fmt.Errorf("There is no availability defined in business process config")
+		return bp, fmt.Errorf("there is no availability defined in business process config")
 	}
 
 	availability, ok := a[bp.AvailabilityName]
 	if !ok {
-		return bp, fmt.Errorf("The availability referenced '%s' does not exist", bp.AvailabilityName)
+		return bp, fmt.Errorf("the availability referenced '%s' does not exist", bp.AvailabilityName)
 	}
 	bp.Availability = availability
 

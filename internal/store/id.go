@@ -44,7 +44,7 @@ func (eid ID) GetResultSet() (ResultSet, error) {
 
 	elements := strings.SplitN(string(data), timeTagSeparator, 2)
 	if len(elements) != 2 {
-		return rs, errors.New("Malformed Event ID")
+		return rs, errors.New("malformed Event ID")
 	}
 
 	nanos, err := strconv.ParseInt(elements[0], 10, 64)
@@ -58,7 +58,7 @@ func (eid ID) GetResultSet() (ResultSet, error) {
 	for _, pair := range tags {
 		touple := strings.SplitN(pair, pairSeparator, 2)
 		if len(touple) != 2 {
-			return rs, errors.New("Malformed Event ID")
+			return rs, errors.New("malformed Event ID")
 		}
 		rs.Tags[Kind(touple[0])] = touple[1]
 	}

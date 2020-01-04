@@ -10,7 +10,7 @@ func (h *Hosts) Get(name string) (*Services, error) {
 			return host, nil
 		}
 	}
-	return &Services{}, fmt.Errorf("Host %s not found", name)
+	return &Services{}, fmt.Errorf("host %s not found", name)
 }
 
 func (h Hosts) List() []string {

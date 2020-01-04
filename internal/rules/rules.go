@@ -77,7 +77,7 @@ func (r Rules) Analyze(values map[string]bool) (status.Status, error) {
 					break
 				}
 			} else {
-				return status.StatusUnknown, fmt.Errorf("Key '%s' from rule with order %d does not exist", keyname, index)
+				return status.StatusUnknown, fmt.Errorf("key '%s' from rule with order %d does not exist", keyname, index)
 			}
 		}
 
@@ -88,7 +88,7 @@ func (r Rules) Analyze(values map[string]bool) (status.Status, error) {
 					break
 				}
 			} else {
-				return status.StatusUnknown, fmt.Errorf("Key '%s' from rule with order %d does not exist", keyname, index)
+				return status.StatusUnknown, fmt.Errorf("key '%s' from rule with order %d does not exist", keyname, index)
 			}
 		}
 
@@ -96,5 +96,5 @@ func (r Rules) Analyze(values map[string]bool) (status.Status, error) {
 			return rule.Then, nil
 		}
 	}
-	return status.StatusUnknown, errors.New("No rule matched")
+	return status.StatusUnknown, errors.New("no rule matched")
 }

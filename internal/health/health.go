@@ -18,14 +18,7 @@ type Health struct {
 }
 
 func New(c Config) Health {
-	h := Health{
-		StoreRequired:   c.StoreRequired,
-		CheckerRequired: c.CheckerRequired,
-		Responsible:     c.Responsible,
-		Name:            c.Name,
-		ID:              c.ID,
-	}
-	return h
+	return Health(c)
 }
 
 func (h Health) Check(c checker.Checker, s store.Accessor) *store.ResultSet {

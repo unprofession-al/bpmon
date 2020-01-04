@@ -109,7 +109,7 @@ type TimeRange struct {
 func toAvailabilityTime(trStrings []string) (AvailabilityTime, error) {
 	out := AvailabilityTime{AllDay: false}
 	if len(trStrings) < 1 || trStrings[0] == "" {
-		return out, errors.New("Time range definition cannot be empty")
+		return out, errors.New("time range definition cannot be empty")
 	}
 	timeranges := make([]TimeRange, 0)
 	for _, trString := range trStrings {

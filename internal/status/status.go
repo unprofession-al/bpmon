@@ -37,7 +37,7 @@ func FromString(in string) (Status, error) {
 			return Status(status), nil
 		}
 	}
-	return StatusUnknown, fmt.Errorf("String '%s' is not a valid status", in)
+	return StatusUnknown, fmt.Errorf("string '%s' is not a valid status", in)
 }
 
 // FromInt64 returns a status matching the int64 provided. If the input does

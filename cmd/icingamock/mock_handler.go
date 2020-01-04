@@ -100,7 +100,7 @@ func splitHostServicePair(hostSvcPair []string) (string, string, error) {
 		return tokens[0], tokens[1], nil
 
 	} else if len(hostSvcPair) > 1 {
-		return "", "", fmt.Errorf("To many URL params `serivce` found: %s", hostSvcPair)
+		return "", "", fmt.Errorf("to many URL params `serivce` found: %s", hostSvcPair)
 	}
-	return "", "", fmt.Errorf("No URL param `service` found")
+	return "", "", fmt.Errorf("no URL param `service` found")
 }

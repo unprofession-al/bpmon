@@ -19,7 +19,7 @@ func injectDefaults(data []byte, key string) ([]byte, error) {
 	c := Config{}
 	err := yaml.Unmarshal(data, &c)
 	if err != nil {
-		return data, fmt.Errorf("Error while reading sections from yaml: %s", err.Error())
+		return data, fmt.Errorf("error while reading sections from yaml: %s", err.Error())
 	}
 
 	// remove "---" at beginning when present
