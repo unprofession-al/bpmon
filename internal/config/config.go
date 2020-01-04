@@ -6,11 +6,11 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/unprofession-al/bpmon/availabilities"
-	"github.com/unprofession-al/bpmon/checker"
-	"github.com/unprofession-al/bpmon/dashboard"
-	"github.com/unprofession-al/bpmon/rules"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/internal/availabilities"
+	"github.com/unprofession-al/bpmon/internal/checker"
+	"github.com/unprofession-al/bpmon/internal/dashboard"
+	"github.com/unprofession-al/bpmon/internal/rules"
+	"github.com/unprofession-al/bpmon/internal/store"
 	yaml "gopkg.in/yaml.v2"
 )
 

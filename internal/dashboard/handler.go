@@ -8,8 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/status"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/internal/status"
+	"github.com/unprofession-al/bpmon/internal/store"
 )
 
 func (d Dashboard) ListBPsHandler(res http.ResponseWriter, req *http.Request) {
@@ -55,7 +55,7 @@ func (d Dashboard) GetBPTimelineHandler(res http.ResponseWriter, req *http.Reque
 	interval, _ := time.ParseDuration("300s")
 	points, err := d.store.GetSpans(re, start, end, interval, []status.Status{})
 	if err != nil {
-		msg := fmt.Sprintf("An error occured: %s", err.Error())
+		msg := fmt.Sprintf("An error occurred: %s", err.Error())
 		Respond(res, req, http.StatusInternalServerError, msg)
 		return
 	}
@@ -128,7 +128,7 @@ func (d Dashboard) GetKPITimelineHandler(res http.ResponseWriter, req *http.Requ
 	interval, _ := time.ParseDuration("300s")
 	points, err := d.store.GetSpans(re, start, end, interval, []status.Status{})
 	if err != nil {
-		msg := fmt.Sprintf("An error occured: %s", err.Error())
+		msg := fmt.Sprintf("An error occurred: %s", err.Error())
 		Respond(res, req, http.StatusInternalServerError, msg)
 		return
 	}

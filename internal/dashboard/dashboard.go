@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/internal/store"
 )
 
 type Dashboard struct {
@@ -52,7 +52,7 @@ func New(c Config, bp bpmon.BusinessProcesses, store store.Accessor, authPepper 
 		return d, msg, fmt.Errorf("ERROR: pepper and recipients-header are set, only one is allowed.")
 	} else if authPepper == "" && authHeader == "" {
 		d.auth = false
-		msg = "WARNING: No pepper or recipients-header is provided, all information are accessable without auth..."
+		msg = "WARNING: No pepper or recipients-header is provided, all information are accessible without auth..."
 		r.Handle("/api/{_:.*}", apiRouter)
 	} else if authHeader != "" {
 		d.auth = true

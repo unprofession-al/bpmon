@@ -4,9 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/unprofession-al/bpmon/checker"
-	"github.com/unprofession-al/bpmon/rules"
-	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/internal/checker"
+	"github.com/unprofession-al/bpmon/internal/rules"
+	"github.com/unprofession-al/bpmon/internal/status"
 )
 
 type CheckerMock struct{}
@@ -30,7 +30,7 @@ func (chk CheckerMock) Status(host, service string) checker.Result {
 		out.Values["bad"] = true
 	case "error":
 		out.Values["error"] = true
-		out.Error = errors.New("Error occured")
+		out.Error = errors.New("Error occurred")
 	default:
 		out.Values["unknown"] = true
 	}

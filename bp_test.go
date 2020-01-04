@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/unprofession-al/bpmon/availabilities"
-	"github.com/unprofession-al/bpmon/status"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/internal/availabilities"
+	"github.com/unprofession-al/bpmon/internal/status"
+	"github.com/unprofession-al/bpmon/internal/store"
 )
 
 type bpTestSet struct {

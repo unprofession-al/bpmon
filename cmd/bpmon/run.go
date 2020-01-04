@@ -8,11 +8,11 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	_ "github.com/unprofession-al/bpmon/checker/icinga"
-	"github.com/unprofession-al/bpmon/config"
-	"github.com/unprofession-al/bpmon/runners"
-	"github.com/unprofession-al/bpmon/store"
-	_ "github.com/unprofession-al/bpmon/store/influx"
+	_ "github.com/unprofession-al/bpmon/internal/checker/icinga"
+	"github.com/unprofession-al/bpmon/internal/config"
+	"github.com/unprofession-al/bpmon/internal/runners"
+	"github.com/unprofession-al/bpmon/internal/store"
+	_ "github.com/unprofession-al/bpmon/internal/store/influx"
 )
 
 var (

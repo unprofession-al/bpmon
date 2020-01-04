@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/influxdata/influxdb/client/v2"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/internal/store"
 )
 
 const timefield = "time"

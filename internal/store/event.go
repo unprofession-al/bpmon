@@ -3,7 +3,7 @@ package store
 import (
 	"time"
 
-	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/internal/status"
 )
 
 // Event represents a status change.
@@ -15,7 +15,7 @@ type Event struct {
 	Tags       map[Kind]string `json:"tags"`
 }
 
-// SetID adds an ID to a `Span` based on its Time and Tags which sould be unique.
+// SetID adds an ID to a `Span` based on its Time and Tags which should be unique.
 func (e *Event) SetID() {
 	e.ID = NewID(e.Time, e.Tags)
 }

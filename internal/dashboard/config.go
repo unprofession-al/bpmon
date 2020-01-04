@@ -7,7 +7,7 @@ type Config struct {
 	// should match the pattern [ip]:[port].
 	Listener string `yaml:"listener"`
 
-	// static is the path to the directory that sould be served
+	// static is the path to the directory that should be served
 	// at the root of the server. This should contain the UI of the
 	// Dashboard
 	Static string `yaml:"static"`

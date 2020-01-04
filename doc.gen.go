@@ -53,6 +53,7 @@ func main() {
 	}
 
 	out, err := v.renderMap("config.ConfigSection", "config")
+	die(err)
 
 	_, err = f.Write([]byte(out))
 	die(err)

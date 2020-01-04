@@ -8,11 +8,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/internal/status"
 )
 
 // Config keeps the counfiguration for a store implementation. This struct
-// is passed to the store implementatinon itself via the registerd setup
+// is passed to the store implementatinon itself via the registered setup
 // function. The field 'Kind' is used to determine which provider is
 // requested.
 type Config struct {
@@ -88,7 +88,7 @@ var (
 
 // Register must be called in the init function of each store implementation.
 // The Register function will panic if two store impelmentations with the same
-// name try to register themselfs.
+// name try to register themselves.
 func Register(name string, setupFunc func(Config) (Accessor, error)) {
 	sMu.Lock()
 	defer sMu.Unlock()
@@ -124,7 +124,7 @@ type Accessor interface {
 	// To determine which spans should be queried, the 'Tags' of the 'ResultSet'
 	// provided are considered.
 	//
-	// If a span cannot be determinded because of a 'StatusChanged' flag, a
+	// If a span cannot be determined because of a 'StatusChanged' flag, a
 	// potential interval is required to _assume_ if a gap between to
 	// measurements represents a status change or should be considered a status
 	// change to 'status.OK'. This interval should be sightly larger than the

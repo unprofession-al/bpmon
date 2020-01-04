@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/internal/status"
 )
 
 // ResultSet holds all results of a check. It is also returned by store
@@ -66,7 +66,7 @@ func (rs *ResultSet) AddPreviousStatus(pp Accessor, saveOK []string) {
 			if rs.Status != rs.Was {
 				rs.StatusChanged = true
 			}
-			rs.AppendOutput("Error occured while AddPreviousStatus: " + err.Error())
+			rs.AppendOutput("Error occurred while AddPreviousStatus: " + err.Error())
 		}
 	}
 

@@ -3,7 +3,7 @@ package store
 import (
 	"time"
 
-	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/internal/status"
 )
 
 // Span represents the time span between two events of different status.
@@ -19,7 +19,7 @@ type Span struct {
 	Tags            map[Kind]string `json:"tags"`
 }
 
-// SetID adds an ID to a `Span` based on its Start and Tags which sould be unique.
+// SetID adds an ID to a `Span` based on its Start and Tags which should be unique.
 func (s *Span) SetID() {
 	s.ID = NewID(s.Start, s.Tags)
 }

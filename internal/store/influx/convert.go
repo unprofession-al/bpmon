@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/unprofession-al/bpmon/status"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/internal/status"
+	"github.com/unprofession-al/bpmon/internal/store"
 )
 
 type point struct {

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/unprofession-al/bpmon/checker/icinga"
+	"github.com/unprofession-al/bpmon/internal/checker/icinga"
 )
 
 func MockIcingaServicesHandler(res http.ResponseWriter, req *http.Request) {

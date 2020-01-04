@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
-	"github.com/unprofession-al/bpmon/config"
-	"github.com/unprofession-al/bpmon/dashboard"
-	_ "github.com/unprofession-al/bpmon/store/influx"
+	"github.com/unprofession-al/bpmon/internal/config"
+	"github.com/unprofession-al/bpmon/internal/dashboard"
+	_ "github.com/unprofession-al/bpmon/internal/store/influx"
 )
 
 var (

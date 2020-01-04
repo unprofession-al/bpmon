@@ -21,7 +21,7 @@ const (
 	timeTagSeparator = " "
 )
 
-// NewID generats an ID based on the timestamp as well as the tags.
+// NewID generates an ID based on the timestamp as well as the tags.
 func NewID(timestamp time.Time, tags map[Kind]string) ID {
 	var pairs []string
 	for key, value := range tags {

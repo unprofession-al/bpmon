@@ -7,7 +7,7 @@ type EnvConfig struct {
 	// relative to your base directory (-b/--base). The path must exist.
 	Runners string `yaml:"runner"`
 
-	// bp is the directory where your buisness process definitions are stored. The path must be
+	// bp is the directory where your business process definitions are stored. The path must be
 	// relative to your base directory (-b/--base). The path must exist.
 	BP string `yaml:"bp"`
 }

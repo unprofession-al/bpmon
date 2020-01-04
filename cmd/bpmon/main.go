@@ -6,10 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/unprofession-al/bpmon"
-	"github.com/unprofession-al/bpmon/checker"
-	"github.com/unprofession-al/bpmon/config"
-	"github.com/unprofession-al/bpmon/rules"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/internal/checker"
+	"github.com/unprofession-al/bpmon/internal/config"
+	"github.com/unprofession-al/bpmon/internal/rules"
+	"github.com/unprofession-al/bpmon/internal/store"
 )
 
 const baseEnv = "BPMON_BASE"

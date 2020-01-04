@@ -5,9 +5,9 @@ import (
 	"log"
 
 	"github.com/spf13/cobra"
-	_ "github.com/unprofession-al/bpmon/checker/icinga"
-	"github.com/unprofession-al/bpmon/config"
-	_ "github.com/unprofession-al/bpmon/store/influx"
+	_ "github.com/unprofession-al/bpmon/internal/checker/icinga"
+	"github.com/unprofession-al/bpmon/internal/config"
+	_ "github.com/unprofession-al/bpmon/internal/store/influx"
 )
 
 var writeCmd = &cobra.Command{

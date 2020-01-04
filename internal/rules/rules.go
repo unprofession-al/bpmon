@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/internal/status"
 )
 
 // Rules is a collection of rules where the key defines the position of the

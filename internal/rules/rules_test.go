@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/unprofession-al/bpmon/status"
+	"github.com/unprofession-al/bpmon/internal/status"
 )
 
 var testRules = map[string]Rules{

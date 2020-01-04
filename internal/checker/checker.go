@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/unprofession-al/bpmon/rules"
+	"github.com/unprofession-al/bpmon/internal/rules"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 )
 
 // Config keeps the configuration of the checker implementation. This struct is
-// passed to the store implementatinon itself via the registerd setup function.
+// passed to the store implementatinon itself via the registered setup function.
 // The field 'Kind' is used to determine which provider is requested.
 type Config struct {
 	// kind defines the checker implementation to be used by BPMON. Currently
@@ -35,7 +35,7 @@ type Config struct {
 	TLSSkipVerify bool `yaml:"tls_skip_verify"`
 
 	// timeout defines how long BPMON waits for each request to the checker to
-	// recieve a response. The string is parsed as a goland duration, refer to
+	// receive a response. The string is parsed as a goland duration, refer to
 	// its documentation for more details:
 	//   https://golang.org/pkg/time/#ParseDuration
 	Timeout time.Duration `yaml:"timeout"`
@@ -90,7 +90,7 @@ type Checker interface {
 
 // Register must be called in the init function of each checker implementation.
 // The Register function will panic if two checker impelmentations with the
-// same name try to register themselfs.
+// same name try to register themselves.
 func Register(name string, setupFunc func(Config) (Checker, error)) {
 	cMu.Lock()
 	defer cMu.Unlock()

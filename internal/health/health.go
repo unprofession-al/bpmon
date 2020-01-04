@@ -3,10 +3,10 @@ package health
 import (
 	"time"
 
-	"github.com/unprofession-al/bpmon/checker"
-	"github.com/unprofession-al/bpmon/math"
-	"github.com/unprofession-al/bpmon/status"
-	"github.com/unprofession-al/bpmon/store"
+	"github.com/unprofession-al/bpmon/internal/checker"
+	"github.com/unprofession-al/bpmon/internal/math"
+	"github.com/unprofession-al/bpmon/internal/status"
+	"github.com/unprofession-al/bpmon/internal/store"
 )
 
 type Health struct {
