@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/internal/bpmon"
 	"github.com/unprofession-al/bpmon/internal/checker/icinga"
 	yaml "gopkg.in/yaml.v2"
 )

@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/internal/bpmon"
 )
 
 type key int

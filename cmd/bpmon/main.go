@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/internal/bpmon"
 	"github.com/unprofession-al/bpmon/internal/checker"
 	"github.com/unprofession-al/bpmon/internal/config"
 	"github.com/unprofession-al/bpmon/internal/rules"

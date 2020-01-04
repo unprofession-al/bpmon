@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/internal/bpmon"
 	"github.com/unprofession-al/bpmon/internal/status"
 	"github.com/unprofession-al/bpmon/internal/store"
 )

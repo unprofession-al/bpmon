@@ -8,7 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
-	"github.com/unprofession-al/bpmon"
+	"github.com/unprofession-al/bpmon/internal/bpmon"
 	"github.com/unprofession-al/bpmon/internal/store"
 )
 
