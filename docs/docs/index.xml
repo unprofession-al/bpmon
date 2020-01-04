@@ -17,9 +17,7 @@
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
       <guid>https://bpmon.unprofession.al/docs/1_gettingstarted/</guid>
-      <description>&lt;p&gt;There are a few things you need to prepare before we can start&amp;hellip; Let&amp;rsquo;s get everything ready.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;There are a few things you need to prepare before we can start&amp;hellip; Let&amp;rsquo;s get everything ready.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -28,9 +26,7 @@
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
       <guid>https://bpmon.unprofession.al/docs/2_mainconfiguration/</guid>
-      <description>&lt;p&gt;Now let&amp;rsquo;s move forward; here comes the fun part.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;Now let&amp;rsquo;s move forward; here comes the fun part.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -39,9 +35,7 @@
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
       <guid>https://bpmon.unprofession.al/docs/3_businessprocesses/</guid>
-      <description>&lt;p&gt;Learn how do create a Business Process composed from existing Icinga2 Checks.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;Learn how do create a Business Process composed from existing Icinga2 Checks.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -50,9 +44,7 @@
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
       <guid>https://bpmon.unprofession.al/docs/4_run/</guid>
-      <description>&lt;p&gt;All set and configured&amp;hellip; Let&amp;rsquo;s see the results!&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;All set and configured&amp;hellip; Let&amp;rsquo;s see the results!&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -61,9 +53,7 @@
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
       <guid>https://bpmon.unprofession.al/docs/5_persistence/</guid>
-      <description>&lt;p&gt;See how you can track the history of your incidents.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;See how you can track the history of your incidents.&lt;/p&gt;</description>
     </item>
     
     <item>
@@ -72,9 +62,7 @@
       <pubDate>Mon, 29 Oct 2018 11:07:36 +0100</pubDate>
       
       <guid>https://bpmon.unprofession.al/docs/6_writerunners/</guid>
-      <description>&lt;p&gt;Not quite what you need yet? Let&amp;rsquo;s customize the output!&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
+      <description>&lt;p&gt;Not quite what you need yet? Let&amp;rsquo;s customize the output!&lt;/p&gt;</description>
     </item>
     
   </channel>

@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-const filename = "config/doc.go"
+const filename = "internal/config/doc.go"
 
 func main() {
 	fmt.Printf("Generating %s...\n", filename)

@@ -29,7 +29,7 @@ string needs to follow the pattern:
 only icinga is implemented.
 `
 	doc[section+".checker.timeout"] = `timeout defines how long BPMON waits for each request to the checker to
-recieve a response. The string is parsed as a goland duration, refer to
+receive a response. The string is parsed as a goland duration, refer to
 its documentation for more details:
   https://golang.org/pkg/time/#ParseDuration
 `
@@ -44,14 +44,14 @@ endpoint via POST request.
 	doc[section+".dashboard.listener"] = `listener tells the dashboard where to bind. This string
 should match the pattern [ip]:[port].
 `
-	doc[section+".dashboard.static"] = `static is the path to the directory that sould be served
+	doc[section+".dashboard.static"] = `static is the path to the directory that should be served
 at the root of the server. This should contain the UI of the
 Dashboard
 `
 	doc[section+".env"] = `env allows you to setup your configuration file structure according to your
 requirements.
 `
-	doc[section+".env.bp"] = `bp is the directory where your buisness process definitions are stored. The path must be
+	doc[section+".env.bp"] = `bp is the directory where your business process definitions are stored. The path must be
 relative to your base directory (-b/--base). The path must exist.
 `
 	doc[section+".env.runner"] = `runners is the directory where your custom runners are stored. The path must be

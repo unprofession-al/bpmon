@@ -193,7 +193,7 @@ var _escData = map[string]*_escFile{
 	"/bpmon.png": {
 		local:   "static/bpmon.png",
 		size:    4875,
-		modtime: 1516869856,
+		modtime: 1511612416,
 		compressed: `
 H4sIAAAAAAAC/wALE/TsiVBORw0KGgoAAAANSUhEUgAAARgAAABECAYAAABatSq0AAAABHNCSVQICAgI
 fAhkiAAAAAlwSFlzAAASOgAAEjoBhc4W7wAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vu
@@ -283,7 +283,7 @@ wft3yqueUEv+B+A6kG2jlRpKAAAAAElFTkSuQmCCAQAA///9LIw4CxMAAA==
 	"/index.html": {
 		local:   "static/index.html",
 		size:    2558,
-		modtime: 1516869856,
+		modtime: 1511911746,
 		compressed: `
 H4sIAAAAAAAC/7RWbW/cRBD+fr9iWOQqkXp2oEhAYxuVlKIKQRGUDwiham89Z09vvWt2JxdOiP+O1i85
 n2MnRVHvQ2I/88zbM7O2009evrl6+/vP30HFtc5XafgHWpoyE2hEAFAW+QoAIK2RJahKOo+cid/evlp/
@@ -305,7 +305,7 @@ AQAA///QwEPX/gkAAA==
 	"/jquery-3.2.1.min.js": {
 		local:   "static/jquery-3.2.1.min.js",
 		size:    86659,
-		modtime: 1516869856,
+		modtime: 1511612416,
 		compressed: `
 H4sIAAAAAAAC/8z9e5ebOLYwDv//fIoyk0OjWKbsdPc8p3EprHSnM5OZvk0nfZnBpJcAgXFhcAGuqrRh
 Pvu7tCWBwDjpOed91vqtrJQB3aWtrb239uX66exq948jK99f3X9qP7NXV82VFaKrv725elUc84jWaZFf
@@ -819,7 +819,7 @@ ExSDUgEA
 	"/main.js": {
 		local:   "static/main.js",
 		size:    5332,
-		modtime: 1516869856,
+		modtime: 1511911746,
 		compressed: `
 H4sIAAAAAAAC/9RYbZPbthH+rl+xga9D0FIpuYnTVjpeJkndNmlydn120/Z648GRKwkWBagAKFlN7r93
 APAFpHhnTzPuTO7DiQT2Hc8udrlnCrRhBi/ZFjWkcA1EbsgEyIEpYX8zxQ3PWGGfS7ER8iAI3CxGlvOg
@@ -856,7 +856,7 @@ PyomcrmlMTxuSQsUK7OO69JcXeRWovX/vwEAAP//yLcem9QUAAA=
 	"/style.css": {
 		local:   "static/style.css",
 		size:    5600,
-		modtime: 1516869856,
+		modtime: 1511612416,
 		compressed: `
 H4sIAAAAAAAC/6RYW2/juhF+Xv2KwTlY7CagbMm5O0DRp6IPp30o+gdG4shiTZEKSfmy2/z3gtTF8kXO
 yVYBYnk4w+HcP3p+C6Vz9XI+r2hPZkvZLNfVnIzI505raee5tXNDltw8AoDNYpbAf2GRpGmSLh496Q+R
@@ -894,7 +894,7 @@ zo0Iv3ZdQQ3F89PTQyvUKG/ANYhxlz0UC8/8vwAAAP//+tj+d+AVAAA=
 	"/templating.js": {
 		local:   "static/templating.js",
 		size:    1173,
-		modtime: 1516869856,
+		modtime: 1511612416,
 		compressed: `
 H4sIAAAAAAAC/3RTUW/bNhh816+4CTUstYqIvkZzAmxYtxQtMKwB9mA5AC19lmjIJEF+shEk/u8DJVt2
 hvSNIu/uu+/OFgI/1M52hK9yL39UTlnGI+1sJ1npJhICX02r8Q951eAGLbP1t0JsTatduMsrsxO4wfeH
