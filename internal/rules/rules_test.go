@@ -8,7 +8,7 @@ import (
 )
 
 var testRules = map[string]Rules{
-	"base": Rules{
+	"base": {
 		10: Rule{
 			Must:    []string{"bad"},
 			MustNot: []string{},
@@ -25,14 +25,14 @@ var testRules = map[string]Rules{
 			Then:    status.StatusOK,
 		},
 	},
-	"additional": Rules{
+	"additional": {
 		15: Rule{
 			Must:    []string{"unknown"},
 			MustNot: []string{},
 			Then:    status.StatusUnknown,
 		},
 	},
-	"base+additional": Rules{
+	"base+additional": {
 		10: Rule{
 			Must:    []string{"bad"},
 			MustNot: []string{},
@@ -54,14 +54,14 @@ var testRules = map[string]Rules{
 			Then:    status.StatusOK,
 		},
 	},
-	"overwrite": Rules{
+	"overwrite": {
 		10: Rule{
 			Must:    []string{"the worst"},
 			MustNot: []string{},
 			Then:    status.StatusUnknown,
 		},
 	},
-	"base+overwrite": Rules{
+	"base+overwrite": {
 		10: Rule{
 			Must:    []string{"the worst"},
 			MustNot: []string{},

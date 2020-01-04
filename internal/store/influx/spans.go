@@ -117,7 +117,7 @@ func (i Influx) getSpans(rs store.ResultSet, start time.Time, end time.Time) ([]
 func (i Influx) assumeSpans(rs store.ResultSet, start time.Time, end time.Time, interval time.Duration) ([]store.Span, error) {
 	duration := end.Sub(start).Seconds()
 	s := []store.Span{
-		store.Span{
+		{
 			Status:     status.StatusOK,
 			Annotation: "",
 			Start:      start,

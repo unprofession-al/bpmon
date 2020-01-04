@@ -95,7 +95,7 @@ func (d Dashboard) Run() {
 
 func (d Dashboard) getRoutes() map[string]Leafs {
 	return map[string]Leafs{
-		"v1": Leafs{
+		"v1": {
 			"whoami": Leaf{
 				E: Endpoints{
 					"GET": Endpoint{N: "WhoAmI", H: d.WhoamiHandler},
