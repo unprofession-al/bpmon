@@ -86,7 +86,7 @@ func (rs *ResultSet) AppendOutput(output string) {
 
 func stringInSlice(a string, list []string) bool {
 	for _, b := range list {
-		if strings.ToUpper(b) == strings.ToUpper(a) {
+		if strings.EqualFold(a, b) {
 			return true
 		}
 	}

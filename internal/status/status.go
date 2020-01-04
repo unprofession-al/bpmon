@@ -51,7 +51,7 @@ func FromInt64(in int64) (Status, error) {
 	case StatusUnknown:
 		return StatusUnknown, nil
 	default:
-		return StatusUnknown, fmt.Errorf("Integer '%d' is not a valid status", in)
+		return StatusUnknown, fmt.Errorf("integer '%d' is not a valid status", in)
 	}
 }
 
