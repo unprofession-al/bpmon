@@ -143,7 +143,7 @@ func NewApp() *App {
 	return a
 }
 
-func (a App) configPrintCmd(cmd *cobra.Command, args []string) {
+func (a *App) configPrintCmd(cmd *cobra.Command, args []string) {
 	cfg := fmt.Sprintf("%s/%s", a.cfg.cfgBase, a.cfg.cfgFile)
 	c, _, err := config.NewFromFile(cfg, a.cfg.injectDefaults)
 	if err != nil {
@@ -171,12 +171,12 @@ func (a App) configPrintCmd(cmd *cobra.Command, args []string) {
 	fmt.Println(string(out))
 }
 
-func (a App) configInitCmd(cmd *cobra.Command, args []string) {
+func (a *App) configInitCmd(cmd *cobra.Command, args []string) {
 	out := config.ExampleYAML(a.cfg.configInitComments)
 	fmt.Println(string(out))
 }
 
-func (a App) configRawCmd(cmd *cobra.Command, args []string) {
+func (a *App) configRawCmd(cmd *cobra.Command, args []string) {
 	cfg := fmt.Sprintf("%s/%s", a.cfg.cfgBase, a.cfg.cfgFile)
 	_, raw, err := config.NewFromFile(cfg, a.cfg.injectDefaults)
 	if err != nil {
@@ -185,7 +185,7 @@ func (a App) configRawCmd(cmd *cobra.Command, args []string) {
 	fmt.Println(string(raw))
 }
 
-func (a App) dashboardCmd(cmd *cobra.Command, args []string) {
+func (a *App) dashboardCmd(cmd *cobra.Command, args []string) {
 	cfg := fmt.Sprintf("%s/%s", a.cfg.cfgBase, a.cfg.cfgFile)
 	c, _, err := config.NewFromFile(cfg, a.cfg.injectDefaults)
 	if err != nil {
@@ -220,7 +220,7 @@ func (a App) dashboardCmd(cmd *cobra.Command, args []string) {
 	d.Run()
 }
 
-func (a App) runCmd(cmd *cobra.Command, args []string) {
+func (a *App) runCmd(cmd *cobra.Command, args []string) {
 	runnerName := "default"
 	if len(args) > 0 {
 		runnerName = args[0]
@@ -349,7 +349,7 @@ func (a App) runCmd(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (a App) writeCmd(cmd *cobra.Command, args []string) {
+func (a *App) writeCmd(cmd *cobra.Command, args []string) {
 	cfg := fmt.Sprintf("%s/%s", a.cfg.cfgBase, a.cfg.cfgFile)
 	c, _, err := config.NewFromFile(cfg, a.cfg.injectDefaults)
 	if err != nil {
@@ -384,6 +384,6 @@ func (a App) writeCmd(cmd *cobra.Command, args []string) {
 	}
 }
 
-func (a App) versionCmd(cmd *cobra.Command, args []string) {
+func (a *App) versionCmd(cmd *cobra.Command, args []string) {
 	fmt.Println(versionInfo())
 }
