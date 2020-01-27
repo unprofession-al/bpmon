@@ -13,6 +13,9 @@ import (
 	"github.com/unprofession-al/bpmon/internal/runners"
 	"github.com/unprofession-al/bpmon/internal/store"
 	"gopkg.in/yaml.v2"
+
+	_ "github.com/unprofession-al/bpmon/internal/checker/icinga"
+	_ "github.com/unprofession-al/bpmon/internal/store/influx"
 )
 
 const baseEnv = "BPMON_BASE"
